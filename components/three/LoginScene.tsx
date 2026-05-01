@@ -117,7 +117,6 @@ function FloatingCommand({ text, color, pos }: { text: string; color: string; po
           color={color}
           anchorX="center"
           anchorY="middle"
-          font="https://fonts.gstatic.com/s/geistmono/v1/or3nQ6P12-Y9XqYLvP_kVbWR_8K8.woff2"
           letterSpacing={0.05}
         >
           {text}

@@ -152,6 +152,10 @@ build_app() {
 start_pm2() {
   cd "${APP_DIR}"
 
+  if [[ ! -d "${APP_DIR}/.next" ]]; then
+    error "No .next build found. Run 'npm run build' first, or deploy without --update."
+  fi
+
   # Load env vars into the current shell so PM2 inherits them
   set -a
   # shellcheck disable=SC1091
