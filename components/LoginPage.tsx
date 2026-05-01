@@ -54,11 +54,8 @@ export function LoginPage() {
       </div>
 
       {/* Title */}
-      <motion.div
+      <div
         className="absolute top-6 left-8 z-20"
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.6 }}
       >
         <div className="flex items-center gap-2 mb-1">
           <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse-glow" />
@@ -67,20 +64,14 @@ export function LoginPage() {
         <p className="text-xs text-slate-400 max-w-xs leading-relaxed">
           Make the invisible visible. Learn Dynatrace Query Language by investigating real incidents.
         </p>
-      </motion.div>
+      </div>
 
       {/* Center glass card */}
-      <motion.div
+      <div
         className="absolute inset-0 z-10 flex items-center justify-center p-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, duration: 0.6 }}
       >
-        <motion.div
+        <div
           className="w-full max-w-sm glass-panel-strong rounded-xl border border-cyan-400/20 p-6 space-y-4 shadow-2xl backdrop-blur-xl pointer-events-auto"
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.5 }}
         >
           {/* Tab toggle */}
           <div className="flex rounded-lg bg-slate-900/60 p-0.5 pointer-events-auto">
@@ -180,8 +171,8 @@ export function LoginPage() {
           </p>
 
           {mode === "signup" && <EnterprisePlan country={country} />}
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
       <FeedbackButton page="Login" />
     </div>
   );
