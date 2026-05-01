@@ -27,7 +27,7 @@
 set -euo pipefail
 
 # ─── Config ──────────────────────────────────────────────────────────────────
-DOMAIN="stackwise.ai"
+DOMAIN="stackwise-ai.com"
 APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # always the repo root
 APP_PORT=3000
 APP_NAME="dql-detective"
