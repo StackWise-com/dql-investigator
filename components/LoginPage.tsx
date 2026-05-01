@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LoginScene } from "./three/LoginScene";
 import { COUNTRIES } from "@/lib/countries";
-import { getPriceForCountry } from "@/lib/pricing";
 import { FeedbackButton } from "./FeedbackButton";
 import { useAuth } from "@/lib/auth/useAuth";
 
@@ -17,8 +16,6 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   const { signIn, signUp } = useAuth();
-
-  const price = getPriceForCountry(country);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,60 +167,9 @@ export function LoginPage() {
               : "Create an account to save progress and unlock the full free tier."}
           </p>
 
-          {mode === "signup" && <EnterprisePlan country={country} />}
         </div>
       </div>
       <FeedbackButton page="Login" />
-    </div>
-  );
-}
-
-function EnterprisePlan({ country }: { country: string }) {
-  const [seats, setSeats] = useState(1);
-  const price = getPriceForCountry(country);
-  const discountPercent = Math.min(seats, 40);
-  const totalBefore = seats * price.amount;
-  const discount = (totalBefore * discountPercent) / 100;
-  const totalAfter = totalBefore - discount;
-
-  const fmt = (n: number) =>
-    n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  return (
-    <div className="mt-3 pt-3 border-t border-white/[0.06] space-y-2">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Enterprise Plan</p>
-      <div className="space-y-1">
-        <div className="flex items-center justify-between">
-          <label className="text-[10px] text-slate-400">Seats</label>
-          <span className="text-xs font-medium text-slate-200">{seats}</span>
-        </div>
-        <input
-          type="range"
-          min={1}
-          max={100}
-          value={seats}
-          onChange={(e) => setSeats(Number(e.target.value))}
-          className="w-full accent-cyan-400"
-        />
-        <div className="flex items-center justify-between text-[10px]">
-          <span className="text-slate-500">Discount: {discountPercent}%</span>
-          <span className="text-slate-500">Max 40% at 40 seats</span>
-        </div>
-      </div>
-      <div className="glass-panel rounded-md p-2.5 space-y-1">
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-slate-400">Subtotal</span>
-          <span className="text-slate-300">{price.symbol}{fmt(totalBefore)}</span>
-        </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-emerald-400">Discount ({discountPercent}%)</span>
-          <span className="text-emerald-400">−{price.symbol}{fmt(discount)}</span>
-        </div>
-        <div className="border-t border-white/[0.06] pt-1 flex items-center justify-between text-sm font-semibold">
-          <span className="text-slate-200">Total</span>
-          <span className="text-amber-400">{price.symbol}{fmt(totalAfter)}</span>
-        </div>
-      </div>
     </div>
   );
 }

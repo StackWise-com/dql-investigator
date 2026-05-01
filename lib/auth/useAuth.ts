@@ -54,10 +54,15 @@ export function useAuth() {
         if (error) throw error;
       },
       signUp: async (email: string, password: string, country: string) => {
+        const redirectTo =
+          typeof window !== "undefined" ? window.location.origin : undefined;
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { country_code: country } },
+          options: {
+            data: { country_code: country },
+            emailRedirectTo: redirectTo,
+          },
         });
         if (error) throw error;
         // Ensure the profile reflects the country even if the trigger ran with default.
