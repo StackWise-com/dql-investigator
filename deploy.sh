@@ -27,8 +27,9 @@ set -euo pipefail
 
 # ─── Config ──────────────────────────────────────────────────────────────────
 DOMAIN="stackwise.ai"
-REPO_URL="https://github.com/technomonstert/dql-detective.git"   # adjust to your actual remote
+REPO_URL="https://github.com/StackWise-com/dql-detective.git"
 APP_DIR="/var/www/${DOMAIN}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_PORT=3000
 APP_NAME="dql-detective"
 NODE_MAJOR=20
@@ -93,15 +94,33 @@ install_system_deps() {
 
 # ─── 2. Repo ─────────────────────────────────────────────────────────────────
 setup_repo() {
-  if [[ -d "${APP_DIR}/.git" ]]; then
+  # Case 1: script is running from inside the repo — sync in-place, skip clone
+  if git -C "${SCRIPT_DIR}" rev-parse --git-dir &>/dev/null; then
+    if [[ "${SCRIPT_DIR}" == "${APP_DIR}" ]]; then
+      info "Already in ${APP_DIR} — pulling latest from origin/dev..."
+      git -C "${APP_DIR}" fetch origin
+      git -C "${APP_DIR}" reset --hard origin/dev
+      success "Code updated"
+    else
+      info "Running from repo at ${SCRIPT_DIR} — syncing to ${APP_DIR}..."
+      mkdir -p "${APP_DIR}"
+      rsync -a --delete \
+        --exclude='.git' --exclude='node_modules' --exclude='.next' \
+        "${SCRIPT_DIR}/" "${APP_DIR}/"
+      rsync -a "${SCRIPT_DIR}/.git/" "${APP_DIR}/.git/"
+      success "Code synced from ${SCRIPT_DIR} to ${APP_DIR}"
+    fi
+  # Case 2: APP_DIR already has a checkout — just pull
+  elif [[ -d "${APP_DIR}/.git" ]]; then
     info "Pulling latest code into ${APP_DIR}..."
     git -C "${APP_DIR}" fetch origin
-    git -C "${APP_DIR}" reset --hard origin/main
+    git -C "${APP_DIR}" reset --hard origin/dev
     success "Code updated"
+  # Case 3: fresh server, nothing yet — clone
   else
     info "Cloning ${REPO_URL} into ${APP_DIR}..."
     mkdir -p "$(dirname "${APP_DIR}")"
-    git clone --depth 1 "${REPO_URL}" "${APP_DIR}"
+    git clone --depth 1 --branch dev "${REPO_URL}" "${APP_DIR}"
     success "Repo cloned"
   fi
 }
