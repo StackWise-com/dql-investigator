@@ -60,11 +60,14 @@ export async function createOrder(amount: number, currency: string, receipt?: st
   return res.json() as Promise<{ order_id: string; amount: number; currency: string }>;
 }
 
-export async function verifyPayment(response: RazorpayResponse) {
+export async function verifyPayment(
+  response: RazorpayResponse,
+  extra?: { amount?: number; currency?: string }
+) {
   const res = await fetch("/api/verify-payment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(response),
+    body: JSON.stringify({ ...response, ...(extra ?? {}) }),
   });
 
   if (!res.ok) {

@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LoginScene } from "./three/LoginScene";
-import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
 import { COUNTRIES } from "@/lib/countries";
 import { getPriceForCountry } from "@/lib/pricing";
 import { FeedbackButton } from "./FeedbackButton";
+import { useAuth } from "@/lib/auth/useAuth";
 
 export function LoginPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -16,42 +16,35 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const setUserEmail = useInvestigatorStore((s) => s.setUserEmail);
-  const setUserCountry = useInvestigatorStore((s) => s.setUserCountry);
-  const setIsGuest = useInvestigatorStore((s) => s.setIsGuest);
-  const setShowLanding = useInvestigatorStore((s) => s.setShowLanding);
+  const { signIn, signUp } = useAuth();
 
   const price = getPriceForCountry(country);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
-
-    await new Promise((r) => setTimeout(r, 800));
 
     if (email.length < 5 || !email.includes("@")) {
       setError("Please enter a valid email address.");
-      setLoading(false);
       return;
     }
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
-      setLoading(false);
       return;
     }
 
-    if (mode === "signup") {
-      setUserCountry(country);
+    setLoading(true);
+    try {
+      if (mode === "signup") {
+        await signUp(email, password, country);
+      } else {
+        await signIn(email, password);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authentication failed.");
+    } finally {
+      setLoading(false);
     }
-    setUserEmail(email);
-    setLoading(false);
-    setShowLanding(true);
-  };
-
-  const handleGuest = () => {
-    setIsGuest(true);
-    setShowLanding(true);
   };
 
   return (
@@ -59,20 +52,6 @@ export function LoginPage() {
       <div className="pointer-events-none">
         <LoginScene />
       </div>
-
-      {/* Top-right guest button */}
-      <motion.button
-        className="absolute top-6 right-8 z-20 px-4 py-2 rounded-full glass-panel-strong border border-white/[0.08] text-xs font-medium text-slate-300 hover:text-slate-100 hover:bg-white/5 transition-colors backdrop-blur-md pointer-events-auto"
-        onClick={handleGuest}
-        whileHover={{ scale: 1.03 }}
-        whileTap={{ scale: 0.97 }}
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-      >
-        Continue without login
-        <span className="ml-1.5 text-[9px] text-slate-500">(Limited access)</span>
-      </motion.button>
 
       {/* Title */}
       <motion.div

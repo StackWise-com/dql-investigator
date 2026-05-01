@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { COUNTRIES } from "@/lib/countries";
-import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
+import { useAuth } from "@/lib/auth/useAuth";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -18,37 +18,34 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const setUserCountry = useInvestigatorStore((s) => s.setUserCountry);
-  const setUserEmail = useInvestigatorStore((s) => s.setUserEmail);
-  const setIsGuest = useInvestigatorStore((s) => s.setIsGuest);
+  const { signIn, signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
-
-    await new Promise((r) => setTimeout(r, 800));
 
     if (email.length < 5 || !email.includes("@")) {
       setError("Please enter a valid email address.");
-      setLoading(false);
       return;
     }
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
-      setLoading(false);
       return;
     }
 
-    // Store country on signup
-    if (mode === "signup") {
-      setUserCountry(country);
+    setLoading(true);
+    try {
+      if (mode === "signup") {
+        await signUp(email, password, country);
+      } else {
+        await signIn(email, password);
+      }
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Authentication failed.");
+    } finally {
+      setLoading(false);
     }
-    setUserEmail(email);
-
-    // TODO: Wire up Supabase auth here
-    setLoading(false);
-    onClose();
   };
 
   return (
@@ -163,16 +160,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               )}
             </p>
 
-            <div className="pt-1 border-t border-white/[0.05] text-center">
-              <button
-                type="button"
-                onClick={() => { setIsGuest(true); onClose(); }}
-                className="text-[11px] text-slate-500 hover:text-slate-300 transition-colors"
-              >
-                Continue without login
-                <span className="ml-1 text-[9px] text-slate-600">(limited access)</span>
-              </button>
-            </div>
           </motion.div>
         </motion.div>
       )}

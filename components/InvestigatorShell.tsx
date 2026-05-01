@@ -10,8 +10,10 @@ import { ScenarioSelector } from "./ScenarioSelector";
 import { VictoryModal } from "./VictoryModal";
 import { CodexScreen } from "./CodexScreen";
 import { LandingPage } from "./LandingPage";
+import { LoginPage } from "./LoginPage";
 import { ArcadeScreen } from "./arcade/ArcadeScreen";
 import { FeedbackButton } from "./FeedbackButton";
+import { useAuth } from "@/lib/auth/useAuth";
 
 const COMMAND_VISUALS: { cmd: string; title: string; description: string; color: string }[] = [
   { cmd: "filter", title: "Filter", description: "Matching rows glow green. Non-matching rows flash red and fade away.", color: "text-rose-400 border-rose-400/20" },
@@ -142,10 +144,16 @@ function getPageName(opts: {
 
 export function InvestigatorShell() {
   useHashRouter();
+  useAuth();
 
   const currentPhase = useInvestigatorStore((s) => s.currentPhase);
   const activeScenario = useInvestigatorStore((s) => s.activeScenario);
   const showLanding = useInvestigatorStore((s) => s.showLanding);
+  const userEmail = useInvestigatorStore((s) => s.userEmail);
+
+  if (!userEmail) {
+    return <LoginPage />;
+  }
 
   const pageName = getPageName({ showLanding, currentPhase, activeScenario });
 

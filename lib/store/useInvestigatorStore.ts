@@ -72,14 +72,12 @@ interface InvestigatorState {
   isPremium: boolean;
   setIsPremium: (val: boolean) => void;
 
-  // User profile
+  // User profile (hydrated from Supabase by useAuth, not persisted locally)
   userEmail: string;
   setUserEmail: (email: string) => void;
   userCountry: string;
   userCurrency: string;
   setUserCountry: (code: string) => void;
-  isGuest: boolean;
-  setIsGuest: (val: boolean) => void;
 
   // XP / Progress
   totalXP: number;
@@ -162,8 +160,6 @@ export const useInvestigatorStore = create<InvestigatorState>()(
         const price = getPriceForCountry(code);
         set({ userCountry: code, userCurrency: price.currency });
       },
-      isGuest: false,
-      setIsGuest: (isGuest) => set({ isGuest }),
 
       pipeline: [],
       setPipeline: (pipeline) => set({ pipeline }),
@@ -230,17 +226,8 @@ export const useInvestigatorStore = create<InvestigatorState>()(
         return persistedState as Partial<InvestigatorState>;
       },
       partialize: (state) => ({
-        totalXP: state.totalXP,
-        completedScenarios: state.completedScenarios,
         phases: state.phases,
-        userEmail: state.userEmail,
-        userCountry: state.userCountry,
-        userCurrency: state.userCurrency,
-        isPremium: state.isPremium,
         unlockedScenarios: state.unlockedScenarios,
-        isGuest: state.isGuest,
-        gameScores: state.gameScores,
-        gameHighScores: state.gameHighScores,
       }),
     }
   )

@@ -5,7 +5,8 @@ import { useState } from "react";
 import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
 import { scenarios } from "@/lib/dql/scenarios";
 import { getPriceForCountry } from "@/lib/pricing";
-// Payments coming soon
+import { createClient } from "@/lib/supabase/client";
+import { openRazorpayCheckout, verifyPayment } from "@/lib/razorpay/checkout";
 
 const DIFFICULTY_COLORS = {
   Beginner: "bg-emerald-400/10 text-emerald-400 border-emerald-400/20",
@@ -13,8 +14,7 @@ const DIFFICULTY_COLORS = {
   Advanced: "bg-rose-400/10 text-rose-400 border-rose-400/20",
 };
 
-const GUEST_FREE = new Set(["case-001", "case-006", "case-007", "case-008", "case-009"]);
-const LOGGED_IN_FREE = new Set([
+const FREE_CASES = new Set([
   "case-001", "case-006", "case-007", "case-008", "case-009",
   "case-010", "case-011", "case-012", "case-013", "case-014",
   "case-015", "case-016", "case-017", "case-018", "case-019",
@@ -82,16 +82,64 @@ export function ScenarioSelector() {
   const setIsPremium = useInvestigatorStore((s) => s.setIsPremium);
   const userCountry = useInvestigatorStore((s) => s.userCountry);
   const userEmail = useInvestigatorStore((s) => s.userEmail);
-  const isGuest = useInvestigatorStore((s) => s.isGuest);
 
-  const price = getPriceForCountry(userCountry);
-  const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  const indiaPrice = getPriceForCountry("IN");
   const [showPremiumInfo, setShowPremiumInfo] = useState(false);
+  const [intlNoticeOpen, setIntlNoticeOpen] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
 
   const unlockedSet = new Set(unlockedScenarios);
+  const isIndia = userCountry === "IN";
 
-  const handlePremiumPay = () => {
-    setComingSoonOpen(true);
+  const handlePremiumPay = async () => {
+    setPayError(null);
+    if (!isIndia) {
+      setIntlNoticeOpen(true);
+      return;
+    }
+
+    setPaying(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      await openRazorpayCheckout({
+        amount: Math.round(indiaPrice.amount * 100), // paise
+        currency: "INR",
+        name: "DQL Detective",
+        description: "Premium access — all cases + 2× XP",
+        receipt: `prem_${Date.now()}`,
+        notes: { user_id: user?.id ?? "", email: userEmail },
+        prefill: { email: userEmail },
+        onSuccess: async (response) => {
+          try {
+            const result = await verifyPayment(response, {
+              amount: Math.round(indiaPrice.amount * 100),
+              currency: "INR",
+            });
+            if (result.verified) {
+              setIsPremium(true);
+              setShowPremiumInfo(false);
+            } else {
+              setPayError("Payment could not be verified. Please contact support.");
+            }
+          } catch (err) {
+            setPayError(err instanceof Error ? err.message : "Verification failed.");
+          } finally {
+            setPaying(false);
+          }
+        },
+        onDismiss: () => setPaying(false),
+        onError: (err) => {
+          setPayError(err instanceof Error ? err.message : "Payment failed.");
+          setPaying(false);
+        },
+      });
+    } catch (err) {
+      setPayError(err instanceof Error ? err.message : "Could not start payment.");
+      setPaying(false);
+    }
   };
 
   return (
@@ -102,14 +150,20 @@ export function ScenarioSelector() {
           <p className="text-sm text-slate-400">
             Select a case to investigate. Complete free cases to unlock more. Upgrade to Premium for full access.
           </p>
+          {!isPremium && (
+            <button
+              onClick={() => setShowPremiumInfo((o) => !o)}
+              className="text-xs font-medium text-amber-300 hover:text-amber-200"
+            >
+              {showPremiumInfo ? "Hide premium info" : "View premium upgrade →"}
+            </button>
+          )}
         </div>
 
         <div className="grid gap-4">
           {scenarios.map((scenario, i) => {
             const isCompleted = completedScenarios.includes(scenario.id);
-            const effectiveFree = isGuest && !userEmail ? GUEST_FREE : LOGGED_IN_FREE;
-            const isUnlocked = unlockedSet.has(scenario.id) || effectiveFree.has(scenario.id);
-            const requiresPremium = !isUnlocked && !isPremium;
+            const isUnlocked = unlockedSet.has(scenario.id) || FREE_CASES.has(scenario.id);
             const tag = getScenarioTag(scenario.id);
 
             return (
@@ -177,7 +231,7 @@ export function ScenarioSelector() {
         </div>
 
         <AnimatePresence>
-          {showPremiumInfo && (
+          {showPremiumInfo && !isPremium && (
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -186,8 +240,20 @@ export function ScenarioSelector() {
             >
               <h3 className="text-base font-semibold text-amber-300">Premium Access</h3>
               <p className="text-sm text-slate-300 leading-relaxed">
-                Unlock all advanced cases and receive 2x XP rewards.
+                Unlock all advanced cases and earn 2× XP on every premium case.
               </p>
+              <p className="text-xs text-slate-400">
+                One-time payment of <span className="text-amber-300 font-semibold">{indiaPrice.display}</span>.
+              </p>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Payments are currently available for users in India only. International payments
+                are not yet activated on our Razorpay account — we&apos;ll enable them soon.
+              </p>
+              {payError && (
+                <p className="text-xs text-rose-400 bg-rose-400/10 border border-rose-400/20 rounded-md p-2">
+                  {payError}
+                </p>
+              )}
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setShowPremiumInfo(false)}
@@ -196,19 +262,11 @@ export function ScenarioSelector() {
                   Maybe later
                 </button>
                 <button
-                  onClick={() => {
-                    setIsPremium(true);
-                    setShowPremiumInfo(false);
-                  }}
-                  className="px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors"
-                >
-                  Unlock Premium (Demo)
-                </button>
-                <button
                   onClick={handlePremiumPay}
-                  className="px-3 py-1.5 rounded-md text-xs font-medium text-amber-300 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 transition-colors"
+                  disabled={paying}
+                  className="px-3 py-1.5 rounded-md text-xs font-medium text-amber-300 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 transition-colors disabled:opacity-50"
                 >
-                  Unlock Premium
+                  {paying ? "Opening checkout…" : isIndia ? `Pay ${indiaPrice.display}` : "Unlock Premium"}
                 </button>
               </div>
             </motion.div>
@@ -216,13 +274,13 @@ export function ScenarioSelector() {
         </AnimatePresence>
 
         <AnimatePresence>
-          {comingSoonOpen && (
+          {intlNoticeOpen && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-              onClick={() => setComingSoonOpen(false)}
+              onClick={() => setIntlNoticeOpen(false)}
             >
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -233,32 +291,25 @@ export function ScenarioSelector() {
                 className="w-full max-w-sm glass-panel-strong rounded-xl border border-amber-400/20 p-6 space-y-4 shadow-2xl"
               >
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-amber-300">Coming Soon</h2>
+                  <h2 className="text-lg font-semibold text-amber-300">International payments coming soon</h2>
                   <button
-                    onClick={() => setComingSoonOpen(false)}
+                    onClick={() => setIntlNoticeOpen(false)}
                     className="text-slate-500 hover:text-slate-300 text-sm"
                   >
                     &#10005;
                   </button>
                 </div>
                 <p className="text-sm text-slate-300 leading-relaxed">
-                  Payments are coming soon with more exciting cases to solve and an exciting gaming mode where you can be the DQL Detective.
+                  Premium payments are currently available for users in India only. International
+                  payments are not yet activated on our Razorpay account — we&apos;ll enable them
+                  shortly. In the meantime, please enjoy the free cases.
                 </p>
-                <div className="flex items-center gap-2">
+                <div className="flex justify-end">
                   <button
-                    onClick={() => setComingSoonOpen(false)}
-                    className="px-3 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors"
-                  >
-                    Got it
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsPremium(true);
-                      setComingSoonOpen(false);
-                    }}
+                    onClick={() => setIntlNoticeOpen(false)}
                     className="px-3 py-1.5 rounded-md text-xs font-medium text-amber-300 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 transition-colors"
                   >
-                    Unlock Premium (Demo)
+                    Got it
                   </button>
                 </div>
               </motion.div>

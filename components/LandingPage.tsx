@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
-import { AuthModal } from "./AuthModal";
 import { CoffeeModal } from "./CoffeeModal";
 import { UserAvatar } from "./UserAvatar";
+import { useAuth } from "@/lib/auth/useAuth";
 import landingImage from "@/images/landing_page.png";
 
 interface Hotspot {
@@ -169,17 +169,13 @@ function HotspotButton({ hotspot }: { hotspot: Hotspot }) {
 }
 
 export function LandingPage() {
-  const [authOpen, setAuthOpen] = useState(false);
   const [coffeeOpen, setCoffeeOpen] = useState(false);
   const userEmail = useInvestigatorStore((s) => s.userEmail);
   const totalXP = useInvestigatorStore((s) => s.totalXP);
-  const isGuest = useInvestigatorStore((s) => s.isGuest);
-  const setUserEmail = useInvestigatorStore((s) => s.setUserEmail);
-  const setIsGuest = useInvestigatorStore((s) => s.setIsGuest);
+  const { signOut } = useAuth();
 
   const handleLogout = () => {
-    setUserEmail("");
-    setIsGuest(false);
+    signOut();
   };
 
   const gameScores = useInvestigatorStore((s) => s.gameScores);
@@ -248,49 +244,19 @@ export function LandingPage() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
-        {isGuest && (
-          <span className="px-2 py-1 rounded-md text-[10px] font-medium text-amber-300 bg-amber-400/10 border border-amber-400/20">
-            Limited Access — Sign in for more
-          </span>
-        )}
-        {userEmail ? (
-          <>
-            <UserAvatar email={userEmail} xp={totalXP} size={32} showTitle />
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleLogout}
-              className="px-2 py-1 rounded-md text-[10px] font-medium text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors"
-            >
-              Log out
-            </motion.button>
-          </>
-        ) : (
-          <>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setAuthOpen(true)}
-              className="px-3 py-1.5 rounded-md text-xs font-medium text-cyan-300 bg-cyan-400/10 hover:bg-cyan-400/20 border border-cyan-400/30 transition-colors"
-            >
-              {isGuest ? "Sign In" : "Get Started"}
-            </motion.button>
-            {isGuest && (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleLogout}
-                className="px-2 py-1 rounded-md text-[10px] font-medium text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors"
-              >
-                Back to login
-              </motion.button>
-            )}
-          </>
-        )}
+        <UserAvatar email={userEmail} xp={totalXP} size={32} showTitle />
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleLogout}
+          className="px-2 py-1 rounded-md text-[10px] font-medium text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-colors"
+        >
+          Log out
+        </motion.button>
       </motion.div>
 
       {/* Arcade Stats Card */}
-      {(userEmail || isGuest) && arcadeStats.totalGames > 0 && (
+      {arcadeStats.totalGames > 0 && (
         <motion.div
           className="absolute bottom-6 right-8 z-10"
           initial={{ opacity: 0, y: 10 }}
@@ -365,7 +331,6 @@ export function LandingPage() {
         <span className="text-sm font-medium">Buy me a coffee</span>
       </motion.button>
 
-      <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
       <CoffeeModal isOpen={coffeeOpen} onClose={() => setCoffeeOpen(false)} />
     </div>
   );
