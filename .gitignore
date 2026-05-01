@@ -25,3 +25,11 @@ dist-ssr
 
 # Claude Code
 .claude/
+
+# Next.js build output
+.next/
+tsconfig.tsbuildinfo
+
+# Supabase local dev & schema
+.supabase/
+.env
