@@ -169,7 +169,7 @@ start_pm2() {
   fi
 
   pm2 save
-  pm2 startup systemd -u root --hp /root 2>/dev/null | tail -1 | bash || true
+  env PATH="$PATH:/usr/bin" pm2 startup systemd -u root --hp /root || true
   success "PM2 running — '${APP_NAME}' on port ${APP_PORT}"
 }
 
@@ -177,6 +177,7 @@ start_pm2() {
 write_nginx_config() {
   local conf="/etc/nginx/sites-available/${DOMAIN}"
 
+  # HTTP-only config — certbot will append the SSL server block automatically
   info "Writing nginx config for ${DOMAIN}..."
   cat > "${conf}" <<NGINX
 server {
@@ -186,32 +187,6 @@ server {
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
-    }
-
-    location / {
-        return 301 https://\$host\$request_uri;
-    }
-}
-
-server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    server_name ${DOMAIN} www.${DOMAIN};
-
-    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
-    include             /etc/letsencrypt/options-ssl-nginx.conf;
-    ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
-
-    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-    add_header X-Frame-Options            SAMEORIGIN always;
-    add_header X-Content-Type-Options     nosniff    always;
-    add_header Referrer-Policy            "strict-origin-when-cross-origin" always;
-
-    location /_next/static/ {
-        proxy_pass http://127.0.0.1:${APP_PORT};
-        add_header Cache-Control "public, max-age=31536000, immutable";
-        proxy_set_header Host \$host;
     }
 
     location / {
