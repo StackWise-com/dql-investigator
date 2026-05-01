@@ -2,24 +2,25 @@
 # =============================================================================
 # deploy.sh — Full production deploy for stackwise.ai
 #
-# Run this as root (or a sudo-capable user) directly on the target Linux server.
-# Safe to run multiple times — all steps are idempotent.
+# Run this as root (or a sudo-capable user) directly on the server,
+# from inside the cloned repo directory.
 #
 # What it does:
 #   1. Installs system deps: Node 20, nginx, certbot, pm2
-#   2. Clones / pulls the latest repo
-#   3. Writes .env.production from the values you supply (or existing file)
+#   2. Pulls latest code (git pull) — skipped on first run if already current
+#   3. Writes .env.production from the values you supply (or keeps existing)
 #   4. Builds the Next.js app
 #   5. Starts/restarts via PM2 + saves the PM2 startup hook
 #   6. Writes the nginx virtual-host config for stackwise.ai
 #   7. Issues / renews the Let's Encrypt SSL cert (certbot --nginx)
 #   8. Reloads nginx
 #
-# Usage:
+# Usage (first time):
 #   chmod +x deploy.sh
 #   sudo ./deploy.sh
 #
-# To deploy an update (code already on server, env already set):
+# Usage (code update):
+#   git pull origin dev
 #   sudo ./deploy.sh --update
 # =============================================================================
 
@@ -27,9 +28,7 @@ set -euo pipefail
 
 # ─── Config ──────────────────────────────────────────────────────────────────
 DOMAIN="stackwise.ai"
-REPO_URL="https://github.com/StackWise-com/dql-detective.git"
-APP_DIR="/var/www/${DOMAIN}"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # always the repo root
 APP_PORT=3000
 APP_NAME="dql-detective"
 NODE_MAJOR=20
@@ -53,8 +52,8 @@ install_system_deps() {
   info "Updating apt..."
   apt-get update -qq
 
-  # Node.js via NodeSource
-  if ! command -v node &>/dev/null || [[ $(node -e "process.exit(+process.version.slice(1).split('.')[0]<${NODE_MAJOR}?1:0)"; echo $?) -eq 1 ]]; then
+  if ! command -v node &>/dev/null || \
+     node -e "process.exit(+process.version.slice(1).split('.')[0] < ${NODE_MAJOR} ? 1 : 0)"; then
     info "Installing Node.js ${NODE_MAJOR}..."
     curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - >/dev/null
     apt-get install -y nodejs >/dev/null
@@ -63,7 +62,6 @@ install_system_deps() {
     success "Node $(node -v) already installed"
   fi
 
-  # nginx
   if ! command -v nginx &>/dev/null; then
     info "Installing nginx..."
     apt-get install -y nginx >/dev/null
@@ -73,7 +71,6 @@ install_system_deps() {
     success "nginx already installed"
   fi
 
-  # certbot
   if ! command -v certbot &>/dev/null; then
     info "Installing certbot..."
     apt-get install -y certbot python3-certbot-nginx >/dev/null
@@ -82,7 +79,6 @@ install_system_deps() {
     success "certbot already installed"
   fi
 
-  # pm2
   if ! command -v pm2 &>/dev/null; then
     info "Installing pm2..."
     npm install -g pm2 >/dev/null
@@ -92,37 +88,12 @@ install_system_deps() {
   fi
 }
 
-# ─── 2. Repo ─────────────────────────────────────────────────────────────────
-setup_repo() {
-  # Case 1: script is running from inside the repo — sync in-place, skip clone
-  if git -C "${SCRIPT_DIR}" rev-parse --git-dir &>/dev/null; then
-    if [[ "${SCRIPT_DIR}" == "${APP_DIR}" ]]; then
-      info "Already in ${APP_DIR} — pulling latest from origin/dev..."
-      git -C "${APP_DIR}" fetch origin
-      git -C "${APP_DIR}" reset --hard origin/dev
-      success "Code updated"
-    else
-      info "Running from repo at ${SCRIPT_DIR} — syncing to ${APP_DIR}..."
-      mkdir -p "${APP_DIR}"
-      rsync -a --delete \
-        --exclude='.git' --exclude='node_modules' --exclude='.next' \
-        "${SCRIPT_DIR}/" "${APP_DIR}/"
-      rsync -a "${SCRIPT_DIR}/.git/" "${APP_DIR}/.git/"
-      success "Code synced from ${SCRIPT_DIR} to ${APP_DIR}"
-    fi
-  # Case 2: APP_DIR already has a checkout — just pull
-  elif [[ -d "${APP_DIR}/.git" ]]; then
-    info "Pulling latest code into ${APP_DIR}..."
-    git -C "${APP_DIR}" fetch origin
-    git -C "${APP_DIR}" reset --hard origin/dev
-    success "Code updated"
-  # Case 3: fresh server, nothing yet — clone
-  else
-    info "Cloning ${REPO_URL} into ${APP_DIR}..."
-    mkdir -p "$(dirname "${APP_DIR}")"
-    git clone --depth 1 --branch dev "${REPO_URL}" "${APP_DIR}"
-    success "Repo cloned"
-  fi
+# ─── 2. Pull latest code ─────────────────────────────────────────────────────
+pull_code() {
+  info "Pulling latest code in ${APP_DIR}..."
+  git -C "${APP_DIR}" fetch origin
+  git -C "${APP_DIR}" reset --hard origin/dev
+  success "Code up to date"
 }
 
 # ─── 3. Environment file ─────────────────────────────────────────────────────
@@ -131,28 +102,23 @@ write_env() {
 
   if [[ -f "${env_file}" ]]; then
     warn ".env.production already exists — skipping env setup."
-    warn "Edit ${env_file} manually if credentials have changed, then re-run with --update."
+    warn "Edit ${env_file} manually if credentials changed, then re-run with --update."
     return
   fi
 
   info "Creating .env.production..."
-
   echo ""
   echo "  Supply the required credentials (leave blank to skip optional ones)."
   echo ""
 
-  # Supabase
   read -rp "  NEXT_PUBLIC_SUPABASE_URL        : " SUPABASE_URL
   read -rp "  NEXT_PUBLIC_SUPABASE_ANON_KEY   : " SUPABASE_ANON_KEY
   read -rp "  SUPABASE_SERVICE_ROLE_KEY        : " SUPABASE_SERVICE_KEY
-
-  # Razorpay
   read -rp "  RAZORPAY_KEY_ID                 : " RAZORPAY_KEY_ID
   read -rp "  RAZORPAY_KEY_SECRET             : " RAZORPAY_KEY_SECRET
 
   cat > "${env_file}" <<EOF
 # Auto-generated by deploy.sh on $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-# Domain: https://${DOMAIN}
 
 NEXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}
 NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
@@ -198,7 +164,6 @@ start_pm2() {
   fi
 
   pm2 save
-  # Register PM2 startup hook (runs once safely)
   pm2 startup systemd -u root --hp /root 2>/dev/null | tail -1 | bash || true
   success "PM2 running — '${APP_NAME}' on port ${APP_PORT}"
 }
@@ -209,15 +174,11 @@ write_nginx_config() {
 
   info "Writing nginx config for ${DOMAIN}..."
   cat > "${conf}" <<NGINX
-# ${DOMAIN} — managed by deploy.sh
-# SSL added by certbot; do not remove the certbot comment blocks.
-
 server {
     listen 80;
     listen [::]:80;
     server_name ${DOMAIN} www.${DOMAIN};
 
-    # certbot uses this to issue the cert; nginx handles the rest
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
@@ -232,40 +193,34 @@ server {
     listen [::]:443 ssl http2;
     server_name ${DOMAIN} www.${DOMAIN};
 
-    # ── SSL (filled in by certbot) ──────────────────────────────────────────
     ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
     include             /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam         /etc/letsencrypt/ssl-dhparams.pem;
 
-    # ── Security headers ────────────────────────────────────────────────────
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
     add_header X-Frame-Options            SAMEORIGIN always;
     add_header X-Content-Type-Options     nosniff    always;
     add_header Referrer-Policy            "strict-origin-when-cross-origin" always;
 
-    # ── Next.js static files (long cache) ──────────────────────────────────
     location /_next/static/ {
         proxy_pass http://127.0.0.1:${APP_PORT};
-        proxy_cache_valid 200 365d;
         add_header Cache-Control "public, max-age=31536000, immutable";
         proxy_set_header Host \$host;
     }
 
-    # ── Everything else through Next.js ────────────────────────────────────
     location / {
         proxy_pass         http://127.0.0.1:${APP_PORT};
         proxy_http_version 1.1;
-        proxy_set_header   Upgrade            \$http_upgrade;
-        proxy_set_header   Connection         "upgrade";
-        proxy_set_header   Host               \$host;
-        proxy_set_header   X-Real-IP          \$remote_addr;
-        proxy_set_header   X-Forwarded-For    \$proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto  \$scheme;
+        proxy_set_header   Upgrade           \$http_upgrade;
+        proxy_set_header   Connection        "upgrade";
+        proxy_set_header   Host              \$host;
+        proxy_set_header   X-Real-IP         \$remote_addr;
+        proxy_set_header   X-Forwarded-For   \$proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto \$scheme;
         proxy_read_timeout 60s;
     }
 
-    # ── Gzip ───────────────────────────────────────────────────────────────
     gzip on;
     gzip_types text/plain text/css application/json application/javascript
                text/javascript image/svg+xml;
@@ -273,20 +228,14 @@ server {
 }
 NGINX
 
-  # Enable site
   ln -sf "${conf}" "/etc/nginx/sites-enabled/${DOMAIN}"
-
-  # Disable default site if it exists
   [[ -f /etc/nginx/sites-enabled/default ]] && rm -f /etc/nginx/sites-enabled/default
-
-  # Test config
   nginx -t
   success "nginx config written and validated"
 }
 
 # ─── 7. SSL cert ─────────────────────────────────────────────────────────────
 issue_ssl() {
-  # Check if cert already exists and is valid
   if certbot certificates 2>/dev/null | grep -q "Domains: ${DOMAIN}"; then
     info "Certificate already exists — renewing if needed..."
     certbot renew --quiet --nginx
@@ -294,14 +243,11 @@ issue_ssl() {
     return
   fi
 
-  # Need an email for Let's Encrypt account
   if [[ -z "${CERTBOT_EMAIL}" ]]; then
-    read -rp "  Email address for Let's Encrypt notifications: " CERTBOT_EMAIL
+    read -rp "  Email for Let's Encrypt notifications: " CERTBOT_EMAIL
   fi
 
-  info "Issuing SSL certificate for ${DOMAIN} and www.${DOMAIN}..."
-
-  # Temporarily serve HTTP so certbot can do the ACME challenge
+  info "Issuing SSL certificate for ${DOMAIN}..."
   mkdir -p /var/www/certbot
   systemctl reload nginx
 
@@ -313,19 +259,16 @@ issue_ssl() {
     -d "${DOMAIN}" \
     -d "www.${DOMAIN}"
 
-  success "SSL certificate issued for ${DOMAIN}"
+  success "SSL certificate issued"
 
-  # Auto-renew via cron (certbot installs a systemd timer on Ubuntu 20+;
-  # this cron entry is a belt-and-braces fallback)
   local cron_job="0 3 * * * certbot renew --quiet --nginx && systemctl reload nginx"
-  (crontab -l 2>/dev/null | grep -q "certbot renew" ) || \
+  (crontab -l 2>/dev/null | grep -q "certbot renew") || \
     (crontab -l 2>/dev/null; echo "${cron_job}") | crontab -
   success "Auto-renew cron installed"
 }
 
 # ─── 8. Reload nginx ─────────────────────────────────────────────────────────
 reload_nginx() {
-  info "Reloading nginx..."
   systemctl reload nginx
   success "nginx reloaded"
 }
@@ -334,20 +277,18 @@ reload_nginx() {
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "  DQL Investigator — Deploy to ${DOMAIN}"
+echo "  App directory: ${APP_DIR}"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
 if [[ "${UPDATE_ONLY}" == true ]]; then
-  # Fast path: pull + build + reload (no system changes, no SSL, no env prompt)
   info "Update-only mode"
-  setup_repo
+  pull_code
   build_app
   start_pm2
   reload_nginx
 else
-  # Full first-time install
   install_system_deps
-  setup_repo
   write_env
   build_app
   start_pm2
@@ -361,8 +302,8 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 success "Deployed! https://${DOMAIN}"
 echo ""
 echo "  Useful commands:"
-echo "    pm2 logs ${APP_NAME}         — tail app logs"
-echo "    pm2 status                    — process status"
-echo "    sudo ./deploy.sh --update     — deploy a new build"
-echo "    certbot renew --dry-run       — test auto-renew"
+echo "    pm2 logs ${APP_NAME}      — tail app logs"
+echo "    pm2 status                 — process status"
+echo "    sudo ./deploy.sh --update  — pull + rebuild + reload"
+echo "    certbot renew --dry-run    — test SSL auto-renew"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
