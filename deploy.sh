@@ -152,6 +152,12 @@ build_app() {
 start_pm2() {
   cd "${APP_DIR}"
 
+  # Load env vars into the current shell so PM2 inherits them
+  set -a
+  # shellcheck disable=SC1091
+  source "${APP_DIR}/.env.production"
+  set +a
+
   if pm2 describe "${APP_NAME}" &>/dev/null; then
     info "Reloading ${APP_NAME} in PM2..."
     pm2 reload "${APP_NAME}" --update-env
@@ -159,7 +165,6 @@ start_pm2() {
     info "Starting ${APP_NAME} in PM2..."
     pm2 start npm \
       --name "${APP_NAME}" \
-      --env-file "${APP_DIR}/.env.production" \
       -- start -- -p "${APP_PORT}"
   fi
 
