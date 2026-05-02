@@ -16,7 +16,7 @@ export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
   // const userEmail = useInvestigatorStore((s) => s.userEmail);
   const price = getCoffeePriceForCountry(userCountry);
 
-  const [amount, setAmount] = useState(price.amount.toString());
+  const [amount, setAmount] = useState("");
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [statusMsg, setStatusMsg] = useState("");
 

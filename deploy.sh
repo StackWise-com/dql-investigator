@@ -10,7 +10,8 @@
 #   2. Pulls latest code (git pull) — skipped on first run if already current
 #   3. Writes .env.production from the values you supply (or keeps existing)
 #   4. Builds the Next.js app
-#   5. Starts/restarts via PM2 + saves the PM2 startup hook
+#   5. DELETES the old PM2 process, starts a fresh one, and waits for
+#      the app to actually respond on its port before reporting ready
 #   6. Writes the nginx virtual-host config for stackwise.ai
 #   7. Issues / renews the Let's Encrypt SSL cert (certbot --nginx)
 #   8. Reloads nginx
@@ -33,6 +34,9 @@ APP_PORT=3000
 APP_NAME="dql-detective"
 NODE_MAJOR=20
 CERTBOT_EMAIL=""   # filled in interactively if empty
+HEALTH_CHECK_URL="http://127.0.0.1:${APP_PORT}"
+HEALTH_CHECK_MAX_RETRIES=30
+HEALTH_CHECK_INTERVAL_SEC=2
 
 # ─── Colours ─────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; CYAN='\033[0;36m'; RESET='\033[0m'
@@ -148,7 +152,7 @@ build_app() {
   success "Build complete"
 }
 
-# ─── 5. PM2 ──────────────────────────────────────────────────────────────────
+# ─── 5. PM2 — delete old, start fresh, health-check ──────────────────────────
 start_pm2() {
   cd "${APP_DIR}"
 
@@ -162,19 +166,46 @@ start_pm2() {
   source "${APP_DIR}/.env.production"
   set +a
 
-  if pm2 describe "${APP_NAME}" &>/dev/null; then
-    info "Reloading ${APP_NAME} in PM2..."
-    pm2 reload "${APP_NAME}" --update-env
+  # ── DELETE old process first ────────────────────────────────────────────────
+  if pm2 describe "${APP_NAME}" >/dev/null 2>&1; then
+    info "Deleting old PM2 process '${APP_NAME}'..."
+    pm2 delete "${APP_NAME}" >/dev/null 2>&1 || true
+    success "Old PM2 process deleted"
   else
-    info "Starting ${APP_NAME} in PM2..."
-    pm2 start npm \
-      --name "${APP_NAME}" \
-      -- start -- -p "${APP_PORT}"
+    info "No existing PM2 process found — clean start"
   fi
 
-  pm2 save
-  env PATH="$PATH:/usr/bin" pm2 startup systemd -u root --hp /root || true
-  success "PM2 running — '${APP_NAME}' on port ${APP_PORT}"
+  # ── Start fresh ─────────────────────────────────────────────────────────────
+  info "Starting fresh PM2 process '${APP_NAME}' on port ${APP_PORT}..."
+  pm2 start npm \
+    --name "${APP_NAME}" \
+    -- start -- -p "${APP_PORT}"
+
+  pm2 save >/dev/null
+  env PATH="$PATH:/usr/bin" pm2 startup systemd -u root --hp /root >/dev/null 2>&1 || true
+
+  # ── Health check: poll until the app responds ───────────────────────────────
+  info "Waiting for app to be reachable at ${HEALTH_CHECK_URL}..."
+  local attempt=0
+  local healthy=false
+
+  while [[ $attempt -lt ${HEALTH_CHECK_MAX_RETRIES} ]]; do
+    attempt=$((attempt + 1))
+    sleep ${HEALTH_CHECK_INTERVAL_SEC}
+
+    if curl -fsS --max-time 3 "${HEALTH_CHECK_URL}" >/dev/null 2>&1; then
+      healthy=true
+      break
+    fi
+
+    info "  Attempt ${attempt}/${HEALTH_CHECK_MAX_RETRIES} — not ready yet, retrying..."
+  done
+
+  if [[ "$healthy" == true ]]; then
+    success "App is UP and responding on port ${APP_PORT}"
+  else
+    error "App failed health check after ${HEALTH_CHECK_MAX_RETRIES} attempts. Check 'pm2 logs ${APP_NAME}'."
+  fi
 }
 
 # ─── 6. Nginx config ─────────────────────────────────────────────────────────

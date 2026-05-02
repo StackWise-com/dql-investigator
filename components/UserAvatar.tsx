@@ -2,6 +2,7 @@
 
 import { getRank } from "@/lib/progression";
 import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
+import { getAnimalEmoji } from "@/lib/avatars";
 
 function stringToHash(str: string): number {
   let hash = 0;
@@ -68,21 +69,22 @@ interface UserAvatarProps {
   xp: number;
   size?: number;
   showTitle?: boolean;
+  emoji?: string;
 }
 
-export function UserAvatar({ email, xp, size = 32, showTitle = true }: UserAvatarProps) {
+export function UserAvatar({ email, xp, size = 32, showTitle = true, emoji }: UserAvatarProps) {
   const rank = getRank(xp);
-  const svgUrl = generateAvatarSVG(email, size * 2);
   const gameHighScores = useInvestigatorStore((s) => s.gameHighScores);
   const totalArcade = Object.values(gameHighScores).reduce((a, b) => a + b, 0);
+  const resolvedEmoji = emoji || getAnimalEmoji(email);
 
   return (
     <div className="flex items-center gap-2">
       <div
-        className="rounded-full border border-white/10 shadow-sm overflow-hidden flex-shrink-0"
-        style={{ width: size, height: size }}
+        className="rounded-full border border-white/10 shadow-sm overflow-hidden flex-shrink-0 flex items-center justify-center bg-slate-900"
+        style={{ width: size, height: size, fontSize: size * 0.65 }}
       >
-        <img src={svgUrl} alt="avatar" width={size} height={size} className="block" />
+        {resolvedEmoji}
       </div>
       {showTitle && (
         <div className="flex flex-col leading-none">

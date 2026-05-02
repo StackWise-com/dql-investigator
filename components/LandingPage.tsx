@@ -7,6 +7,7 @@ import { CoffeeModal } from "./CoffeeModal";
 import { UserAvatar } from "./UserAvatar";
 import { useAuth } from "@/lib/auth/useAuth";
 import landingImage from "@/images/landing_page.png";
+import { RefundRequestModal } from "./RefundRequestModal";
 
 interface Hotspot {
   id: string;
@@ -99,6 +100,7 @@ function HotspotButton({ hotspot }: { hotspot: Hotspot }) {
   return (
     <motion.button
       className="absolute flex flex-col items-center gap-1 group"
+      data-tour-target={`landing-${hotspot.id}`}
       style={{ left: hotspot.x, top: hotspot.y, transform: "translate(-50%, -50%)" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -170,8 +172,11 @@ function HotspotButton({ hotspot }: { hotspot: Hotspot }) {
 
 export function LandingPage() {
   const [coffeeOpen, setCoffeeOpen] = useState(false);
+  const [refundOpen, setRefundOpen] = useState(false);
   const userEmail = useInvestigatorStore((s) => s.userEmail);
   const totalXP = useInvestigatorStore((s) => s.totalXP);
+  const avatarEmoji = useInvestigatorStore((s) => s.avatarEmoji);
+  const isPremium = useInvestigatorStore((s) => s.isPremium);
   const { signOut } = useAuth();
 
   const handleLogout = () => {
@@ -224,6 +229,7 @@ export function LandingPage() {
       {/* Title overlay */}
       <motion.div
         className="absolute top-6 left-8 z-10"
+        data-tour-target="landing-title"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
@@ -240,11 +246,48 @@ export function LandingPage() {
       {/* Auth buttons / Avatar */}
       <motion.div
         className="absolute top-6 right-8 z-10 flex items-center gap-2"
+        data-tour-target="landing-avatar"
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <UserAvatar email={userEmail} xp={totalXP} size={32} showTitle />
+        <UserAvatar email={userEmail} xp={totalXP} size={32} showTitle emoji={avatarEmoji} />
+        <motion.a
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          href="/profile"
+          className="px-2 py-1 rounded-md text-[10px] font-medium text-cyan-400 hover:text-cyan-300 hover:bg-cyan-400/5 transition-colors"
+        >
+          Profile
+        </motion.a>
+        <motion.a
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          href="/leaderboard"
+          className="px-2 py-1 rounded-md text-[10px] font-medium text-cyan-400 hover:text-cyan-300 hover:bg-cyan-400/5 transition-colors"
+        >
+          Leaderboard
+        </motion.a>
+        {!isPremium && (
+          <motion.a
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            href="/pricing"
+            className="px-2 py-1 rounded-md text-[10px] font-semibold text-amber-300 hover:text-amber-200 hover:bg-amber-400/10 border border-amber-400/30 transition-colors"
+          >
+            Upgrade
+          </motion.a>
+        )}
+        {isPremium && (
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setRefundOpen(true)}
+            className="px-2 py-1 rounded-md text-[10px] font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-400/5 transition-colors"
+          >
+            Refund
+          </motion.button>
+        )}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -307,7 +350,7 @@ export function LandingPage() {
 
       {/* Bottom hint */}
       <motion.div
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10"
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8, duration: 0.5 }}
@@ -315,6 +358,22 @@ export function LandingPage() {
         <p className="text-[10px] text-slate-500 tracking-wider">
           Hover over any glowing button to learn where it leads
         </p>
+      </motion.div>
+
+      {/* Footer links */}
+      <motion.div
+        className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.0, duration: 0.5 }}
+      >
+        <div className="flex items-center gap-3 text-[10px] text-slate-600">
+          <a href="/terms" className="hover:text-slate-400 transition-colors">Terms</a>
+          <span>·</span>
+          <a href="/refund-policy" className="hover:text-slate-400 transition-colors">Refund Policy</a>
+          <span>·</span>
+          <a href="/pricing" className="hover:text-slate-400 transition-colors">Pricing</a>
+        </div>
       </motion.div>
 
       {/* Coffee button */}
@@ -332,6 +391,7 @@ export function LandingPage() {
       </motion.button>
 
       <CoffeeModal isOpen={coffeeOpen} onClose={() => setCoffeeOpen(false)} />
+      <RefundRequestModal isOpen={refundOpen} onClose={() => setRefundOpen(false)} />
     </div>
   );
 }

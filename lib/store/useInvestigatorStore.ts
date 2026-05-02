@@ -11,7 +11,7 @@ import type {
 } from "@/lib/types/dql";
 
 export interface GameScore {
-  mode: "timer" | "pipeline" | "mcq";
+  mode: "timer" | "pipeline" | "mcq" | "dpl-matcher" | "dpl-builder";
   score: number;
   maxScore: number;
   date: string;
@@ -73,11 +73,27 @@ interface InvestigatorState {
   setIsPremium: (val: boolean) => void;
 
   // User profile (hydrated from Supabase by useAuth, not persisted locally)
+  userId: string;
+  setUserId: (id: string) => void;
   userEmail: string;
   setUserEmail: (email: string) => void;
   userCountry: string;
   userCurrency: string;
   setUserCountry: (code: string) => void;
+  displayName: string;
+  setDisplayName: (name: string) => void;
+  displaySlug: string;
+  setDisplaySlug: (slug: string) => void;
+  avatarEmoji: string;
+  setAvatarEmoji: (emoji: string) => void;
+  termsAcceptedAt: string | null;
+  setTermsAcceptedAt: (at: string | null) => void;
+  // Hydration: once true, the store mirrors the server and every
+  // addXP / addGameScore call also pushes to Supabase.
+  progressHydrated: boolean;
+  setProgressHydrated: (val: boolean) => void;
+  setTotalXP: (xp: number) => void;
+  setGameHighScores: (scores: Record<string, number>) => void;
 
   // XP / Progress
   totalXP: number;
@@ -91,6 +107,11 @@ interface InvestigatorState {
   gameHighScores: Record<string, number>;
   gameSession: GameSession | null;
   setGameSession: (session: GameSession | null) => void;
+
+  // Tour
+  tourCompletedSegments: string[];
+  completeTourSegment: (segment: string) => void;
+  skipTour: () => void;
 }
 
 export const useInvestigatorStore = create<InvestigatorState>()(
@@ -145,13 +166,22 @@ export const useInvestigatorStore = create<InvestigatorState>()(
       setShowLanding: (showLanding) => set({ showLanding }),
 
       unlockedScenarios: [
+        // Legacy DQL free cases
         "case-001", "case-006", "case-007", "case-008", "case-009",
         "case-010", "case-011", "case-012", "case-013", "case-014",
         "case-015", "case-016", "case-017", "case-018", "case-019",
+        // Onboarding track (all free)
+        "onboard-001", "onboard-002", "onboard-003", "onboard-004", "onboard-005", "onboard-006",
+        // DPL track (first 4 free)
+        "dpl-001", "dpl-002", "dpl-003", "dpl-004",
+        // Combined track (2 free tasters)
+        "combo-001", "combo-002",
       ],
       isPremium: false,
       setIsPremium: (isPremium) => set({ isPremium }),
 
+      userId: "",
+      setUserId: (userId) => set({ userId }),
       userEmail: "",
       setUserEmail: (email) => set({ userEmail: email }),
       userCountry: "US",
@@ -160,6 +190,18 @@ export const useInvestigatorStore = create<InvestigatorState>()(
         const price = getPriceForCountry(code);
         set({ userCountry: code, userCurrency: price.currency });
       },
+      displayName: "",
+      setDisplayName: (displayName) => set({ displayName }),
+      displaySlug: "",
+      setDisplaySlug: (displaySlug) => set({ displaySlug }),
+      avatarEmoji: "",
+      setAvatarEmoji: (avatarEmoji) => set({ avatarEmoji }),
+      termsAcceptedAt: null,
+      setTermsAcceptedAt: (termsAcceptedAt) => set({ termsAcceptedAt }),
+      progressHydrated: false,
+      setProgressHydrated: (progressHydrated) => set({ progressHydrated }),
+      setTotalXP: (totalXP) => set({ totalXP }),
+      setGameHighScores: (gameHighScores) => set({ gameHighScores }),
 
       pipeline: [],
       setPipeline: (pipeline) => set({ pipeline }),
@@ -215,6 +257,26 @@ export const useInvestigatorStore = create<InvestigatorState>()(
       gameHighScores: {},
       gameSession: null,
       setGameSession: (gameSession) => set({ gameSession }),
+
+      tourCompletedSegments: [],
+      completeTourSegment: (segment) =>
+        set((state) => ({
+          tourCompletedSegments: state.tourCompletedSegments.includes(segment)
+            ? state.tourCompletedSegments
+            : [...state.tourCompletedSegments, segment],
+        })),
+      skipTour: () =>
+        set(() => ({
+          tourCompletedSegments: [
+            "landing",
+            "learn",
+            "sandbox",
+            "visualize",
+            "cases-selector",
+            "cases-active",
+            "arcade",
+          ],
+        })),
     }),
     {
       name: "dql-investigator-store",
@@ -228,6 +290,7 @@ export const useInvestigatorStore = create<InvestigatorState>()(
       partialize: (state) => ({
         phases: state.phases,
         unlockedScenarios: state.unlockedScenarios,
+        tourCompletedSegments: state.tourCompletedSegments,
       }),
     }
   )

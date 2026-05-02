@@ -201,7 +201,7 @@ export function DataViewPane() {
   };
 
   return (
-    <div className="flex-1 min-w-0 glass-panel border-x border-cyan-400/10 flex flex-col">
+    <div className="flex-1 min-w-0 glass-panel border-x border-cyan-400/10 flex flex-col" data-tour-target="dataview">
       <div className="h-10 flex items-center px-4 border-b border-white/[0.06] justify-between">
         <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">Data View</span>
         <div className="flex items-center gap-3">

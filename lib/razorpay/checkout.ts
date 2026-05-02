@@ -141,12 +141,12 @@ export async function openRazorpayCheckout(options: {
     theme: { color: "#22d3ee" },
     // Explicitly configure payment methods for test mode
     method: {
-      card: true,
-      upi: true,
-      netbanking: true,
-      wallet: true,
-      emi: false,
-      paylater: false,
+      card: 1,
+      upi: 1,
+      netbanking: 1,
+      wallet: 1,
+      emi: 0,
+      paylater: 0,
     },
     handler: (response: RazorpayResponse) => {
       if (options.onSuccess) {

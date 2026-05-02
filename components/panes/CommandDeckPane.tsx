@@ -34,7 +34,7 @@ export function CommandDeckPane() {
   const showRunButton = isEditor && hasEditorText;
 
   return (
-    <div className="w-[28%] min-w-[300px] glass-panel border-l border-cyan-400/20 flex flex-col">
+    <div className="w-[28%] min-w-[300px] glass-panel border-l border-cyan-400/20 flex flex-col" data-tour-target="commanddeck">
       <div className="h-10 flex items-center px-4 border-b border-white/[0.06] justify-between">
         <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">Command Deck</span>
         <div className="flex items-center gap-1">
@@ -77,6 +77,7 @@ export function CommandDeckPane() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleRun}
+              data-tour-target="run-button"
               className={`px-3 py-1.5 rounded-md text-[10px] font-medium flex items-center gap-1.5 transition-colors ${
                 hasUnrunChanges
                   ? "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30 hover:bg-emerald-400/25"

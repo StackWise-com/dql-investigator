@@ -1,0 +1,57 @@
+[
+  {
+    "precedence": 1,
+    "operators": "- (unary)",
+    "description": "Negation"
+  },
+  {
+    "precedence": 2,
+    "operators": "* / %",
+    "description": "Multiplication, division, modulo"
+  },
+  {
+    "precedence": 3,
+    "operators": "@",
+    "description": "Time alignment"
+  },
+  {
+    "precedence": 4,
+    "operators": "+ -",
+    "description": "Addition, subtraction"
+  },
+  {
+    "precedence": 5,
+    "operators": "~",
+    "description": "Search / contains"
+  },
+  {
+    "precedence": 6,
+    "operators": "== != > >= < <=",
+    "description": "Comparison"
+  },
+  {
+    "precedence": 7,
+    "operators": "in",
+    "description": "Membership test"
+  },
+  {
+    "precedence": 8,
+    "operators": "not",
+    "description": "Logical negation"
+  },
+  {
+    "precedence": 9,
+    "operators": "and",
+    "description": "Logical conjunction"
+  },
+  {
+    "precedence": 10,
+    "operators": "xor",
+    "description": "Exclusive or"
+  },
+  {
+    "precedence": 11,
+    "operators": "or",
+    "description": "Logical disjunction"
+  }
+]

@@ -4,17 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
 import { calculateCaseStepXP } from "@/lib/progression";
 
-const PREMIUM_IDS = new Set(["case-002", "case-003", "case-004", "case-005"]);
-
-function isPremiumScenario(id: string): boolean {
-  return (
-    PREMIUM_IDS.has(id) ||
-    id.startsWith("case-02") ||
-    id.startsWith("case-03") ||
-    id.startsWith("case-04")
-  );
-}
-
 export function VictoryModal() {
   const activeScenario = useInvestigatorStore((s) => s.activeScenario);
   const completedScenarios = useInvestigatorStore((s) => s.completedScenarios);
@@ -26,8 +15,7 @@ export function VictoryModal() {
 
   const scenarioXP = activeScenario
     ? activeScenario.steps.reduce(
-        (acc, _, i) =>
-          acc + calculateCaseStepXP(i, activeScenario.steps.length, isPremiumScenario(activeScenario.id)),
+        (acc, _, i) => acc + calculateCaseStepXP(i, activeScenario.steps.length),
         0
       )
     : 0;
@@ -72,12 +60,6 @@ export function VictoryModal() {
                 <span className="text-xs text-slate-400">Case earned</span>
                 <span className="text-sm font-semibold text-emerald-400">+{scenarioXP} XP</span>
               </div>
-              {activeScenario && isPremiumScenario(activeScenario.id) && (
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-amber-400/80">Premium 2× bonus</span>
-                  <span className="text-xs font-medium text-amber-400">applied</span>
-                </div>
-              )}
               <div className="h-px bg-white/[0.06]" />
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-300 font-medium">Total XP</span>

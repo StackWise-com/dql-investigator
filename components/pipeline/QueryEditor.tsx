@@ -53,7 +53,7 @@ export function QueryEditor() {
 | sort timestamp desc
 | limit 10`}
         spellCheck={false}
-        className="flex-1 min-h-[200px] bg-slate-900/80 border border-white/[0.08] rounded-lg p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400/40 resize-none leading-relaxed"
+        className="flex-1 min-h-[100px] bg-slate-900/80 border border-white/[0.08] rounded-lg p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400/40 resize-none leading-relaxed"
       />
       <div className="mt-2 text-[10px] text-slate-600">
         Supported: fetch, filter, fields, sort, limit, summarize, dedup, search, parse, expand

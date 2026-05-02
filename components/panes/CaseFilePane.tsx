@@ -6,8 +6,6 @@ import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
 import { runPipeline } from "@/lib/dql/engine";
 import { calculateCaseStepXP } from "@/lib/progression";
 
-const PREMIUM_CASE_IDS = new Set(["case-002", "case-003", "case-004", "case-005"]);
-
 const CASE_TAGS: Record<string, string> = {
   "case-001": "fetch logs", "case-002": "fetch events", "case-003": "fetch bizevents",
   "case-004": "fetch spans", "case-005": "makeTimeseries", "case-006": "filter WARN",
@@ -22,16 +20,16 @@ const CASE_TAGS: Record<string, string> = {
   "case-032": "in array", "case-033": "fieldsRemove", "case-034": "makeTimeseries",
   "case-035": "if()", "case-036": "timeseries+by", "case-037": "fieldsAdd+if",
   "case-038": "tier+sum", "case-039": "parse+sort", "case-040": "avg+limit",
+  "dpl-001": "INTEGER parse", "dpl-002": "IPADDR parse", "dpl-003": "TIMESTAMP parse",
+  "dpl-004": "ALPHA parse", "dpl-005": "multi-field", "dpl-006": "JSON parse",
+  "dpl-007": "KVP parse", "dpl-008": "syslog parse", "dpl-009": "Apache parse",
+  "dpl-010": "double matcher", "dpl-011": "UUID parse", "dpl-012": "full nginx",
+  "combo-001": "parse+avg", "combo-002": "JSON+count", "combo-003": "firewall+filter",
+  "combo-004": "syslog+failed", "combo-005": "Apache+404", "combo-006": "nginx+5xx",
+  "combo-007": "latency+filter", "combo-008": "firewall+allow",
+  "onboard-001": "fetch logs", "onboard-002": "filter ERROR", "onboard-003": "summarize count",
+  "onboard-004": "group by host", "onboard-005": "sort desc", "onboard-006": "parse intro",
 };
-
-function getIsPremiumCase(id: string): boolean {
-  return (
-    PREMIUM_CASE_IDS.has(id) ||
-    id.startsWith("case-02") ||
-    id.startsWith("case-03") ||
-    id.startsWith("case-04")
-  );
-}
 
 export function CaseFilePane() {
   const activeScenario = useInvestigatorStore((s) => s.activeScenario);
@@ -57,7 +55,6 @@ export function CaseFilePane() {
   }, []);
 
   const step = activeScenario?.steps[currentStepIndex];
-  const isPremiumCase = activeScenario ? getIsPremiumCase(activeScenario.id) : false;
 
   const handleCheck = () => {
     if (!step || !activeScenario) return;
@@ -84,7 +81,7 @@ export function CaseFilePane() {
         resultKeys.every((k) => expectedKeys.includes(k));
 
       if (keysMatch && lastResult.recordCount === lastExpected.recordCount) {
-        const xp = calculateCaseStepXP(currentStepIndex, activeScenario.steps.length, isPremiumCase);
+        const xp = calculateCaseStepXP(currentStepIndex, activeScenario.steps.length);
         setCheckResult({ correct: true, message: `Correct! +${xp} XP` });
         addXP(xp);
         if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
@@ -162,7 +159,7 @@ export function CaseFilePane() {
                   transition={{ duration: 0.25 }}
                   className="space-y-4"
                 >
-                  <div className="glass-panel-strong rounded-lg p-4 space-y-3">
+                  <div className="glass-panel-strong rounded-lg p-4 space-y-3" data-tour-target="case-brief">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-semibold uppercase tracking-wider text-amber-400/80">Mission Brief</span>
                       <button
@@ -183,12 +180,12 @@ export function CaseFilePane() {
                     )}
                   </div>
 
-                  <div className="glass-panel rounded-lg p-4 space-y-2">
+                  <div className="glass-panel rounded-lg p-4 space-y-2" data-tour-target="case-objective">
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400/80">Objective</span>
                     <p className="text-sm text-slate-200">{step.goal}</p>
                   </div>
 
-                  <div className="glass-panel rounded-lg p-4 space-y-2">
+                  <div className="glass-panel rounded-lg p-4 space-y-2" data-tour-target="case-hint">
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400/80">Hint</span>
                       <button
@@ -212,7 +209,7 @@ export function CaseFilePane() {
                   {step.lesson && (
                     <div className="glass-panel rounded-lg p-4 space-y-2">
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-cyan-400/80">Lesson</span>
-                      <pre className="text-xs font-mono text-slate-300 bg-slate-950/80 rounded-md p-3 overflow-x-auto">
+                      <pre className="text-xs font-mono text-slate-300 bg-slate-950/80 rounded-md p-3 overflow-x-auto blur-sm hover:blur-0 transition-all cursor-help select-none" title="Hover to reveal the solution">
                         {step.lesson}
                       </pre>
                     </div>
@@ -266,6 +263,7 @@ export function CaseFilePane() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleCheck}
+              data-tour-target="case-check"
               className="flex-[2] py-2 rounded-md text-xs font-medium bg-cyan-400/15 text-cyan-300 hover:bg-cyan-400/25 border border-cyan-400/30"
             >
               Check Solution

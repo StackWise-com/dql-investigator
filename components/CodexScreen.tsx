@@ -8,6 +8,7 @@ import {
   type QueryCategory,
   type QueryDifficulty,
 } from "@/lib/dql/query-library";
+import { ExplainerCard } from "./ExplainerCard";
 
 type ContentBlock =
   | { type: "paragraph"; text: string }
@@ -567,6 +568,65 @@ function QueryCookbook() {
   );
 }
 
+function CommandTable({ block }: { block: ContentBlock & { type: "table" } }) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const isCommandTable = block.headers[0]?.toLowerCase() === "command";
+
+  return (
+    <div className="overflow-x-auto mb-4">
+      <table className="w-full text-sm border border-white/[0.06] rounded-lg overflow-hidden">
+        <thead>
+          <tr className="border-b border-white/[0.06] bg-white/[0.03]">
+            {block.headers.map((h, i) => (
+              <th
+                key={i}
+                className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-cyan-400/80"
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {block.rows.map((row, ri) => (
+            <>
+              <tr
+                key={ri}
+                className="border-b border-white/[0.03] even:bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+              >
+                {row.map((cell, ci) => (
+                  <td key={ci} className="px-3 py-2 text-xs text-slate-300">
+                    {isCommandTable && ci === 0 ? (
+                      <button
+                        onClick={() => setExpanded(expanded === cell ? null : cell)}
+                        className="text-cyan-300 hover:text-cyan-200 font-medium transition-colors flex items-center gap-1"
+                      >
+                        {cell}
+                        <span className="text-[9px] text-slate-500">
+                          {expanded === cell ? "▲" : "▼"}
+                        </span>
+                      </button>
+                    ) : (
+                      cell
+                    )}
+                  </td>
+                ))}
+              </tr>
+              {isCommandTable && expanded === row[0] && (
+                <tr className="border-b border-white/[0.03]">
+                  <td colSpan={block.headers.length} className="p-0">
+                    <ExplainerCard command={row[0]} />
+                  </td>
+                </tr>
+              )}
+            </>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function renderBlock(block: ContentBlock, idx: number) {
   switch (block.type) {
     case "paragraph":
@@ -591,38 +651,7 @@ function renderBlock(block: ContentBlock, idx: number) {
         </pre>
       );
     case "table":
-      return (
-        <div key={idx} className="overflow-x-auto mb-4">
-          <table className="w-full text-sm border border-white/[0.06] rounded-lg overflow-hidden">
-            <thead>
-              <tr className="border-b border-white/[0.06] bg-white/[0.03]">
-                {block.headers.map((h, i) => (
-                  <th
-                    key={i}
-                    className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-cyan-400/80"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {block.rows.map((row, ri) => (
-                <tr
-                  key={ri}
-                  className="border-b border-white/[0.03] even:bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
-                >
-                  {row.map((cell, ci) => (
-                    <td key={ci} className="px-3 py-2 text-xs text-slate-300">
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
+      return <CommandTable key={idx} block={block} />;
     default:
       return null;
   }
@@ -634,7 +663,7 @@ export function CodexScreen() {
 
   return (
     <div className="flex-1 flex h-full">
-      <div className="w-64 glass-panel border-r border-cyan-400/20 flex flex-col">
+      <div className="w-64 glass-panel border-r border-cyan-400/20 flex flex-col" data-tour-target="learn-sidebar">
         <div className="h-10 flex items-center px-4 border-b border-white/[0.06]">
           <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">DQL Codex</span>
         </div>
@@ -655,7 +684,7 @@ export function CodexScreen() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex-1 overflow-y-auto p-8" data-tour-target="learn-content">
         <AnimatePresence mode="wait">
           {section && (
             <motion.div
@@ -668,7 +697,9 @@ export function CodexScreen() {
             >
               <h2 className="text-xl font-semibold text-slate-100 mb-6">{section.title}</h2>
               {section.id === "query-cookbook" ? (
-                <QueryCookbook />
+                <div data-tour-target="learn-cookbook">
+                  <QueryCookbook />
+                </div>
               ) : (
                 section.blocks.map((block, i) => renderBlock(block, i))
               )}

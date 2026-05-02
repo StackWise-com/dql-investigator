@@ -45,25 +45,24 @@ export function getXPToNextRank(xp: number): number {
 export interface XPBreakdown {
   base: number;
   complexityBonus: number;
-  premiumMultiplier: number;
   total: number;
 }
 
-export function calculatePipelineXP(pipelineLength: number, isPremiumCase: boolean): XPBreakdown {
+// XP is identical for free and premium cases. Premium unlocks more
+// content and deeper explanations only — never an XP advantage.
+export function calculatePipelineXP(pipelineLength: number): XPBreakdown {
   let base = 5;
   if (pipelineLength >= 3) base = 15;
   else if (pipelineLength >= 2) base = 10;
 
   const complexityBonus = pipelineLength > 3 ? (pipelineLength - 3) * 5 : 0;
-  const premiumMultiplier = isPremiumCase ? 2 : 1;
-  const total = (base + complexityBonus) * premiumMultiplier;
+  const total = base + complexityBonus;
 
-  return { base, complexityBonus, premiumMultiplier, total };
+  return { base, complexityBonus, total };
 }
 
-export function calculateCaseStepXP(stepIndex: number, totalSteps: number, isPremiumCase: boolean): number {
+export function calculateCaseStepXP(stepIndex: number, totalSteps: number): number {
   const base = 25;
   const finishBonus = stepIndex === totalSteps - 1 ? 100 : 0;
-  const premiumMultiplier = isPremiumCase ? 2 : 1;
-  return (base + finishBonus) * premiumMultiplier;
+  return base + finishBonus;
 }

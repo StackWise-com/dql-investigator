@@ -58,6 +58,9 @@ export interface GamePhase {
   completed: boolean;
 }
 
+export type ScenarioTrack = "onboarding" | "dql" | "dpl" | "combined";
+export type ScenarioTier = "free" | "premium";
+
 export interface Scenario {
   id: string;
   title: string;
@@ -65,6 +68,10 @@ export interface Scenario {
   briefing: string;
   difficulty: "Beginner" | "Intermediate" | "Advanced";
   steps: ScenarioStep[];
+  /** Learning track this case belongs to. Defaults to "dql" for legacy scenarios. */
+  track?: ScenarioTrack;
+  /** Premium gating tier. Defaults to "premium" unless explicitly free. */
+  tier?: ScenarioTier;
 }
 
 export interface ScenarioStep {
@@ -76,6 +83,15 @@ export interface ScenarioStep {
   hint: string;
   sampleData: DQLRecord[];
   expectedPipeline: PipelineStage[];
+  /** Optional DPL pattern phase for "dpl" or "combined" track steps. */
+  dpl?: {
+    /** The raw input strings the player's pattern must parse. */
+    inputs: string[];
+    /** Reference DPL pattern that successfully parses the inputs. */
+    expectedPattern: string;
+    /** Field names the pattern is expected to extract. */
+    expectedFields: string[];
+  };
 }
 
 export type ViewMode = "cards" | "editor";

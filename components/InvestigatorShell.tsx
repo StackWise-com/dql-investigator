@@ -14,6 +14,10 @@ import { LoginPage } from "./LoginPage";
 import { ArcadeScreen } from "./arcade/ArcadeScreen";
 import { FeedbackButton } from "./FeedbackButton";
 import { useAuth } from "@/lib/auth/useAuth";
+import { useProgressSync } from "@/lib/auth/useProgressSync";
+import { TermsAcceptModal } from "./TermsAcceptModal";
+import { TourProvider } from "./tour/TourProvider";
+import { TourAutoTrigger } from "./tour/TourAutoTrigger";
 
 const COMMAND_VISUALS: { cmd: string; title: string; description: string; color: string }[] = [
   { cmd: "filter", title: "Filter", description: "Matching rows glow green. Non-matching rows flash red and fade away.", color: "text-rose-400 border-rose-400/20" },
@@ -66,7 +70,7 @@ function SandboxPane() {
         <p className="text-xs text-slate-500">Write any DQL pipeline and see results instantly. No objectives — just explore.</p>
       </div>
 
-      <div className="p-4 space-y-2">
+      <div className="p-4 space-y-2" data-tour-target="sandbox-starters">
         <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-3">Starter Queries</p>
         {SANDBOX_STARTERS.map((s) => (
           <div key={s.label} className="glass-panel-strong rounded-lg border border-white/[0.05] p-3 space-y-1.5">
@@ -145,6 +149,7 @@ function getPageName(opts: {
 export function InvestigatorShell() {
   useHashRouter();
   useAuth();
+  useProgressSync();
 
   const currentPhase = useInvestigatorStore((s) => s.currentPhase);
   const activeScenario = useInvestigatorStore((s) => s.activeScenario);
@@ -171,40 +176,44 @@ export function InvestigatorShell() {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden">
-      <div className="flex-1 flex overflow-hidden">
-        {showLanding ? (
-          <LandingPage />
-        ) : currentPhase === 0 ? (
-          <CodexScreen />
-        ) : currentPhase === 1 ? (
-          <div className="flex-1 flex">
-            <SandboxPane />
-            <DataViewPane />
-            <CommandDeckPane />
-          </div>
-        ) : currentPhase === 2 ? (
-          <div className="flex-1 flex">
-            <div className="w-[28%] min-w-[280px] glass-panel border-r border-cyan-400/20 flex flex-col">
-              <div className="p-6 border-b border-white/[0.06]">
-                <h2 className="text-lg font-semibold text-slate-100 mb-2">Visualize</h2>
-                <p className="text-sm text-slate-400">Build a pipeline and watch how each DQL command transforms data.</p>
-              </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                <VisualGuide />
-              </div>
+    <TourProvider>
+      <div className="h-screen w-screen flex flex-col bg-slate-950 text-slate-100 overflow-hidden">
+        <TourAutoTrigger />
+        <div className="flex-1 flex overflow-hidden">
+          {showLanding ? (
+            <LandingPage />
+          ) : currentPhase === 0 ? (
+            <CodexScreen />
+          ) : currentPhase === 1 ? (
+            <div className="flex-1 flex">
+              <SandboxPane />
+              <DataViewPane />
+              <CommandDeckPane />
             </div>
-            <DataViewPane />
-            <CommandDeckPane />
-          </div>
-        ) : currentPhase === 4 ? (
-          <ArcadeScreen />
-        ) : (
-          renderCasesPhase()
-        )}
+          ) : currentPhase === 2 ? (
+            <div className="flex-1 flex">
+              <div className="w-[28%] min-w-[280px] glass-panel border-r border-cyan-400/20 flex flex-col" data-tour-target="visualize-sidebar">
+                <div className="p-6 border-b border-white/[0.06]">
+                  <h2 className="text-lg font-semibold text-slate-100 mb-2">Visualize</h2>
+                  <p className="text-sm text-slate-400">Build a pipeline and watch how each DQL command transforms data.</p>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  <VisualGuide />
+                </div>
+              </div>
+              <DataViewPane />
+              <CommandDeckPane />
+            </div>
+          ) : currentPhase === 4 ? (
+            <ArcadeScreen />
+          ) : (
+            renderCasesPhase()
+          )}
+        </div>
+        <VictoryModal />
+        <TermsAcceptModal />
+        <FeedbackButton page={pageName} />
       </div>
-      <VictoryModal />
-      <FeedbackButton page={pageName} />
-    </div>
+    </TourProvider>
   );
 }

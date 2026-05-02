@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GRAIL BASIN — DQL Interactive World</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles/main.css" />
+  </head>
+  <body>
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+      <div class="splash-content">
+        <h1 class="splash-title">GRAIL BASIN</h1>
+        <p class="splash-subtitle">The Dynatrace Query Language lives in a river basin.</p>
+        <p class="splash-desc">Logs flow like water. Grail is the reservoir. DQL is the processing plant. Learn by playing.</p>
+        <button id="enter-basin" class="enter-btn">Enter the Basin</button>
+      </div>
+    </div>
+
+    <!-- 3D Canvas Container -->
+    <div id="canvas-container" class="canvas-container"></div>
+
+    <!-- HUD -->
+    <div id="hud" class="hud hidden">
+      <div class="hud-left">
+        <span class="logo">GRAIL BASIN</span>
+        <nav class="zone-tabs">
+          <button data-zone="basin" class="zone-tab active">Basin</button>
+          <button data-zone="smartscape" class="zone-tab">Smartscape</button>
+          <button data-zone="grail" class="zone-tab">Grail</button>
+          <button data-zone="dpl" class="zone-tab">DPL Lab</button>
+        </nav>
+      </div>
+      <div class="hud-right">
+        <div class="xp-bar">
+          <span class="xp-label">XP</span>
+          <div class="xp-track"><div id="xp-fill" class="xp-fill"></div></div>
+          <span id="xp-value" class="xp-value">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Challenge Panel (Left) -->
+    <div id="challenge-panel" class="challenge-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">Challenge</span>
+        <span id="challenge-level" class="panel-level">1 / 10</span>
+      </div>
+      <div id="challenge-content" class="challenge-content"></div>
+    </div>
+
+    <!-- Results Panel (Right) -->
+    <div id="results-panel" class="results-panel hidden">
+      <div class="panel-header">
+        <span class="panel-title">Query Results</span>
+        <span id="results-count" class="results-count">0 records</span>
+      </div>
+      <div id="results-table" class="results-table"></div>
+    </div>
+
+    <!-- Log Legend (Bottom-left) -->
+    <div id="log-legend" class="log-legend hidden">
+      <div class="legend-title">Log Levels</div>
+      <div class="legend-item"><span class="legend-dot info"></span> INFO</div>
+      <div class="legend-item"><span class="legend-dot warn"></span> WARN</div>
+      <div class="legend-item"><span class="legend-dot error"></span> ERROR</div>
+      <div class="legend-item"><span class="legend-dot debug"></span> DEBUG</div>
+      <div class="legend-item"><span class="legend-dot none"></span> NONE</div>
+    </div>
+
+    <!-- Pipeline Visualizer -->
+    <div id="pipeline-vis" class="pipeline-vis hidden">
+      <div id="stage-pills" class="stage-pills"></div>
+      <div id="stage-counts" class="stage-counts"></div>
+    </div>
+
+    <!-- Query Lab (Bottom) -->
+    <div id="query-lab" class="query-lab hidden">
+      <div class="query-header">DQL ANALYSIS LAB</div>
+      <div id="query-editor" class="query-editor" contenteditable="true" spellcheck="false" data-placeholder="Type your DQL query here..."></div>
+      <div class="query-toolbar">
+        <div id="quick-actions" class="quick-actions">
+          <button data-snippet="fetch logs">fetch</button>
+          <button data-snippet="| filter loglevel == &quot;ERROR&quot;">filter</button>
+          <button data-snippet="| summarize count(), by:{service}">summarize</button>
+          <button data-snippet="| sort count desc">sort</button>
+          <button data-snippet="| limit 5">limit</button>
+        </div>
+        <button id="run-query" class="run-btn">RUN</button>
+      </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="tooltip hidden"></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

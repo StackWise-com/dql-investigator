@@ -1,0 +1,100 @@
+{
+  "fetch": {
+    "title": "fetch",
+    "plainEnglish": "Open a filing cabinet. You tell it which drawer (logs, events, spans, bizevents) and it hands you every record in that drawer.",
+    "analogy": "Like walking into a library and asking for every book in the Science section.",
+    "commonMistake": "Forgetting that fetch must always be the first command. You cannot filter data you have not loaded yet.",
+    "tip": "Always use a time range (from:-1h) in production so you do not pull millions of rows."
+  },
+  "filter": {
+    "title": "filter",
+    "plainEnglish": "Throw away rows you do not care about. Only rows that match your condition stay in the pipeline.",
+    "analogy": "Like a sieve — only pebbles small enough to fall through the holes make it to the bottom.",
+    "commonMistake": "Using = instead of ==. In DQL, == means equality; = is only for assignments inside summarize or fieldsAdd.",
+    "tip": "Chain multiple conditions with and / or. Parentheses help when mixing them."
+  },
+  "filterOut": {
+    "title": "filterOut",
+    "plainEnglish": "The opposite of filter. Remove rows that DO match your condition. Everything else stays.",
+    "analogy": "Like picking olives out of a salad — you remove the olives, everything else remains.",
+    "commonMistake": "Thinking filterOut removes the field. It removes the ROW, not the column.",
+    "tip": "Use filterOut when you want to exclude one noisy category (like INFO logs) and keep everything else."
+  },
+  "summarize": {
+    "title": "summarize",
+    "plainEnglish": "Crunch many rows down into a small summary table. You define what to calculate (count, sum, avg) and what to group by.",
+    "analogy": "Like sorting a deck of cards into piles by suit, then counting how many cards are in each pile.",
+    "commonMistake": "Forgetting the by:{field} clause. Without it, summarize collapses everything into one single row.",
+    "tip": "You can compute multiple aggregations in one summarize: summarize total = sum(amount), count = count(), by:{product}"
+  },
+  "sort": {
+    "title": "sort",
+    "plainEnglish": "Reorder rows by a column. Use asc for smallest-first, desc for largest-first.",
+    "analogy": "Like arranging books on a shelf from thinnest to thickest.",
+    "commonMistake": "Sorting after limit. Always sort BEFORE limit, or you will cap the unordered list first.",
+    "tip": "During incidents, sort by count or duration desc — the worst offenders float to the top."
+  },
+  "limit": {
+    "title": "limit",
+    "plainEnglish": "Keep only the first N rows. Discard everything after.",
+    "analogy": "Like taking only the first 10 photos from a roll of film.",
+    "commonMistake": "Using limit too early in the pipeline. If you limit before sorting, your top-N will be random.",
+    "tip": "Always place limit at the very end of your pipeline, after sort."
+  },
+  "parse": {
+    "title": "parse",
+    "plainEnglish": "Pull structured fields out of unstructured text. You write a pattern that describes what the text looks like, and DPL extracts the values into named fields.",
+    "analogy": "Like using a stencil to trace shapes out of a messy drawing. The stencil defines the pattern; the traced shapes are your new fields.",
+    "commonMistake": "Writing a pattern that is too greedy. Use LD (lazy data) when the next literal in the pattern decides where a match stops.",
+    "tip": "Start small: extract one field first, test it, then add more matchers to the pattern."
+  },
+  "fieldsAdd": {
+    "title": "fieldsAdd",
+    "plainEnglish": "Create a new column by computing a value for every row.",
+    "analogy": "Like adding a new column to a spreadsheet and filling it with a formula.",
+    "commonMistake": "Trying to reference a field that does not exist yet. fieldsAdd can only use fields that are already in the pipeline.",
+    "tip": "Use if() inside fieldsAdd to create categories: fieldsAdd tier = if(amount > 500, \"premium\", \"standard\")"
+  },
+  "fieldsRemove": {
+    "title": "fieldsRemove",
+    "plainEnglish": "Drop one or more columns. The rows stay; only the specified fields disappear.",
+    "analogy": "Like cutting out certain columns from a printed table before sharing it.",
+    "commonMistake": "Removing a field you still need in a later command. DQL reads left-to-right; once removed, a field is gone.",
+    "tip": "Use fieldsRemove to clean up verbose logs before exporting or sharing a report."
+  },
+  "fieldsRename": {
+    "title": "fieldsRename",
+    "plainEnglish": "Change the name of an existing column.",
+    "analogy": "Like putting a new label on a folder without changing what is inside.",
+    "commonMistake": "Trying to rename a field that was never created. Make sure the field exists before renaming it.",
+    "tip": "Useful when merging data from different sources that use different naming conventions."
+  },
+  "dedup": {
+    "title": "dedup",
+    "plainEnglish": "Remove duplicate rows, keeping only the first occurrence for each value of a given field.",
+    "analogy": "Like removing duplicate contacts from your phone — keep the first entry, skip the rest.",
+    "commonMistake": "Expecting dedup to remove rows that are identical across ALL fields. It only checks the field you specify.",
+    "tip": "After dedup, use fields to keep just the columns you need for a clean report."
+  },
+  "makeTimeseries": {
+    "title": "makeTimeseries",
+    "plainEnglish": "Group rows into time buckets and calculate a value for each bucket. Perfect for spotting trends and spikes.",
+    "analogy": "Like counting how many cars pass through a toll booth every 15 minutes, then plotting those counts on a graph.",
+    "commonMistake": "Forgetting the interval. Without interval:5m or similar, the command has no buckets to fill.",
+    "tip": "Use by:{field} to create multiple time series on the same chart — one line per service or host."
+  },
+  "expand": {
+    "title": "expand",
+    "plainEnglish": "Take an array field and turn each array element into its own row.",
+    "analogy": "Like taking a bag of marbles and placing each marble in its own cup.",
+    "commonMistake": "Using expand on a non-array field. If the field is a plain string, expand will create one row with the whole string.",
+    "tip": "After expand, you can filter on individual array values as if they were regular fields."
+  },
+  "search": {
+    "title": "search",
+    "plainEnglish": "Find rows that contain a specific word anywhere in any field.",
+    "analogy": "Like using Ctrl+F on a document to find every mention of a keyword.",
+    "commonMistake": "Expecting search to match exact field values. It searches across ALL fields, so results can be broad.",
+    "tip": "Use search for exploratory hunting, then narrow down with filter once you know which field matters."
+  }
+}

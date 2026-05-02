@@ -94,7 +94,7 @@ export function MonacoQueryEditor() {
         <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">DQL Editor</span>
         <span className="text-[10px] text-slate-600">Monaco</span>
       </div>
-      <div ref={containerRef} className="flex-1 rounded-lg overflow-hidden border border-white/[0.08]" />
+      <div ref={containerRef} className="h-[140px] rounded-lg overflow-hidden border border-white/[0.08]" />
       <div className="mt-2 text-[10px] text-slate-600">
         Supported: fetch, filter, fields, sort, limit, summarize, dedup, search, parse, expand
       </div>

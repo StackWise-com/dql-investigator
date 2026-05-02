@@ -7,6 +7,9 @@ import {
   generateAppLogs,
   generateDbLogs,
   generateEventsWithTags,
+  generatePaymentLogs,
+  generateK8sLogs,
+  generateApiGatewayLogs,
 } from "./log-generator";
 
 export const scenarios: Scenario[] = [
@@ -26,7 +29,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs, from: -1h",
         goal: "Load the authentication logs from the last hour.",
         hint: "Use the 'fetch' command with source 'logs'.",
-        sampleData: generateAuthLogs(1500, 1),
+        sampleData: generateAuthLogs(3000, 1),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -37,7 +40,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter loglevel == \"ERROR\"",
         goal: "Show only ERROR-level log entries.",
         hint: "Use the 'filter' command with condition loglevel == 'ERROR'.",
-        sampleData: generateAuthLogs(1500, 1),
+        sampleData: generateAuthLogs(3000, 1),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -51,7 +54,7 @@ export const scenarios: Scenario[] = [
         lesson: 'parse content, "IP:attacker_ip"',
         goal: "Extract the IP address from the content field.",
         hint: "Use 'parse content' with a pattern to capture the IP.",
-        sampleData: generateAuthLogs(1500, 1),
+        sampleData: generateAuthLogs(3000, 1),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -66,7 +69,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize count = count(), by:{attacker_ip}",
         goal: "Count failed logins per IP address.",
         hint: "Use 'summarize' with count() and group by attacker_ip.",
-        sampleData: generateAuthLogs(1500, 1),
+        sampleData: generateAuthLogs(3000, 1),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -91,7 +94,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch events",
         goal: "Load deployment and alert events.",
         hint: "Use fetch events.",
-        sampleData: generateEvents(1500, 2),
+        sampleData: generateEvents(3000, 2),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" }],
       },
       {
@@ -101,7 +104,7 @@ export const scenarios: Scenario[] = [
         lesson: 'filter event.type == "deployment"',
         goal: "Filter for deployment events.",
         hint: "Filter where event.type equals deployment.",
-        sampleData: generateEvents(1500, 2),
+        sampleData: generateEvents(3000, 2),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"deployment\"" }, raw: "filter event.type == \"deployment\"" },
@@ -114,7 +117,7 @@ export const scenarios: Scenario[] = [
         lesson: 'filter status == "failure"',
         goal: "Show only failed deployments.",
         hint: "Filter where status equals failure.",
-        sampleData: generateEvents(1500, 2),
+        sampleData: generateEvents(3000, 2),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"deployment\"" }, raw: "filter event.type == \"deployment\"" },
@@ -138,7 +141,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch bizevents",
         goal: "Load business events.",
         hint: "Use fetch bizevents.",
-        sampleData: generateBizEvents(1500, 3),
+        sampleData: generateBizEvents(3000, 3),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" }],
       },
       {
@@ -148,7 +151,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize count = count(), by:{order_id}",
         goal: "Count events per order.",
         hint: "Use summarize with by:order_id.",
-        sampleData: generateBizEvents(1500, 3),
+        sampleData: generateBizEvents(3000, 3),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "summarize", args: { aggregation: "count", alias: "count", by: "order_id" }, raw: "summarize count = count(), by:{order_id}" },
@@ -161,7 +164,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter count < 3",
         goal: "Find orders with fewer than 3 events.",
         hint: "Filter where count is less than 3.",
-        sampleData: generateBizEvents(1500, 3),
+        sampleData: generateBizEvents(3000, 3),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "summarize", args: { aggregation: "count", alias: "count", by: "order_id" }, raw: "summarize count = count(), by:{order_id}" },
@@ -185,7 +188,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch spans",
         goal: "Load span data.",
         hint: "Use fetch spans.",
-        sampleData: generateSpans(1500, 4),
+        sampleData: generateSpans(3000, 4),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" }],
       },
       {
@@ -195,7 +198,7 @@ export const scenarios: Scenario[] = [
         lesson: 'filter status.code == "ERROR"',
         goal: "Filter for error spans.",
         hint: "Filter where status.code equals ERROR.",
-        sampleData: generateSpans(1500, 4),
+        sampleData: generateSpans(3000, 4),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: "status.code == \"ERROR\"" }, raw: "filter status.code == \"ERROR\"" },
@@ -208,7 +211,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort duration desc",
         goal: "Sort error spans by duration.",
         hint: "Use sort with duration and desc direction.",
-        sampleData: generateSpans(1500, 4),
+        sampleData: generateSpans(3000, 4),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: "status.code == \"ERROR\"" }, raw: "filter status.code == \"ERROR\"" },
@@ -232,7 +235,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs, from: -1h",
         goal: "Load the application logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAppLogs(1500, 5),
+        sampleData: generateAppLogs(3000, 5),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -242,7 +245,7 @@ export const scenarios: Scenario[] = [
         lesson: 'filter loglevel == "ERROR"',
         goal: "Show only ERROR logs.",
         hint: "Filter where loglevel equals ERROR.",
-        sampleData: generateAppLogs(1500, 5),
+        sampleData: generateAppLogs(3000, 5),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -255,7 +258,7 @@ export const scenarios: Scenario[] = [
         lesson: "makeTimeseries errors = count(), interval:15m",
         goal: "Create a time series of error counts per 15 minutes.",
         hint: "Use makeTimeseries with count() and interval:15m.",
-        sampleData: generateAppLogs(1500, 5),
+        sampleData: generateAppLogs(3000, 5),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -279,7 +282,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load database logs.",
         hint: "Use fetch logs.",
-        sampleData: generateDbLogs(1500, 6),
+        sampleData: generateDbLogs(3000, 6),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -289,7 +292,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter loglevel == \"WARN\"",
         goal: "Show only slow query warnings.",
         hint: "Filter where loglevel equals WARN.",
-        sampleData: generateDbLogs(1500, 6),
+        sampleData: generateDbLogs(3000, 6),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"WARN\"" }, raw: "filter loglevel == \"WARN\"" },
@@ -302,7 +305,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort duration_ms desc",
         goal: "Sort slow queries by duration.",
         hint: "Use sort with duration_ms and desc direction.",
-        sampleData: generateDbLogs(1500, 6),
+        sampleData: generateDbLogs(3000, 6),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"WARN\"" }, raw: "filter loglevel == \"WARN\"" },
@@ -326,7 +329,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch events",
         goal: "Load system events.",
         hint: "Use fetch events.",
-        sampleData: generateEvents(1500, 7),
+        sampleData: generateEvents(3000, 7),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" }],
       },
       {
@@ -336,7 +339,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter severity == \"critical\"",
         goal: "Show only critical alerts.",
         hint: "Filter where severity equals critical.",
-        sampleData: generateEvents(1500, 7),
+        sampleData: generateEvents(3000, 7),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: "severity == \"critical\"" }, raw: "filter severity == \"critical\"" },
@@ -349,7 +352,7 @@ export const scenarios: Scenario[] = [
         lesson: "fields timestamp, service, severity, message",
         goal: "Keep timestamp, service, severity, and message.",
         hint: "Use fields to keep only the required columns.",
-        sampleData: generateEvents(1500, 7),
+        sampleData: generateEvents(3000, 7),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: "severity == \"critical\"" }, raw: "filter severity == \"critical\"" },
@@ -373,7 +376,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch bizevents",
         goal: "Load business events.",
         hint: "Use fetch bizevents.",
-        sampleData: generateBizEvents(1500, 8),
+        sampleData: generateBizEvents(3000, 8),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" }],
       },
       {
@@ -383,7 +386,7 @@ export const scenarios: Scenario[] = [
         lesson: "dedup product",
         goal: "Remove duplicate product rows.",
         hint: "Use dedup with field product.",
-        sampleData: generateBizEvents(1500, 8),
+        sampleData: generateBizEvents(3000, 8),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "dedup", args: { field: "product" }, raw: "dedup product" },
@@ -396,7 +399,7 @@ export const scenarios: Scenario[] = [
         lesson: "fields product",
         goal: "Keep only the product column.",
         hint: "Use fields to keep just the product column.",
-        sampleData: generateBizEvents(1500, 8),
+        sampleData: generateBizEvents(3000, 8),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "dedup", args: { field: "product" }, raw: "dedup product" },
@@ -420,7 +423,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch spans",
         goal: "Load span data.",
         hint: "Use fetch spans.",
-        sampleData: generateSpans(1500, 9),
+        sampleData: generateSpans(3000, 9),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" }],
       },
       {
@@ -430,7 +433,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter status.code == \"ERROR\"",
         goal: "Filter for error spans.",
         hint: "Filter where status.code equals ERROR.",
-        sampleData: generateSpans(1500, 9),
+        sampleData: generateSpans(3000, 9),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: "status.code == \"ERROR\"" }, raw: "filter status.code == \"ERROR\"" },
@@ -443,7 +446,7 @@ export const scenarios: Scenario[] = [
         lesson: "limit 5",
         goal: "Show only the first 5 error spans.",
         hint: "Use limit with count 5.",
-        sampleData: generateSpans(1500, 9),
+        sampleData: generateSpans(3000, 9),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: "status.code == \"ERROR\"" }, raw: "filter status.code == \"ERROR\"" },
@@ -467,7 +470,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load application logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAppLogs(1500, 10),
+        sampleData: generateAppLogs(3000, 10),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -477,7 +480,7 @@ export const scenarios: Scenario[] = [
         lesson: "search \"timeout\"",
         goal: "Find all logs mentioning timeout.",
         hint: "Use search with term timeout.",
-        sampleData: generateAppLogs(1500, 10),
+        sampleData: generateAppLogs(3000, 10),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "search", args: { term: "timeout" }, raw: "search \"timeout\"" },
@@ -490,7 +493,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter loglevel == \"ERROR\"",
         goal: "Show only ERROR timeout logs.",
         hint: "Filter where loglevel equals ERROR.",
-        sampleData: generateAppLogs(1500, 10),
+        sampleData: generateAppLogs(3000, 10),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "search", args: { term: "timeout" }, raw: "search \"timeout\"" },
@@ -514,7 +517,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load all application logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAppLogs(1500, 11),
+        sampleData: generateAppLogs(3000, 11),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -524,7 +527,7 @@ export const scenarios: Scenario[] = [
         lesson: "filterOut loglevel == \"INFO\"",
         goal: "Remove INFO logs from the stream.",
         hint: "Use filterOut to exclude INFO entries.",
-        sampleData: generateAppLogs(1500, 11),
+        sampleData: generateAppLogs(3000, 11),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filterOut", args: { condition: "loglevel == \"INFO\"" }, raw: "filterOut loglevel == \"INFO\"" },
@@ -537,7 +540,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize count = count(), by:{loglevel}",
         goal: "Count remaining logs per severity level.",
         hint: "Use summarize with count() grouped by loglevel.",
-        sampleData: generateAppLogs(1500, 11),
+        sampleData: generateAppLogs(3000, 11),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filterOut", args: { condition: "loglevel == \"INFO\"" }, raw: "filterOut loglevel == \"INFO\"" },
@@ -561,7 +564,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load auth logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAuthLogs(1500, 12),
+        sampleData: generateAuthLogs(3000, 12),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -571,7 +574,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter loglevel == \"ERROR\"",
         goal: "Filter for failed logins.",
         hint: "Filter where loglevel equals ERROR.",
-        sampleData: generateAuthLogs(1500, 12),
+        sampleData: generateAuthLogs(3000, 12),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -584,7 +587,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize count = count(), by:{host}",
         goal: "Count failed logins per host.",
         hint: "Use summarize with count() grouped by host.",
-        sampleData: generateAuthLogs(1500, 12),
+        sampleData: generateAuthLogs(3000, 12),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -598,7 +601,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort count desc",
         goal: "Sort hosts by failure count.",
         hint: "Use sort with count and desc direction.",
-        sampleData: generateAuthLogs(1500, 12),
+        sampleData: generateAuthLogs(3000, 12),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -623,7 +626,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch bizevents",
         goal: "Load business events.",
         hint: "Use fetch bizevents.",
-        sampleData: generateBizEvents(1500, 13),
+        sampleData: generateBizEvents(3000, 13),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" }],
       },
       {
@@ -633,7 +636,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter event.type == \"com.easytrade.payment_confirmed\"",
         goal: "Filter for payment events.",
         hint: "Filter where event.type equals payment_confirmed.",
-        sampleData: generateBizEvents(1500, 13),
+        sampleData: generateBizEvents(3000, 13),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"com.easytrade.payment_confirmed\"" }, raw: "filter event.type == \"com.easytrade.payment_confirmed\"" },
@@ -646,7 +649,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize total = sum(amount), by:{method}",
         goal: "Calculate total payment volume per provider.",
         hint: "Use summarize with sum(amount) grouped by method.",
-        sampleData: generateBizEvents(1500, 13),
+        sampleData: generateBizEvents(3000, 13),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"com.easytrade.payment_confirmed\"" }, raw: "filter event.type == \"com.easytrade.payment_confirmed\"" },
@@ -670,7 +673,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load application logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAppLogs(1500, 14),
+        sampleData: generateAppLogs(3000, 14),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -680,7 +683,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter loglevel == \"ERROR\"",
         goal: "Show only ERROR logs.",
         hint: "Filter where loglevel equals ERROR.",
-        sampleData: generateAppLogs(1500, 14),
+        sampleData: generateAppLogs(3000, 14),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -693,7 +696,7 @@ export const scenarios: Scenario[] = [
         lesson: "makeTimeseries errors = count(), interval:10m",
         goal: "Create a time series of errors in 10-minute buckets.",
         hint: "Use makeTimeseries with count() and interval:10m.",
-        sampleData: generateAppLogs(1500, 14),
+        sampleData: generateAppLogs(3000, 14),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -717,7 +720,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch spans",
         goal: "Load span data.",
         hint: "Use fetch spans.",
-        sampleData: generateSpans(1500, 15),
+        sampleData: generateSpans(3000, 15),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" }],
       },
       {
@@ -727,7 +730,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter duration > 100000",
         goal: "Filter spans with duration over 100ms.",
         hint: "Filter where duration is greater than 100000.",
-        sampleData: generateSpans(1500, 15),
+        sampleData: generateSpans(3000, 15),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: "duration > 100000" }, raw: "filter duration > 100000" },
@@ -740,7 +743,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort duration desc",
         goal: "Sort slow spans by duration.",
         hint: "Use sort with duration desc, then fields to project columns.",
-        sampleData: generateSpans(1500, 15),
+        sampleData: generateSpans(3000, 15),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: "duration > 100000" }, raw: "filter duration > 100000" },
@@ -764,7 +767,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch events",
         goal: "Load system events.",
         hint: "Use fetch events.",
-        sampleData: generateEvents(1500, 16),
+        sampleData: generateEvents(3000, 16),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" }],
       },
       {
@@ -774,7 +777,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter event.type == \"deployment\" and status == \"failure\"",
         goal: "Find failed deployment events.",
         hint: "Use a single filter with and to combine both conditions.",
-        sampleData: generateEvents(1500, 16),
+        sampleData: generateEvents(3000, 16),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"deployment\" and status == \"failure\"" }, raw: "filter event.type == \"deployment\" and status == \"failure\"" },
@@ -787,7 +790,7 @@ export const scenarios: Scenario[] = [
         lesson: "fields service, version, host",
         goal: "Keep service, version, and host columns.",
         hint: "Use fields to keep only the needed columns.",
-        sampleData: generateEvents(1500, 16),
+        sampleData: generateEvents(3000, 16),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"deployment\" and status == \"failure\"" }, raw: "filter event.type == \"deployment\" and status == \"failure\"" },
@@ -811,7 +814,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch bizevents",
         goal: "Load business events.",
         hint: "Use fetch bizevents.",
-        sampleData: generateBizEvents(1500, 17),
+        sampleData: generateBizEvents(3000, 17),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" }],
       },
       {
@@ -821,7 +824,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter event.type == \"com.easytrade.order_confirmed\"",
         goal: "Filter for order confirmations.",
         hint: "Filter where event.type equals order_confirmed.",
-        sampleData: generateBizEvents(1500, 17),
+        sampleData: generateBizEvents(3000, 17),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"com.easytrade.order_confirmed\"" }, raw: "filter event.type == \"com.easytrade.order_confirmed\"" },
@@ -834,7 +837,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize orders = count(), revenue = sum(amount), by:{product}",
         goal: "Aggregate orders and revenue per product.",
         hint: "Use summarize with count() and sum(amount) grouped by product.",
-        sampleData: generateBizEvents(1500, 17),
+        sampleData: generateBizEvents(3000, 17),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"com.easytrade.order_confirmed\"" }, raw: "filter event.type == \"com.easytrade.order_confirmed\"" },
@@ -848,7 +851,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort revenue desc",
         goal: "Sort products by revenue.",
         hint: "Use sort with revenue and desc direction.",
-        sampleData: generateBizEvents(1500, 17),
+        sampleData: generateBizEvents(3000, 17),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"com.easytrade.order_confirmed\"" }, raw: "filter event.type == \"com.easytrade.order_confirmed\"" },
@@ -873,7 +876,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch bizevents",
         goal: "Load business events.",
         hint: "Use fetch bizevents.",
-        sampleData: generateBizEvents(1500, 18),
+        sampleData: generateBizEvents(3000, 18),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" }],
       },
       {
@@ -883,7 +886,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter event.type == \"com.easytrade.close_order\" and status == \"returned\"",
         goal: "Find returned orders.",
         hint: "Use a compound filter for close_order and returned status.",
-        sampleData: generateBizEvents(1500, 18),
+        sampleData: generateBizEvents(3000, 18),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"com.easytrade.close_order\" and status == \"returned\"" }, raw: "filter event.type == \"com.easytrade.close_order\" and status == \"returned\"" },
@@ -896,7 +899,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize count = count(), by:{reason}",
         goal: "Count returns per reason.",
         hint: "Use summarize with count() grouped by reason.",
-        sampleData: generateBizEvents(1500, 18),
+        sampleData: generateBizEvents(3000, 18),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"com.easytrade.close_order\" and status == \"returned\"" }, raw: "filter event.type == \"com.easytrade.close_order\" and status == \"returned\"" },
@@ -920,7 +923,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch events",
         goal: "Load system events.",
         hint: "Use fetch events.",
-        sampleData: generateEvents(1500, 19),
+        sampleData: generateEvents(3000, 19),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" }],
       },
       {
@@ -930,7 +933,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter event.type == \"scale-up\"",
         goal: "Filter for scale-up events.",
         hint: "Filter where event.type equals scale-up.",
-        sampleData: generateEvents(1500, 19),
+        sampleData: generateEvents(3000, 19),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"scale-up\"" }, raw: "filter event.type == \"scale-up\"" },
@@ -943,7 +946,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize total_instances = sum(instances), by:{service}",
         goal: "Sum scale-up instances per service.",
         hint: "Use summarize with sum(instances) grouped by service.",
-        sampleData: generateEvents(1500, 19),
+        sampleData: generateEvents(3000, 19),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"scale-up\"" }, raw: "filter event.type == \"scale-up\"" },
@@ -967,7 +970,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch spans",
         goal: "Load span data.",
         hint: "Use fetch spans.",
-        sampleData: generateSpans(1500, 20),
+        sampleData: generateSpans(3000, 20),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" }],
       },
       {
@@ -977,7 +980,7 @@ export const scenarios: Scenario[] = [
         lesson: "fieldsAdd is_slow = if(duration > 100000, \"yes\", \"no\")",
         goal: "Tag spans as slow or fast.",
         hint: "Use fieldsAdd with an if expression on duration.",
-        sampleData: generateSpans(1500, 20),
+        sampleData: generateSpans(3000, 20),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "fieldsAdd", args: { assignments: "is_slow = if(duration > 100000, \"yes\", \"no\")" }, raw: "fieldsAdd is_slow = if(duration > 100000, \"yes\", \"no\")" },
@@ -990,7 +993,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter is_slow == \"yes\"",
         goal: "Show only slow spans.",
         hint: "Filter where is_slow equals yes.",
-        sampleData: generateSpans(1500, 20),
+        sampleData: generateSpans(3000, 20),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "fieldsAdd", args: { assignments: "is_slow = if(duration > 100000, \"yes\", \"no\")" }, raw: "fieldsAdd is_slow = if(duration > 100000, \"yes\", \"no\")" },
@@ -1014,7 +1017,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load auth logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAuthLogs(1500, 21),
+        sampleData: generateAuthLogs(3000, 21),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -1024,7 +1027,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter loglevel == \"ERROR\" | parse content, \"IP:attacker_ip\"",
         goal: "Extract the attacker IP from error logs.",
         hint: "Chain filter and parse to get the IP field.",
-        sampleData: generateAuthLogs(1500, 21),
+        sampleData: generateAuthLogs(3000, 21),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -1038,7 +1041,7 @@ export const scenarios: Scenario[] = [
         lesson: "fieldsRename attacker_ip = client_ip | summarize count = count(), by:{client_ip}",
         goal: "Rename the field and count failures per client IP.",
         hint: "Use fieldsRename then summarize by the new field name.",
-        sampleData: generateAuthLogs(1500, 21),
+        sampleData: generateAuthLogs(3000, 21),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -1064,7 +1067,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch events",
         goal: "Load events with tags.",
         hint: "Use fetch events.",
-        sampleData: generateEventsWithTags(1500, 22),
+        sampleData: generateEventsWithTags(3000, 22),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" }],
       },
       {
@@ -1074,7 +1077,7 @@ export const scenarios: Scenario[] = [
         lesson: "expand tags",
         goal: "Expand the tags array into separate rows.",
         hint: "Use expand with field tags.",
-        sampleData: generateEventsWithTags(1500, 22),
+        sampleData: generateEventsWithTags(3000, 22),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "expand", args: { field: "tags" }, raw: "expand tags" },
@@ -1087,7 +1090,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter tags == \"critical\"",
         goal: "Show only critical-tagged events.",
         hint: "Filter where tags equals critical.",
-        sampleData: generateEventsWithTags(1500, 22),
+        sampleData: generateEventsWithTags(3000, 22),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "expand", args: { field: "tags" }, raw: "expand tags" },
@@ -1111,7 +1114,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load application logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAppLogs(1500, 23),
+        sampleData: generateAppLogs(3000, 23),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -1121,7 +1124,7 @@ export const scenarios: Scenario[] = [
         lesson: "parse content, \"STRING:endpoint\"",
         goal: "Extract endpoint from content.",
         hint: "Use parse with pattern STRING:endpoint on the content field.",
-        sampleData: generateAppLogs(1500, 23),
+        sampleData: generateAppLogs(3000, 23),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "parse", args: { field: "content", pattern: "STRING:endpoint" }, raw: "parse content, \"STRING:endpoint\"" },
@@ -1134,7 +1137,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter endpoint == \"/api/payment\" | summarize count = count(), by:{endpoint}",
         goal: "Count calls to /api/payment.",
         hint: "Filter for the payment endpoint then summarize by endpoint.",
-        sampleData: generateAppLogs(1500, 23),
+        sampleData: generateAppLogs(3000, 23),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "parse", args: { field: "content", pattern: "STRING:endpoint" }, raw: "parse content, \"STRING:endpoint\"" },
@@ -1159,7 +1162,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch spans",
         goal: "Load span data.",
         hint: "Use fetch spans.",
-        sampleData: generateSpans(1500, 24),
+        sampleData: generateSpans(3000, 24),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" }],
       },
       {
@@ -1169,7 +1172,7 @@ export const scenarios: Scenario[] = [
         lesson: "dedup endpoint",
         goal: "Remove duplicate endpoints.",
         hint: "Use dedup with field endpoint.",
-        sampleData: generateSpans(1500, 24),
+        sampleData: generateSpans(3000, 24),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "dedup", args: { field: "endpoint" }, raw: "dedup endpoint" },
@@ -1182,7 +1185,7 @@ export const scenarios: Scenario[] = [
         lesson: "fields endpoint, service.name, duration",
         goal: "Keep endpoint, service.name, and duration.",
         hint: "Use fields to keep only the needed columns.",
-        sampleData: generateSpans(1500, 24),
+        sampleData: generateSpans(3000, 24),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "dedup", args: { field: "endpoint" }, raw: "dedup endpoint" },
@@ -1206,7 +1209,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load auth logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAuthLogs(1500, 25),
+        sampleData: generateAuthLogs(3000, 25),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -1216,7 +1219,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter loglevel == \"ERROR\"",
         goal: "Filter for failed logins.",
         hint: "Filter where loglevel equals ERROR.",
-        sampleData: generateAuthLogs(1500, 25),
+        sampleData: generateAuthLogs(3000, 25),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -1229,7 +1232,7 @@ export const scenarios: Scenario[] = [
         lesson: "parse content, \"IP:attacker_ip\"",
         goal: "Extract attacker IP.",
         hint: "Use parse with IP:attacker_ip pattern.",
-        sampleData: generateAuthLogs(1500, 25),
+        sampleData: generateAuthLogs(3000, 25),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -1243,7 +1246,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize count = count(), by:{attacker_ip} | sort count desc | limit 10",
         goal: "Get the top 10 attacker IPs.",
         hint: "Use summarize, sort, and limit in sequence.",
-        sampleData: generateAuthLogs(1500, 25),
+        sampleData: generateAuthLogs(3000, 25),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -1270,7 +1273,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch spans",
         goal: "Load span data.",
         hint: "Use fetch spans.",
-        sampleData: generateSpans(1500, 26),
+        sampleData: generateSpans(3000, 26),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" }],
       },
       {
@@ -1280,7 +1283,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter status.code == \"OK\"",
         goal: "Filter for successful spans.",
         hint: "Filter where status.code equals OK.",
-        sampleData: generateSpans(1500, 26),
+        sampleData: generateSpans(3000, 26),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: "status.code == \"OK\"" }, raw: "filter status.code == \"OK\"" },
@@ -1293,7 +1296,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize avg_duration = avg(duration), by:{endpoint} | sort avg_duration desc",
         goal: "Calculate average latency per endpoint.",
         hint: "Use summarize with avg(duration) grouped by endpoint, then sort.",
-        sampleData: generateSpans(1500, 26),
+        sampleData: generateSpans(3000, 26),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: "status.code == \"OK\"" }, raw: "filter status.code == \"OK\"" },
@@ -1318,7 +1321,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load database logs.",
         hint: "Use fetch logs.",
-        sampleData: generateDbLogs(1500, 27),
+        sampleData: generateDbLogs(3000, 27),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -1328,7 +1331,7 @@ export const scenarios: Scenario[] = [
         lesson: "parse content, \"STRING:query_type\"",
         goal: "Extract query type from content.",
         hint: "Use parse with STRING:query_type pattern.",
-        sampleData: generateDbLogs(1500, 27),
+        sampleData: generateDbLogs(3000, 27),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "parse", args: { field: "content", pattern: "STRING:query_type" }, raw: "parse content, \"STRING:query_type\"" },
@@ -1341,7 +1344,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter query_type == \"SELECT\" | summarize count = count(), by:{query_type}",
         goal: "Count SELECT queries.",
         hint: "Filter for SELECT then summarize by query_type.",
-        sampleData: generateDbLogs(1500, 27),
+        sampleData: generateDbLogs(3000, 27),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "parse", args: { field: "content", pattern: "STRING:query_type" }, raw: "parse content, \"STRING:query_type\"" },
@@ -1366,7 +1369,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load application logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAppLogs(1500, 28),
+        sampleData: generateAppLogs(3000, 28),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -1376,7 +1379,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter loglevel == \"ERROR\"",
         goal: "Show only ERROR logs.",
         hint: "Filter where loglevel equals ERROR.",
-        sampleData: generateAppLogs(1500, 28),
+        sampleData: generateAppLogs(3000, 28),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -1389,7 +1392,7 @@ export const scenarios: Scenario[] = [
         lesson: "makeTimeseries errors = count(), interval:15m",
         goal: "Create a 15-minute error time series.",
         hint: "Use makeTimeseries with count() and interval:15m.",
-        sampleData: generateAppLogs(1500, 28),
+        sampleData: generateAppLogs(3000, 28),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -1413,7 +1416,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch events",
         goal: "Load system events.",
         hint: "Use fetch events.",
-        sampleData: generateEvents(1500, 29),
+        sampleData: generateEvents(3000, 29),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" }],
       },
       {
@@ -1423,7 +1426,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter event.type == \"deployment\" and status == \"success\"",
         goal: "Find successful deployments.",
         hint: "Use a compound filter with and.",
-        sampleData: generateEvents(1500, 29),
+        sampleData: generateEvents(3000, 29),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"deployment\" and status == \"success\"" }, raw: "filter event.type == \"deployment\" and status == \"success\"" },
@@ -1436,7 +1439,7 @@ export const scenarios: Scenario[] = [
         lesson: "fieldsRemove version, timestamp",
         goal: "Remove version and timestamp fields.",
         hint: "Use fieldsRemove to drop the columns.",
-        sampleData: generateEvents(1500, 29),
+        sampleData: generateEvents(3000, 29),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: "event.type == \"deployment\" and status == \"success\"" }, raw: "filter event.type == \"deployment\" and status == \"success\"" },
@@ -1460,7 +1463,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load database logs.",
         hint: "Use fetch logs.",
-        sampleData: generateDbLogs(1500, 30),
+        sampleData: generateDbLogs(3000, 30),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -1470,7 +1473,7 @@ export const scenarios: Scenario[] = [
         lesson: "parse content, \"STRING:query_type\"",
         goal: "Extract query_type.",
         hint: "Use parse with STRING:query_type pattern.",
-        sampleData: generateDbLogs(1500, 30),
+        sampleData: generateDbLogs(3000, 30),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "parse", args: { field: "content", pattern: "STRING:query_type" }, raw: "parse content, \"STRING:query_type\"" },
@@ -1483,7 +1486,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter query_type == \"UPDATE\" | summarize count = count(), by:{query_type}",
         goal: "Count UPDATE queries.",
         hint: "Filter for UPDATE then summarize by query_type.",
-        sampleData: generateDbLogs(1500, 30),
+        sampleData: generateDbLogs(3000, 30),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "parse", args: { field: "content", pattern: "STRING:query_type" }, raw: "parse content, \"STRING:query_type\"" },
@@ -1508,7 +1511,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch spans",
         goal: "Load span data.",
         hint: "Use fetch spans.",
-        sampleData: generateSpans(1500, 31),
+        sampleData: generateSpans(3000, 31),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" }],
       },
       {
@@ -1518,7 +1521,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter status.code == \"OK\"",
         goal: "Filter for OK spans.",
         hint: "Filter where status.code equals OK.",
-        sampleData: generateSpans(1500, 31),
+        sampleData: generateSpans(3000, 31),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: "status.code == \"OK\"" }, raw: "filter status.code == \"OK\"" },
@@ -1531,7 +1534,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort duration desc | limit 20",
         goal: "Get the top 20 slowest OK spans.",
         hint: "Use sort with duration desc, then limit 20.",
-        sampleData: generateSpans(1500, 31),
+        sampleData: generateSpans(3000, 31),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: "status.code == \"OK\"" }, raw: "filter status.code == \"OK\"" },
@@ -1556,7 +1559,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch bizevents",
         goal: "Load business events.",
         hint: "Use fetch bizevents.",
-        sampleData: generateBizEvents(1500, 32),
+        sampleData: generateBizEvents(3000, 32),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" }],
       },
       {
@@ -1566,7 +1569,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter event.type in array(\"com.easytrade.order_confirmed\",\"com.easytrade.payment_confirmed\",\"com.easytrade.close_order\")",
         goal: "Keep only order lifecycle events.",
         hint: "Use filter with in and an array of event types.",
-        sampleData: generateBizEvents(1500, 32),
+        sampleData: generateBizEvents(3000, 32),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: "event.type in array(\"com.easytrade.order_confirmed\",\"com.easytrade.payment_confirmed\",\"com.easytrade.close_order\")" }, raw: "filter event.type in array(\"com.easytrade.order_confirmed\",\"com.easytrade.payment_confirmed\",\"com.easytrade.close_order\")" },
@@ -1579,7 +1582,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize count = count(), by:{event.type}",
         goal: "Count events per funnel step.",
         hint: "Use summarize with count() grouped by event.type.",
-        sampleData: generateBizEvents(1500, 32),
+        sampleData: generateBizEvents(3000, 32),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: "event.type in array(\"com.easytrade.order_confirmed\",\"com.easytrade.payment_confirmed\",\"com.easytrade.close_order\")" }, raw: "filter event.type in array(\"com.easytrade.order_confirmed\",\"com.easytrade.payment_confirmed\",\"com.easytrade.close_order\")" },
@@ -1603,7 +1606,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load application logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAppLogs(1500, 33),
+        sampleData: generateAppLogs(3000, 33),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -1613,7 +1616,7 @@ export const scenarios: Scenario[] = [
         lesson: "filter loglevel == \"ERROR\"",
         goal: "Show only ERROR logs.",
         hint: "Filter where loglevel equals ERROR.",
-        sampleData: generateAppLogs(1500, 33),
+        sampleData: generateAppLogs(3000, 33),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -1626,7 +1629,7 @@ export const scenarios: Scenario[] = [
         lesson: "fieldsRemove content | fields timestamp, loglevel, host",
         goal: "Remove content and keep only three columns.",
         hint: "Use fieldsRemove then fields to shape the output.",
-        sampleData: generateAppLogs(1500, 33),
+        sampleData: generateAppLogs(3000, 33),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: "loglevel == \"ERROR\"" }, raw: "filter loglevel == \"ERROR\"" },
@@ -1651,7 +1654,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load application logs.",
         hint: "Use fetch logs.",
-        sampleData: generateAppLogs(1500, 34),
+        sampleData: generateAppLogs(3000, 34),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -1661,7 +1664,7 @@ export const scenarios: Scenario[] = [
         lesson: "makeTimeseries volume = count(), interval:5m",
         goal: "Create a 5-minute volume time series.",
         hint: "Use makeTimeseries with count() and interval:5m.",
-        sampleData: generateAppLogs(1500, 34),
+        sampleData: generateAppLogs(3000, 34),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "makeTimeseries", args: { aggregation: "count", alias: "volume", interval: "5m" }, raw: "makeTimeseries volume = count(), interval:5m" },
@@ -1684,7 +1687,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch spans",
         goal: "Load span data.",
         hint: "Use fetch spans.",
-        sampleData: generateSpans(1500, 35),
+        sampleData: generateSpans(3000, 35),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" }],
       },
       {
@@ -1694,7 +1697,7 @@ export const scenarios: Scenario[] = [
         lesson: "fieldsAdd category = if(duration > 100000, \"slow\", \"fast\")",
         goal: "Categorize spans by speed.",
         hint: "Use fieldsAdd with an if expression.",
-        sampleData: generateSpans(1500, 35),
+        sampleData: generateSpans(3000, 35),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "fieldsAdd", args: { assignments: "category = if(duration > 100000, \"slow\", \"fast\")" }, raw: "fieldsAdd category = if(duration > 100000, \"slow\", \"fast\")" },
@@ -1707,7 +1710,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize count = count(), by:{category}",
         goal: "Count spans per category.",
         hint: "Use summarize with count() grouped by category.",
-        sampleData: generateSpans(1500, 35),
+        sampleData: generateSpans(3000, 35),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "fieldsAdd", args: { assignments: "category = if(duration > 100000, \"slow\", \"fast\")" }, raw: "fieldsAdd category = if(duration > 100000, \"slow\", \"fast\")" },
@@ -1735,7 +1738,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch spans",
         goal: "Load all distributed tracing spans.",
         hint: "Use fetch spans.",
-        sampleData: generateSpans(1500, 36),
+        sampleData: generateSpans(3000, 36),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" }],
       },
       {
@@ -1746,7 +1749,7 @@ export const scenarios: Scenario[] = [
         lesson: 'filter status.code == "ERROR"',
         goal: "Keep only error spans.",
         hint: "Filter where status.code equals ERROR.",
-        sampleData: generateSpans(1500, 36),
+        sampleData: generateSpans(3000, 36),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: 'status.code == "ERROR"' }, raw: 'filter status.code == "ERROR"' },
@@ -1760,7 +1763,7 @@ export const scenarios: Scenario[] = [
         lesson: "makeTimeseries errors = count(), interval:5m, by:{service.name}",
         goal: "Create a per-service 5-minute error time series.",
         hint: "Use makeTimeseries with count(), interval:5m, and by:{service.name}.",
-        sampleData: generateSpans(1500, 36),
+        sampleData: generateSpans(3000, 36),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: 'status.code == "ERROR"' }, raw: 'filter status.code == "ERROR"' },
@@ -1775,7 +1778,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize total_errors = sum(errors), by:{service.name}",
         goal: "Sum errors across all time buckets per service.",
         hint: "Use summarize with sum(errors) grouped by service.name.",
-        sampleData: generateSpans(1500, 36),
+        sampleData: generateSpans(3000, 36),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: 'status.code == "ERROR"' }, raw: 'filter status.code == "ERROR"' },
@@ -1791,7 +1794,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort total_errors desc",
         goal: "Rank services from most errors to least.",
         hint: "Use sort with total_errors and desc direction.",
-        sampleData: generateSpans(1500, 36),
+        sampleData: generateSpans(3000, 36),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: 'status.code == "ERROR"' }, raw: 'filter status.code == "ERROR"' },
@@ -1818,7 +1821,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch events",
         goal: "Load all system events.",
         hint: "Use fetch events.",
-        sampleData: generateEvents(1500, 37),
+        sampleData: generateEvents(3000, 37),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" }],
       },
       {
@@ -1829,7 +1832,7 @@ export const scenarios: Scenario[] = [
         lesson: 'filter event.type == "deployment"',
         goal: "Keep only deployment events.",
         hint: "Filter where event.type equals deployment.",
-        sampleData: generateEvents(1500, 37),
+        sampleData: generateEvents(3000, 37),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: 'event.type == "deployment"' }, raw: 'filter event.type == "deployment"' },
@@ -1843,7 +1846,7 @@ export const scenarios: Scenario[] = [
         lesson: 'fieldsAdd outcome = if(status == "failure", "broken", "healthy")',
         goal: "Label each deployment as broken or healthy.",
         hint: 'Use fieldsAdd with if(status == "failure", "broken", "healthy").',
-        sampleData: generateEvents(1500, 37),
+        sampleData: generateEvents(3000, 37),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: 'event.type == "deployment"' }, raw: 'filter event.type == "deployment"' },
@@ -1858,7 +1861,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize count = count(), by:{outcome}",
         goal: "Count deployments per outcome.",
         hint: "Use summarize with count() grouped by outcome.",
-        sampleData: generateEvents(1500, 37),
+        sampleData: generateEvents(3000, 37),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: 'event.type == "deployment"' }, raw: 'filter event.type == "deployment"' },
@@ -1874,7 +1877,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort count desc",
         goal: "Show the most frequent outcome first.",
         hint: "Use sort with count desc.",
-        sampleData: generateEvents(1500, 37),
+        sampleData: generateEvents(3000, 37),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "events" }, raw: "fetch events" },
           { id: "e2", command: "filter", args: { condition: 'event.type == "deployment"' }, raw: 'filter event.type == "deployment"' },
@@ -1901,7 +1904,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch bizevents",
         goal: "Load business events.",
         hint: "Use fetch bizevents.",
-        sampleData: generateBizEvents(1500, 38),
+        sampleData: generateBizEvents(3000, 38),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" }],
       },
       {
@@ -1912,7 +1915,7 @@ export const scenarios: Scenario[] = [
         lesson: 'filter event.type == "com.easytrade.payment_confirmed"',
         goal: "Keep only confirmed payment events.",
         hint: "Filter where event.type equals com.easytrade.payment_confirmed.",
-        sampleData: generateBizEvents(1500, 38),
+        sampleData: generateBizEvents(3000, 38),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: 'event.type == "com.easytrade.payment_confirmed"' }, raw: 'filter event.type == "com.easytrade.payment_confirmed"' },
@@ -1926,7 +1929,7 @@ export const scenarios: Scenario[] = [
         lesson: 'fieldsAdd tier = if(amount > 500, "premium", "standard")',
         goal: "Label each payment as premium or standard.",
         hint: 'Use fieldsAdd with if(amount > 500, "premium", "standard").',
-        sampleData: generateBizEvents(1500, 38),
+        sampleData: generateBizEvents(3000, 38),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: 'event.type == "com.easytrade.payment_confirmed"' }, raw: 'filter event.type == "com.easytrade.payment_confirmed"' },
@@ -1941,7 +1944,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize revenue = sum(amount), by:{tier}",
         goal: "Calculate total revenue per payment tier.",
         hint: "Use summarize with sum(amount) grouped by tier.",
-        sampleData: generateBizEvents(1500, 38),
+        sampleData: generateBizEvents(3000, 38),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: 'event.type == "com.easytrade.payment_confirmed"' }, raw: 'filter event.type == "com.easytrade.payment_confirmed"' },
@@ -1957,7 +1960,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort revenue desc",
         goal: "Show the highest revenue tier first.",
         hint: "Use sort with revenue desc.",
-        sampleData: generateBizEvents(1500, 38),
+        sampleData: generateBizEvents(3000, 38),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "bizevents" }, raw: "fetch bizevents" },
           { id: "e2", command: "filter", args: { condition: 'event.type == "com.easytrade.payment_confirmed"' }, raw: 'filter event.type == "com.easytrade.payment_confirmed"' },
@@ -1984,7 +1987,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch logs",
         goal: "Load database logs.",
         hint: "Use fetch logs.",
-        sampleData: generateDbLogs(1500, 39),
+        sampleData: generateDbLogs(3000, 39),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
       },
       {
@@ -1995,7 +1998,7 @@ export const scenarios: Scenario[] = [
         lesson: 'filter loglevel == "WARN"',
         goal: "Show only WARN-level database entries.",
         hint: "Filter where loglevel equals WARN.",
-        sampleData: generateDbLogs(1500, 39),
+        sampleData: generateDbLogs(3000, 39),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: 'loglevel == "WARN"' }, raw: 'filter loglevel == "WARN"' },
@@ -2009,7 +2012,7 @@ export const scenarios: Scenario[] = [
         lesson: 'parse content, "STRING:query_type"',
         goal: "Extract the query_type field from content.",
         hint: "Use parse with STRING:query_type pattern on the content field.",
-        sampleData: generateDbLogs(1500, 39),
+        sampleData: generateDbLogs(3000, 39),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: 'loglevel == "WARN"' }, raw: 'filter loglevel == "WARN"' },
@@ -2024,7 +2027,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize count = count(), by:{query_type}",
         goal: "Count slow queries per type.",
         hint: "Use summarize with count() grouped by query_type.",
-        sampleData: generateDbLogs(1500, 39),
+        sampleData: generateDbLogs(3000, 39),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: 'loglevel == "WARN"' }, raw: 'filter loglevel == "WARN"' },
@@ -2040,7 +2043,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort count desc",
         goal: "Rank query types by slow count.",
         hint: "Use sort with count desc.",
-        sampleData: generateDbLogs(1500, 39),
+        sampleData: generateDbLogs(3000, 39),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
           { id: "e2", command: "filter", args: { condition: 'loglevel == "WARN"' }, raw: 'filter loglevel == "WARN"' },
@@ -2067,7 +2070,7 @@ export const scenarios: Scenario[] = [
         lesson: "fetch spans",
         goal: "Load all distributed tracing spans.",
         hint: "Use fetch spans.",
-        sampleData: generateSpans(1500, 40),
+        sampleData: generateSpans(3000, 40),
         expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" }],
       },
       {
@@ -2078,7 +2081,7 @@ export const scenarios: Scenario[] = [
         lesson: 'filter status.code == "ERROR"',
         goal: "Keep only error spans.",
         hint: "Filter where status.code equals ERROR.",
-        sampleData: generateSpans(1500, 40),
+        sampleData: generateSpans(3000, 40),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: 'status.code == "ERROR"' }, raw: 'filter status.code == "ERROR"' },
@@ -2092,7 +2095,7 @@ export const scenarios: Scenario[] = [
         lesson: "summarize avg_ms = avg(duration), by:{endpoint}",
         goal: "Calculate average error duration per endpoint.",
         hint: "Use summarize with avg(duration) grouped by endpoint.",
-        sampleData: generateSpans(1500, 40),
+        sampleData: generateSpans(3000, 40),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: 'status.code == "ERROR"' }, raw: 'filter status.code == "ERROR"' },
@@ -2107,7 +2110,7 @@ export const scenarios: Scenario[] = [
         lesson: "sort avg_ms desc",
         goal: "Rank endpoints from slowest to fastest error duration.",
         hint: "Use sort with avg_ms desc.",
-        sampleData: generateSpans(1500, 40),
+        sampleData: generateSpans(3000, 40),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: 'status.code == "ERROR"' }, raw: 'filter status.code == "ERROR"' },
@@ -2123,13 +2126,237 @@ export const scenarios: Scenario[] = [
         lesson: "limit 5",
         goal: "Keep only the top 5 worst endpoints.",
         hint: "Use limit with count 5.",
-        sampleData: generateSpans(1500, 40),
+        sampleData: generateSpans(3000, 40),
         expectedPipeline: [
           { id: "e1", command: "fetch", args: { source: "spans" }, raw: "fetch spans" },
           { id: "e2", command: "filter", args: { condition: 'status.code == "ERROR"' }, raw: 'filter status.code == "ERROR"' },
           { id: "e3", command: "summarize", args: { aggregation: "avg", alias: "avg_ms", aggField: "duration", by: "endpoint" }, raw: "summarize avg_ms = avg(duration), by:{endpoint}" },
           { id: "e4", command: "sort", args: { field: "avg_ms", direction: "desc" }, raw: "sort avg_ms desc" },
           { id: "e5", command: "limit", args: { count: 5 }, raw: "limit 5" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "case-041",
+    track: "dql",
+    tier: "premium",
+    title: "The Payment Fraud Ring",
+    company: "FinVault",
+    briefing:
+      "A wave of high-value transactions is being declined. Security suspects a coordinated fraud ring. We need to identify which currencies and merchants are most affected.",
+    difficulty: "Advanced",
+    steps: [
+      {
+        id: "step-1",
+        title: "Load payment logs",
+        narration:
+          "Pull the payment gateway logs. Each line contains transaction details including amount, currency, merchant, and risk flags.",
+        lesson: "fetch logs",
+        goal: "Load all payment gateway logs.",
+        hint: "Use fetch logs.",
+        sampleData: generatePaymentLogs(3000, 41),
+        expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
+      },
+      {
+        id: "step-2",
+        title: "Parse transaction fields",
+        narration:
+          "The content field is structured key=value pairs. Parse out amount and currency so we can analyze them.",
+        lesson: 'parse content, "amount:amount currency:currency"',
+        goal: "Extract amount and currency fields from the content.",
+        hint: 'Use parse with amount:amount and currency:currency on the content field.',
+        sampleData: generatePaymentLogs(3000, 41),
+        expectedPipeline: [
+          { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
+          { id: "e2", command: "parse", args: { field: "content", pattern: "amount:amount currency:currency" }, raw: 'parse content, "amount:amount currency:currency"' },
+        ],
+      },
+      {
+        id: "step-3",
+        title: "Flag high-risk transactions",
+        narration:
+          "Add a risk_score field: 'high' if amount is greater than 500, otherwise 'low'. This lets us bucket transactions by risk.",
+        lesson: 'fieldsAdd risk_score = if(amount > 500, "high", "low")',
+        goal: "Create a risk_score field based on transaction amount.",
+        hint: 'Use fieldsAdd with an if() expression.',
+        sampleData: generatePaymentLogs(3000, 41),
+        expectedPipeline: [
+          { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
+          { id: "e2", command: "parse", args: { field: "content", pattern: "amount:amount currency:currency" }, raw: 'parse content, "amount:amount currency:currency"' },
+          { id: "e3", command: "fieldsAdd", args: { assignments: 'risk_score = if(amount > 500, "high", "low")' }, raw: 'fieldsAdd risk_score = if(amount > 500, "high", "low")' },
+        ],
+      },
+      {
+        id: "step-4",
+        title: "Summarize fraud by currency",
+        narration:
+          "Group by currency and count how many high-risk transactions exist in each. This reveals which markets are being targeted.",
+        lesson: "summarize count = count(), by:{currency}",
+        goal: "Count transactions per currency.",
+        hint: "Use summarize with count() grouped by currency.",
+        sampleData: generatePaymentLogs(3000, 41),
+        expectedPipeline: [
+          { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
+          { id: "e2", command: "parse", args: { field: "content", pattern: "amount:amount currency:currency" }, raw: 'parse content, "amount:amount currency:currency"' },
+          { id: "e3", command: "fieldsAdd", args: { assignments: 'risk_score = if(amount > 500, "high", "low")' }, raw: 'fieldsAdd risk_score = if(amount > 500, "high", "low")' },
+          { id: "e4", command: "summarize", args: { aggregation: "count", alias: "count", aggField: "", by: "currency" }, raw: "summarize count = count(), by:{currency}" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "case-042",
+    track: "dql",
+    tier: "premium",
+    title: "The Crashing Pod Mystery",
+    company: "KubeCorp",
+    briefing:
+      "Multiple pods across namespaces are crashing with OOM errors. We need to find which namespace is the worst offender and which pods are dying most.",
+    difficulty: "Advanced",
+    steps: [
+      {
+        id: "step-1",
+        title: "Load K8s logs",
+        narration:
+          "Fetch the Kubernetes cluster logs. Each line contains namespace, pod name, container, and message.",
+        lesson: "fetch logs",
+        goal: "Load all Kubernetes logs.",
+        hint: "Use fetch logs.",
+        sampleData: generateK8sLogs(3000, 42),
+        expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
+      },
+      {
+        id: "step-2",
+        title: "Isolate ERROR-level entries",
+        narration:
+          "We only care about actual crashes and failures. Filter for ERROR loglevel.",
+        lesson: 'filter loglevel == "ERROR"',
+        goal: "Keep only ERROR-level logs.",
+        hint: 'Use filter loglevel == "ERROR".',
+        sampleData: generateK8sLogs(3000, 42),
+        expectedPipeline: [
+          { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
+          { id: "e2", command: "filter", args: { condition: 'loglevel == "ERROR"' }, raw: 'filter loglevel == "ERROR"' },
+        ],
+      },
+      {
+        id: "step-3",
+        title: "Parse namespace and pod",
+        narration:
+          "Extract namespace and pod name from the content field so we can group by them.",
+        lesson: 'parse content, "namespace:namespace pod:pod"',
+        goal: "Extract namespace and pod fields.",
+        hint: 'Use parse with namespace:namespace and pod:pod.',
+        sampleData: generateK8sLogs(3000, 42),
+        expectedPipeline: [
+          { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
+          { id: "e2", command: "filter", args: { condition: 'loglevel == "ERROR"' }, raw: 'filter loglevel == "ERROR"' },
+          { id: "e3", command: "parse", args: { field: "content", pattern: "namespace:namespace pod:pod" }, raw: 'parse content, "namespace:namespace pod:pod"' },
+        ],
+      },
+      {
+        id: "step-4",
+        title: "Count crashes per namespace",
+        narration:
+          "Group by namespace and count errors. Then sort descending to find the worst namespace.",
+        lesson: "summarize count = count(), by:{namespace} | sort count desc",
+        goal: "Find the namespace with the most errors, ranked first.",
+        hint: "Use summarize by namespace, then sort count desc.",
+        sampleData: generateK8sLogs(3000, 42),
+        expectedPipeline: [
+          { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
+          { id: "e2", command: "filter", args: { condition: 'loglevel == "ERROR"' }, raw: 'filter loglevel == "ERROR"' },
+          { id: "e3", command: "parse", args: { field: "content", pattern: "namespace:namespace pod:pod" }, raw: 'parse content, "namespace:namespace pod:pod"' },
+          { id: "e4", command: "summarize", args: { aggregation: "count", alias: "count", aggField: "", by: "namespace" }, raw: "summarize count = count(), by:{namespace}" },
+          { id: "e5", command: "sort", args: { field: "count", direction: "desc" }, raw: "sort count desc" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "case-043",
+    track: "dql",
+    tier: "premium",
+    title: "The API Quota Thief",
+    company: "CloudScale",
+    briefing:
+      "Some API keys are generating abnormally slow requests. We need to find which keys are consistently above the 300ms SLA threshold and rank them by average latency.",
+    difficulty: "Advanced",
+    steps: [
+      {
+        id: "step-1",
+        title: "Load gateway logs",
+        narration:
+          "Fetch the API gateway access logs. Each line contains the API key, endpoint, latency, and status code.",
+        lesson: "fetch logs",
+        goal: "Load all API gateway logs.",
+        hint: "Use fetch logs.",
+        sampleData: generateApiGatewayLogs(3000, 43),
+        expectedPipeline: [{ id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" }],
+      },
+      {
+        id: "step-2",
+        title: "Parse latency and api_key",
+        narration:
+          "Extract latency_ms and api_key from the structured content so we can analyze per-key performance.",
+        lesson: 'parse content, "latency_ms:latency_ms api_key:api_key"',
+        goal: "Extract latency_ms and api_key fields.",
+        hint: 'Use parse with latency_ms:latency_ms and api_key:api_key.',
+        sampleData: generateApiGatewayLogs(3000, 43),
+        expectedPipeline: [
+          { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
+          { id: "e2", command: "parse", args: { field: "content", pattern: "latency_ms:latency_ms api_key:api_key" }, raw: 'parse content, "latency_ms:latency_ms api_key:api_key"' },
+        ],
+      },
+      {
+        id: "step-3",
+        title: "Flag slow requests",
+        narration:
+          "Add a boolean 'slow' field that is true when latency_ms exceeds 300. This marks SLA violations.",
+        lesson: "fieldsAdd slow = if(latency_ms > 300, true, false)",
+        goal: "Mark requests slower than 300ms as slow=true.",
+        hint: "Use fieldsAdd with an if() comparing latency_ms > 300.",
+        sampleData: generateApiGatewayLogs(3000, 43),
+        expectedPipeline: [
+          { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
+          { id: "e2", command: "parse", args: { field: "content", pattern: "latency_ms:latency_ms api_key:api_key" }, raw: 'parse content, "latency_ms:latency_ms api_key:api_key"' },
+          { id: "e3", command: "fieldsAdd", args: { assignments: "slow = if(latency_ms > 300, true, false)" }, raw: "fieldsAdd slow = if(latency_ms > 300, true, false)" },
+        ],
+      },
+      {
+        id: "step-4",
+        title: "Filter SLA violations",
+        narration:
+          "Keep only the slow requests so we can summarize by API key.",
+        lesson: 'filter slow == true',
+        goal: "Keep only rows where slow is true.",
+        hint: 'Use filter slow == true.',
+        sampleData: generateApiGatewayLogs(3000, 43),
+        expectedPipeline: [
+          { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
+          { id: "e2", command: "parse", args: { field: "content", pattern: "latency_ms:latency_ms api_key:api_key" }, raw: 'parse content, "latency_ms:latency_ms api_key:api_key"' },
+          { id: "e3", command: "fieldsAdd", args: { assignments: "slow = if(latency_ms > 300, true, false)" }, raw: "fieldsAdd slow = if(latency_ms > 300, true, false)" },
+          { id: "e4", command: "filter", args: { condition: "slow == true" }, raw: "filter slow == true" },
+        ],
+      },
+      {
+        id: "step-5",
+        title: "Rank worst API keys by average latency",
+        narration:
+          "Group by api_key, compute average latency_ms, and rank the top 5 offenders.",
+        lesson: "summarize avg_latency = avg(latency_ms), by:{api_key} | sort avg_latency desc | limit 5",
+        goal: "Find the top 5 API keys by average latency.",
+        hint: "Use summarize avg() by api_key, then sort desc and limit 5.",
+        sampleData: generateApiGatewayLogs(3000, 43),
+        expectedPipeline: [
+          { id: "e1", command: "fetch", args: { source: "logs" }, raw: "fetch logs" },
+          { id: "e2", command: "parse", args: { field: "content", pattern: "latency_ms:latency_ms api_key:api_key" }, raw: 'parse content, "latency_ms:latency_ms api_key:api_key"' },
+          { id: "e3", command: "fieldsAdd", args: { assignments: "slow = if(latency_ms > 300, true, false)" }, raw: "fieldsAdd slow = if(latency_ms > 300, true, false)" },
+          { id: "e4", command: "filter", args: { condition: "slow == true" }, raw: "filter slow == true" },
+          { id: "e5", command: "summarize", args: { aggregation: "avg", alias: "avg_latency", aggField: "latency_ms", by: "api_key" }, raw: "summarize avg_latency = avg(latency_ms), by:{api_key}" },
+          { id: "e6", command: "sort", args: { field: "avg_latency", direction: "desc" }, raw: "sort avg_latency desc" },
+          { id: "e7", command: "limit", args: { count: 5 }, raw: "limit 5" },
         ],
       },
     ],

@@ -2,11 +2,17 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
 import { scenarios } from "@/lib/dql/scenarios";
+import { onboardingScenarios } from "@/lib/dql/scenarios-onboarding";
+import { dplScenarios } from "@/lib/dql/scenarios-dpl";
+import { combinedScenarios } from "@/lib/dql/scenarios-combined";
 import { getPriceForCountry } from "@/lib/pricing";
 import { createClient } from "@/lib/supabase/client";
 import { openRazorpayCheckout, verifyPayment } from "@/lib/razorpay/checkout";
+import type { Scenario, ScenarioTrack } from "@/lib/types/dql";
+import { CheckoutSummaryModal } from "./CheckoutSummaryModal";
 
 const DIFFICULTY_COLORS = {
   Beginner: "bg-emerald-400/10 text-emerald-400 border-emerald-400/20",
@@ -14,54 +20,55 @@ const DIFFICULTY_COLORS = {
   Advanced: "bg-rose-400/10 text-rose-400 border-rose-400/20",
 };
 
-const FREE_CASES = new Set([
-  "case-001", "case-006", "case-007", "case-008", "case-009",
-  "case-010", "case-011", "case-012", "case-013", "case-014",
-  "case-015", "case-016", "case-017", "case-018", "case-019",
-]);
+const TRACK_LABELS: Record<ScenarioTrack, string> = {
+  onboarding: "Onboarding",
+  dql: "DQL",
+  dpl: "DPL",
+  combined: "Combined",
+};
+
+const TRACK_COLORS: Record<ScenarioTrack, string> = {
+  onboarding: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+  dql: "text-cyan-400 bg-cyan-400/10 border-cyan-400/20",
+  dpl: "text-violet-400 bg-violet-400/10 border-violet-400/20",
+  combined: "text-amber-400 bg-amber-400/10 border-amber-400/20",
+};
+
+function isScenarioFree(scenario: Scenario): boolean {
+  if (scenario.tier) return scenario.tier === "free";
+  // Fallback for legacy DQL scenarios without explicit tier
+  const freeLegacyIds = new Set([
+    "case-001", "case-006", "case-007", "case-008", "case-009",
+    "case-010", "case-011", "case-012", "case-013", "case-014",
+    "case-015", "case-016", "case-017", "case-018", "case-019",
+  ]);
+  return freeLegacyIds.has(scenario.id);
+}
 
 function getScenarioTag(id: string): string | null {
   const tags: Record<string, string> = {
-    "case-001": "fetch logs",
-    "case-002": "fetch events",
-    "case-003": "fetch bizevents",
-    "case-004": "fetch spans",
-    "case-005": "makeTimeseries",
-    "case-006": "filter WARN",
-    "case-007": "filter critical",
-    "case-008": "dedup",
-    "case-009": "limit",
-    "case-010": "search",
-    "case-011": "filterOut",
-    "case-012": "summarize",
-    "case-013": "sum",
-    "case-014": "makeTimeseries",
-    "case-015": "sort",
-    "case-016": "compound filter",
-    "case-017": "revenue",
-    "case-018": "returns",
-    "case-019": "scale-up",
-    "case-020": "fieldsAdd",
-    "case-021": "fieldsRename",
-    "case-022": "expand",
-    "case-023": "parse",
-    "case-024": "dedup",
-    "case-025": "limit",
-    "case-026": "avg",
-    "case-027": "parse",
-    "case-028": "makeTimeseries",
-    "case-029": "fieldsRemove",
-    "case-030": "parse",
-    "case-031": "limit",
-    "case-032": "in array",
-    "case-033": "fieldsRemove",
-    "case-034": "makeTimeseries",
-    "case-035": "if()",
-    "case-036": "timeseries+by",
-    "case-037": "fieldsAdd+if",
-    "case-038": "tier+sum",
-    "case-039": "parse+sort",
-    "case-040": "avg+limit",
+    "case-001": "fetch logs", "case-002": "fetch events", "case-003": "fetch bizevents",
+    "case-004": "fetch spans", "case-005": "makeTimeseries", "case-006": "filter WARN",
+    "case-007": "filter critical", "case-008": "dedup", "case-009": "limit",
+    "case-010": "search", "case-011": "filterOut", "case-012": "summarize",
+    "case-013": "sum", "case-014": "makeTimeseries", "case-015": "sort",
+    "case-016": "compound filter", "case-017": "revenue", "case-018": "returns",
+    "case-019": "scale-up", "case-020": "fieldsAdd", "case-021": "fieldsRename",
+    "case-022": "expand", "case-023": "parse", "case-024": "dedup", "case-025": "limit",
+    "case-026": "avg", "case-027": "parse", "case-028": "makeTimeseries",
+    "case-029": "fieldsRemove", "case-030": "parse", "case-031": "limit",
+    "case-032": "in array", "case-033": "fieldsRemove", "case-034": "makeTimeseries",
+    "case-035": "if()", "case-036": "timeseries+by", "case-037": "fieldsAdd+if",
+    "case-038": "tier+sum", "case-039": "parse+sort", "case-040": "avg+limit",
+    "dpl-001": "INTEGER parse", "dpl-002": "IPADDR parse", "dpl-003": "TIMESTAMP parse",
+    "dpl-004": "ALPHA parse", "dpl-005": "multi-field", "dpl-006": "JSON parse",
+    "dpl-007": "KVP parse", "dpl-008": "syslog parse", "dpl-009": "Apache parse",
+    "dpl-010": "double matcher", "dpl-011": "UUID parse", "dpl-012": "full nginx",
+    "combo-001": "parse+avg", "combo-002": "JSON+count", "combo-003": "firewall+filter",
+    "combo-004": "syslog+failed", "combo-005": "Apache+404", "combo-006": "nginx+5xx",
+    "combo-007": "latency+filter", "combo-008": "firewall+allow",
+    "onboard-001": "fetch logs", "onboard-002": "filter ERROR", "onboard-003": "summarize count",
+    "onboard-004": "group by host", "onboard-005": "sort desc", "onboard-006": "parse intro",
   };
   return tags[id] || null;
 }
@@ -83,32 +90,49 @@ export function ScenarioSelector() {
   const userCountry = useInvestigatorStore((s) => s.userCountry);
   const userEmail = useInvestigatorStore((s) => s.userEmail);
 
-  const indiaPrice = getPriceForCountry("IN");
+  const allScenarios = [
+    ...onboardingScenarios,
+    ...scenarios,
+    ...dplScenarios,
+    ...combinedScenarios,
+  ];
+
+  const [activeTrack, setActiveTrack] = useState<ScenarioTrack | "all">("all");
+  const router = useRouter();
   const [showPremiumInfo, setShowPremiumInfo] = useState(false);
+  const [showCheckoutSummary, setShowCheckoutSummary] = useState(false);
   const [intlNoticeOpen, setIntlNoticeOpen] = useState(false);
   const [paying, setPaying] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
 
-  const unlockedSet = new Set(unlockedScenarios);
+  const indiaPrice = getPriceForCountry("IN");
   const isIndia = userCountry === "IN";
 
-  const handlePremiumPay = async () => {
+  const filteredScenarios =
+    activeTrack === "all"
+      ? allScenarios
+      : allScenarios.filter((s) => s.track === activeTrack);
+
+  const handleOpenCheckout = () => {
     setPayError(null);
     if (!isIndia) {
       setIntlNoticeOpen(true);
       return;
     }
+    setShowCheckoutSummary(true);
+  };
 
+  const handlePremiumPay = async () => {
     setPaying(true);
     try {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
 
       await openRazorpayCheckout({
-        amount: Math.round(indiaPrice.amount * 100), // paise
+        amount: Math.round(indiaPrice.amount * 100),
         currency: "INR",
         name: "DQL Detective",
-        description: "Premium access — all cases + 2× XP",
+        description: "Premium access — full case library + deeper explanations",
         receipt: `prem_${Date.now()}`,
         notes: { user_id: user?.id ?? "", email: userEmail },
         prefill: { email: userEmail },
@@ -121,6 +145,7 @@ export function ScenarioSelector() {
             if (result.verified) {
               setIsPremium(true);
               setShowPremiumInfo(false);
+              setShowCheckoutSummary(false);
             } else {
               setPayError("Payment could not be verified. Please contact support.");
             }
@@ -142,36 +167,64 @@ export function ScenarioSelector() {
     }
   };
 
+  const unlockedSet = new Set(unlockedScenarios);
+
+  const tabs: Array<{ key: ScenarioTrack | "all"; label: string }> = [
+    { key: "all", label: "All Cases" },
+    { key: "onboarding", label: "Onboarding" },
+    { key: "dql", label: "DQL" },
+    { key: "dpl", label: "DPL" },
+    { key: "combined", label: "Combined" },
+  ];
+
   return (
     <div className="h-full overflow-y-auto p-6">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold text-slate-100">Cases</h1>
           <p className="text-sm text-slate-400">
-            Select a case to investigate. Complete free cases to unlock more. Upgrade to Premium for full access.
+            Select a case to investigate. Complete free cases to learn. Upgrade to Premium to unlock the full case library and the deeper, narrated explanations.
           </p>
           {!isPremium && (
             <button
-              onClick={() => setShowPremiumInfo((o) => !o)}
+              onClick={() => router.push("/pricing")}
               className="text-xs font-medium text-amber-300 hover:text-amber-200"
             >
-              {showPremiumInfo ? "Hide premium info" : "View premium upgrade →"}
+              View premium upgrade →
             </button>
           )}
         </div>
 
-        <div className="grid gap-4">
-          {scenarios.map((scenario, i) => {
+        {/* Track tabs */}
+        <div className="flex flex-wrap gap-2" data-tour-target="cases-tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTrack(tab.key)}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                activeTrack === tab.key
+                  ? "bg-cyan-400/15 text-cyan-300 border-cyan-400/30"
+                  : "text-slate-400 border-white/[0.06] hover:bg-white/5 hover:text-slate-200"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid gap-4" data-tour-target="cases-cards">
+          {filteredScenarios.map((scenario, i) => {
             const isCompleted = completedScenarios.includes(scenario.id);
-            const isUnlocked = unlockedSet.has(scenario.id) || FREE_CASES.has(scenario.id);
+            const isUnlocked = unlockedSet.has(scenario.id) || isScenarioFree(scenario);
             const tag = getScenarioTag(scenario.id);
+            const track = scenario.track || "dql";
 
             return (
               <motion.div
                 key={scenario.id}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
+                transition={{ delay: i * 0.05 }}
               >
                 <motion.button
                   whileHover={isUnlocked || isPremium ? { scale: 1.01, y: -2 } : {}}
@@ -190,18 +243,25 @@ export function ScenarioSelector() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-base font-semibold text-slate-100">{scenario.title}</h3>
                         {isCompleted && (
                           <span className="text-emerald-400 text-xs">&#10003; Completed</span>
                         )}
                         {!isUnlocked && !isPremium && (
-                          <span className="flex items-center gap-1 text-[10px] font-medium text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20">
+                          <span className="flex items-center gap-1 text-[10px] font-medium text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded border border-amber-400/20" data-tour-target="cases-locks">
                             <LockIcon /> Premium
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-slate-500">{scenario.company}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-slate-500">{scenario.company}</p>
+                        <span
+                          className={`text-[9px] font-medium px-1.5 py-0.5 rounded border ${TRACK_COLORS[track as ScenarioTrack]}`}
+                        >
+                          {TRACK_LABELS[track as ScenarioTrack]}
+                        </span>
+                      </div>
                     </div>
                     <span
                       className={`px-2 py-0.5 rounded text-[10px] font-medium border ${
@@ -216,11 +276,16 @@ export function ScenarioSelector() {
 
                   <div className="flex items-center gap-3 mt-4 flex-wrap">
                     <span className="text-[10px] text-slate-500">{scenario.steps.length} steps</span>
-                    <span className="text-[10px] text-slate-600">·</span>
+                    <span className="text-[10px] text-slate-600">.</span>
                     <span className="text-[10px] text-slate-500">+{scenario.steps.length * 25} XP</span>
                     {tag && (
                       <span className="text-[10px] font-mono font-medium text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded">
                         {tag}
+                      </span>
+                    )}
+                    {!isScenarioFree(scenario) && (
+                      <span className="text-[10px] font-medium text-amber-400/80 bg-amber-400/5 border border-amber-400/10 px-1.5 py-0.5 rounded">
+                        Premium
                       </span>
                     )}
                   </div>
@@ -240,7 +305,9 @@ export function ScenarioSelector() {
             >
               <h3 className="text-base font-semibold text-amber-300">Premium Access</h3>
               <p className="text-sm text-slate-300 leading-relaxed">
-                Unlock all advanced cases and earn 2× XP on every premium case.
+                Unlock all advanced cases and the deeper, step-by-step explanations and
+                walkthroughs that ship with them. XP is identical on free and premium cases —
+                you never pay for an XP advantage.
               </p>
               <p className="text-xs text-slate-400">
                 One-time payment of <span className="text-amber-300 font-semibold">{indiaPrice.display}</span>.
@@ -262,11 +329,11 @@ export function ScenarioSelector() {
                   Maybe later
                 </button>
                 <button
-                  onClick={handlePremiumPay}
+                  onClick={handleOpenCheckout}
                   disabled={paying}
                   className="px-3 py-1.5 rounded-md text-xs font-medium text-amber-300 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 transition-colors disabled:opacity-50"
                 >
-                  {paying ? "Opening checkout…" : isIndia ? `Pay ${indiaPrice.display}` : "Unlock Premium"}
+                  {paying ? "Opening checkout..." : isIndia ? `Pay ${indiaPrice.display}` : "Unlock Premium"}
                 </button>
               </div>
             </motion.div>
@@ -316,6 +383,14 @@ export function ScenarioSelector() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        <CheckoutSummaryModal
+          isOpen={showCheckoutSummary}
+          onClose={() => setShowCheckoutSummary(false)}
+          onConfirm={handlePremiumPay}
+          priceDisplay={indiaPrice.display}
+          loading={paying}
+        />
       </div>
     </div>
   );

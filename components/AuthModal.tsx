@@ -5,30 +5,42 @@ import { motion, AnimatePresence } from "framer-motion";
 import { COUNTRIES } from "@/lib/countries";
 import { useAuth } from "@/lib/auth/useAuth";
 
+type Mode = "login" | "signup" | "forgot";
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("US");
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resetPassword } = useAuth();
+
+  const switchMode = (m: Mode) => {
+    setMode(m);
+    setError("");
+    setInfo("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setInfo("");
 
-    if (email.length < 5 || !email.includes("@")) {
+    const trimmedEmail = email.trim();
+
+    if (trimmedEmail.length < 5 || !trimmedEmail.includes("@")) {
       setError("Please enter a valid email address.");
       return;
     }
-    if (password.length < 6) {
+    if (mode !== "forgot" && password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
     }
@@ -36,11 +48,21 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     setLoading(true);
     try {
       if (mode === "signup") {
-        await signUp(email, password, country);
+        const { needsEmailConfirmation } = await signUp(trimmedEmail, password, country);
+        if (needsEmailConfirmation) {
+          setInfo("Account created — check your email to confirm before signing in.");
+          setMode("login");
+          setPassword("");
+        } else {
+          onClose();
+        }
+      } else if (mode === "login") {
+        await signIn(trimmedEmail, password);
+        onClose();
       } else {
-        await signIn(email, password);
+        await resetPassword(trimmedEmail);
+        setInfo("If that email is registered, a reset link is on its way. Check your inbox.");
       }
-      onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Authentication failed.");
     } finally {
@@ -68,7 +90,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           >
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-slate-100">
-                {mode === "login" ? "Sign In" : "Create Account"}
+                {mode === "login"
+                  ? "Sign In"
+                  : mode === "signup"
+                  ? "Create Account"
+                  : "Reset password"}
               </h2>
               <button
                 onClick={onClose}
@@ -91,17 +117,30 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 />
               </div>
 
-              <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Password</label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full mt-1 bg-slate-900/80 border border-white/[0.08] rounded-md px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-400/40"
-                  required
-                />
-              </div>
+              {mode !== "forgot" && (
+                <div>
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Password</label>
+                    {mode === "login" && (
+                      <button
+                        type="button"
+                        onClick={() => switchMode("forgot")}
+                        className="text-[10px] text-cyan-400 hover:text-cyan-300 hover:underline"
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full mt-1 bg-slate-900/80 border border-white/[0.08] rounded-md px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-400/40"
+                    required
+                  />
+                </div>
+              )}
 
               {mode === "signup" && (
                 <div>
@@ -124,6 +163,9 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               {error && (
                 <p className="text-xs text-rose-400 bg-rose-400/10 border border-rose-400/20 rounded-md p-2">{error}</p>
               )}
+              {info && !error && (
+                <p className="text-xs text-emerald-300 bg-emerald-400/10 border border-emerald-400/20 rounded-md p-2">{info}</p>
+              )}
 
               <motion.button
                 whileHover={{ scale: 1.01 }}
@@ -132,7 +174,13 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 disabled={loading}
                 className="w-full py-2.5 rounded-md text-sm font-medium bg-cyan-400/15 text-cyan-300 hover:bg-cyan-400/25 border border-cyan-400/30 transition-colors disabled:opacity-50"
               >
-                {loading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account"}
+                {loading
+                  ? "Please wait..."
+                  : mode === "login"
+                  ? "Sign In"
+                  : mode === "signup"
+                  ? "Create Account"
+                  : "Send reset link"}
               </motion.button>
             </form>
 
@@ -141,22 +189,29 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 <>
                   Don&apos;t have an account?{" "}
                   <button
-                    onClick={() => { setMode("signup"); setError(""); }}
+                    onClick={() => switchMode("signup")}
                     className="text-cyan-400 hover:underline"
                   >
                     Sign up
                   </button>
                 </>
-              ) : (
+              ) : mode === "signup" ? (
                 <>
                   Already have an account?{" "}
                   <button
-                    onClick={() => { setMode("login"); setError(""); }}
+                    onClick={() => switchMode("login")}
                     className="text-cyan-400 hover:underline"
                   >
                     Sign in
                   </button>
                 </>
+              ) : (
+                <button
+                  onClick={() => switchMode("login")}
+                  className="text-cyan-400 hover:underline"
+                >
+                  ← Back to sign in
+                </button>
               )}
             </p>
 
