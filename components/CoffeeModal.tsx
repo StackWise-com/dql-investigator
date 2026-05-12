@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
-import { getCoffeePriceForCountry } from "@/lib/pricing";
 import { openRazorpayCheckout, verifyPayment } from "@/lib/razorpay/checkout";
+
+const PRESET_AMOUNTS = [100, 150, 200, 500, 750, 1000];
 
 interface CoffeeModalProps {
   isOpen: boolean;
@@ -12,20 +13,17 @@ interface CoffeeModalProps {
 }
 
 export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
-  const userCountry = useInvestigatorStore((s) => s.userCountry);
   const userEmail = useInvestigatorStore((s) => s.userEmail);
-  const price = getCoffeePriceForCountry(userCountry);
 
-  const [amount, setAmount] = useState(price.amount.toString());
+  const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [paying, setPaying] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [statusMsg, setStatusMsg] = useState("");
 
   const handlePay = async () => {
-    const val = parseInt(amount, 10);
-    if (!val || val < 1) {
+    if (!selectedAmount) {
       setStatus("error");
-      setStatusMsg("Please enter a valid amount.");
+      setStatusMsg("Please select an amount.");
       return;
     }
 
@@ -33,10 +31,12 @@ export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
     setStatus("idle");
     setStatusMsg("");
 
+    const amountInPaise = selectedAmount * 100;
+
     try {
       await openRazorpayCheckout({
-        amount: Math.round(val * 100),
-        currency: price.currency,
+        amount: amountInPaise,
+        currency: "INR",
         name: "DQL Detective",
         description: "Buy me a coffee — support open-source DQL learning",
         receipt: `coffee_${Date.now()}`,
@@ -45,8 +45,8 @@ export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
         onSuccess: async (response) => {
           try {
             const result = await verifyPayment(response, {
-              amount: Math.round(val * 100),
-              currency: price.currency,
+              amount: amountInPaise,
+              currency: "INR",
             });
             if (result.verified) {
               setStatus("success");
@@ -110,21 +110,26 @@ export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
 
             <div>
               <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                Amount ({price.currency})
+                Choose an amount (INR)
               </label>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm text-slate-400">{price.symbol}</span>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  min={1}
-                  className="flex-1 bg-slate-900/80 border border-white/[0.08] rounded-md px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-amber-400/40"
-                />
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {PRESET_AMOUNTS.map((amt) => (
+                  <button
+                    key={amt}
+                    onClick={() => {
+                      setSelectedAmount(amt);
+                      setStatus("idle");
+                    }}
+                    className={`py-2 rounded-md text-sm font-medium border transition-colors ${
+                      selectedAmount === amt
+                        ? "bg-amber-400/25 text-amber-300 border-amber-400/50"
+                        : "bg-slate-900/60 text-slate-300 border-white/[0.08] hover:border-amber-400/30 hover:bg-amber-400/10"
+                    }`}
+                  >
+                    ₹{amt}
+                  </button>
+                ))}
               </div>
-              <p className="text-[10px] text-slate-500 mt-1">
-                Suggested: {price.display} in your region
-              </p>
             </div>
 
             {status === "success" && (
@@ -142,10 +147,16 @@ export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               onClick={handlePay}
-              disabled={paying}
+              disabled={paying || !selectedAmount}
               className="w-full py-2.5 rounded-md text-sm font-medium bg-amber-400/15 text-amber-300 hover:bg-amber-400/25 border border-amber-400/30 transition-colors disabled:opacity-50"
             >
-              {paying ? "Opening checkout..." : status === "success" ? "Paid" : "Pay with Razorpay"}
+              {paying
+                ? "Opening checkout..."
+                : status === "success"
+                ? "Paid"
+                : selectedAmount
+                ? `Pay ₹${selectedAmount}`
+                : "Pay with Razorpay"}
             </motion.button>
 
             <p className="text-[10px] text-slate-500 text-center">
