@@ -21,7 +21,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const secret = process.env.RAZORPAY_KEY_SECRET || "";
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret) {
+      return NextResponse.json(
+        { verified: false, message: "Razorpay secret not configured on server" },
+        { status: 500 }
+      );
+    }
+
     const generatedSignature = crypto
       .createHmac("sha256", secret)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)

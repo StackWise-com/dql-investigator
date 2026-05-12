@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-});
+function getRazorpayClient() {
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    throw new Error(
+      "Razorpay credentials missing. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your environment."
+    );
+  }
+
+  return new Razorpay({ key_id: keyId, key_secret: keySecret });
+}
 
 export async function POST(request: Request) {
   try {
@@ -15,16 +23,24 @@ export async function POST(request: Request) {
       notes?: Record<string, string>;
     };
 
-    if (!amount || !currency) {
+    if (!amount || amount < 1) {
       return NextResponse.json(
-        { error: "amount and currency are required" },
+        { error: "amount is required and must be at least 1" },
+        { status: 400 }
+      );
+    }
+    if (!currency) {
+      return NextResponse.json(
+        { error: "currency is required" },
         { status: 400 }
       );
     }
 
+    const razorpay = getRazorpayClient();
+
     const order = await razorpay.orders.create({
       amount,
-      currency,
+      currency: currency.toUpperCase(),
       receipt: receipt || `order_${Date.now()}`,
       notes,
     });
@@ -34,8 +50,23 @@ export async function POST(request: Request) {
       amount: order.amount,
       currency: order.currency,
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to create order";
+  } catch (err: unknown) {
+    console.error("[create-order] Error:", err);
+
+    let message = "Failed to create order";
+    if (err instanceof Error) {
+      message = err.message;
+    } else if (typeof err === "object" && err !== null) {
+      const anyErr = err as Record<string, unknown>;
+      if (typeof anyErr.description === "string") {
+        message = anyErr.description;
+      } else if (typeof anyErr.message === "string") {
+        message = anyErr.message;
+      } else if (typeof anyErr.error === "string") {
+        message = anyErr.error;
+      }
+    }
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
