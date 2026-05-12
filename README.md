@@ -91,6 +91,14 @@ This project is open-source under the MIT License. Contributions, suggestions, a
 
 **Reach out:** [maheedhartalluri@gmail.com](mailto:maheedhartalluri@gmail.com)
 
+## Support the Project
+
+If you find DQL Detective useful and want to support its continued development, you can buy the developer a coffee at the live site:
+
+**[stackwise-ai.com](https://stackwise-ai.com)** — Click the "Buy me a coffee" button in the app.
+
+All support goes toward building more cases, features, and keeping the platform free for everyone.
+
 ---
 
 ## License

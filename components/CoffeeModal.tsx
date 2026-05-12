@@ -1,6 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
+import { getCoffeePriceForCountry } from "@/lib/pricing";
+import { openRazorpayCheckout, verifyPayment } from "@/lib/razorpay/checkout";
 
 interface CoffeeModalProps {
   isOpen: boolean;
@@ -8,6 +12,70 @@ interface CoffeeModalProps {
 }
 
 export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
+  const userCountry = useInvestigatorStore((s) => s.userCountry);
+  const userEmail = useInvestigatorStore((s) => s.userEmail);
+  const price = getCoffeePriceForCountry(userCountry);
+
+  const [amount, setAmount] = useState(price.amount.toString());
+  const [paying, setPaying] = useState(false);
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [statusMsg, setStatusMsg] = useState("");
+
+  const handlePay = async () => {
+    const val = parseInt(amount, 10);
+    if (!val || val < 1) {
+      setStatus("error");
+      setStatusMsg("Please enter a valid amount.");
+      return;
+    }
+
+    setPaying(true);
+    setStatus("idle");
+    setStatusMsg("");
+
+    try {
+      await openRazorpayCheckout({
+        amount: Math.round(val * 100),
+        currency: price.currency,
+        name: "DQL Detective",
+        description: "Buy me a coffee — support open-source DQL learning",
+        receipt: `coffee_${Date.now()}`,
+        notes: { email: userEmail || "", type: "coffee" },
+        prefill: { email: userEmail },
+        onSuccess: async (response) => {
+          try {
+            const result = await verifyPayment(response, {
+              amount: Math.round(val * 100),
+              currency: price.currency,
+            });
+            if (result.verified) {
+              setStatus("success");
+              setStatusMsg("Thank you for the coffee! Your support keeps this project alive.");
+            } else {
+              setStatus("error");
+              setStatusMsg("Payment could not be verified. Please contact support.");
+            }
+          } catch (err) {
+            setStatus("error");
+            setStatusMsg(err instanceof Error ? err.message : "Verification failed.");
+          } finally {
+            setPaying(false);
+          }
+        },
+        onDismiss: () => setPaying(false),
+        onError: (err) => {
+          setStatus("error");
+          setStatusMsg(err instanceof Error ? err.message : "Payment failed.");
+          setPaying(false);
+        },
+      });
+    } catch (err) {
+      setStatus("error");
+      setStatusMsg(err instanceof Error ? err.message : "Could not start payment.");
+      setPaying(false);
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -27,7 +95,7 @@ export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
             className="w-full max-w-sm glass-panel-strong rounded-xl border border-amber-400/20 p-6 space-y-4 shadow-2xl"
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-amber-300">Support DQL Detective</h2>
+              <h2 className="text-lg font-semibold text-amber-300">Buy me a coffee</h2>
               <button
                 onClick={onClose}
                 className="text-slate-500 hover:text-slate-300 text-sm"
@@ -37,30 +105,52 @@ export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
             </div>
 
             <p className="text-sm text-slate-300 leading-relaxed">
-              If you find this project useful, consider supporting its development.
-              Every bit of encouragement helps keep the cases coming.
+              Thanks for thinking of buying me a coffee — it really motivates me to keep building this.
             </p>
 
-            <div className="rounded-lg border border-white/[0.06] bg-slate-900/40 p-4 space-y-2">
-              <p className="text-xs text-slate-400">
-                Reach out for support, collaboration, or just to say hi:
+            <div>
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                Amount ({price.currency})
+              </label>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-sm text-slate-400">{price.symbol}</span>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  min={1}
+                  className="flex-1 bg-slate-900/80 border border-white/[0.08] rounded-md px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-amber-400/40"
+                />
+              </div>
+              <p className="text-[10px] text-slate-500 mt-1">
+                Suggested: {price.display} in your region
               </p>
-              <a
-                href="mailto:maheedhartalluri@gmail.com"
-                className="text-sm text-cyan-400 hover:underline break-all"
-              >
-                maheedhartalluri@gmail.com
-              </a>
             </div>
+
+            {status === "success" && (
+              <p className="text-xs text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-md p-2">
+                {statusMsg}
+              </p>
+            )}
+            {status === "error" && (
+              <p className="text-xs text-rose-400 bg-rose-400/10 border border-rose-400/20 rounded-md p-2">
+                {statusMsg}
+              </p>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
-              onClick={onClose}
-              className="w-full py-2.5 rounded-md text-sm font-medium bg-amber-400/15 text-amber-300 hover:bg-amber-400/25 border border-amber-400/30 transition-colors"
+              onClick={handlePay}
+              disabled={paying}
+              className="w-full py-2.5 rounded-md text-sm font-medium bg-amber-400/15 text-amber-300 hover:bg-amber-400/25 border border-amber-400/30 transition-colors disabled:opacity-50"
             >
-              Close
+              {paying ? "Opening checkout..." : status === "success" ? "Paid" : "Pay with Razorpay"}
             </motion.button>
+
+            <p className="text-[10px] text-slate-500 text-center">
+              Secure payments powered by Razorpay. All cards &amp; UPI accepted.
+            </p>
           </motion.div>
         </motion.div>
       )}
