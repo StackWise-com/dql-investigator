@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { getPriceForCountry } from "@/lib/pricing";
 import type {
   DQLRecord,
   DQLColumn,
@@ -69,8 +68,6 @@ interface InvestigatorState {
 
   // Unlocks
   unlockedScenarios: string[];
-  isPremium: boolean;
-  setIsPremium: (val: boolean) => void;
 
   // User profile (hydrated from Supabase by useAuth, not persisted locally)
   userId: string;
@@ -166,19 +163,25 @@ export const useInvestigatorStore = create<InvestigatorState>()(
       setShowLanding: (showLanding) => set({ showLanding }),
 
       unlockedScenarios: [
-        // Legacy DQL free cases
-        "case-001", "case-006", "case-007", "case-008", "case-009",
-        "case-010", "case-011", "case-012", "case-013", "case-014",
-        "case-015", "case-016", "case-017", "case-018", "case-019",
-        // Onboarding track (all free)
+        // All DQL cases (free)
+        "case-001", "case-002", "case-003", "case-004", "case-005",
+        "case-006", "case-007", "case-008", "case-009", "case-010",
+        "case-011", "case-012", "case-013", "case-014", "case-015",
+        "case-016", "case-017", "case-018", "case-019", "case-020",
+        "case-021", "case-022", "case-023", "case-024", "case-025",
+        "case-026", "case-027", "case-028", "case-029", "case-030",
+        "case-031", "case-032", "case-033", "case-034", "case-035",
+        "case-036", "case-037", "case-038", "case-039", "case-040",
+        "case-041", "case-042", "case-043",
+        // Onboarding track
         "onboard-001", "onboard-002", "onboard-003", "onboard-004", "onboard-005", "onboard-006",
-        // DPL track (first 4 free)
-        "dpl-001", "dpl-002", "dpl-003", "dpl-004",
-        // Combined track (2 free tasters)
-        "combo-001", "combo-002",
+        // DPL track
+        "dpl-001", "dpl-002", "dpl-003", "dpl-004", "dpl-005", "dpl-006",
+        "dpl-007", "dpl-008", "dpl-009", "dpl-010", "dpl-011", "dpl-012",
+        // Combined track
+        "combo-001", "combo-002", "combo-003", "combo-004", "combo-005",
+        "combo-006", "combo-007", "combo-008",
       ],
-      isPremium: false,
-      setIsPremium: (isPremium) => set({ isPremium }),
 
       userId: "",
       setUserId: (userId) => set({ userId }),
@@ -186,10 +189,7 @@ export const useInvestigatorStore = create<InvestigatorState>()(
       setUserEmail: (email) => set({ userEmail: email }),
       userCountry: "US",
       userCurrency: "USD",
-      setUserCountry: (code) => {
-        const price = getPriceForCountry(code);
-        set({ userCountry: code, userCurrency: price.currency });
-      },
+      setUserCountry: (code) => set({ userCountry: code }),
       displayName: "",
       setDisplayName: (displayName) => set({ displayName }),
       displaySlug: "",

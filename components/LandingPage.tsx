@@ -7,7 +7,6 @@ import { CoffeeModal } from "./CoffeeModal";
 import { UserAvatar } from "./UserAvatar";
 import { useAuth } from "@/lib/auth/useAuth";
 import landingImage from "@/images/landing_page.png";
-import { RefundRequestModal } from "./RefundRequestModal";
 
 interface Hotspot {
   id: string;
@@ -172,11 +171,9 @@ function HotspotButton({ hotspot }: { hotspot: Hotspot }) {
 
 export function LandingPage() {
   const [coffeeOpen, setCoffeeOpen] = useState(false);
-  const [refundOpen, setRefundOpen] = useState(false);
   const userEmail = useInvestigatorStore((s) => s.userEmail);
   const totalXP = useInvestigatorStore((s) => s.totalXP);
   const avatarEmoji = useInvestigatorStore((s) => s.avatarEmoji);
-  const isPremium = useInvestigatorStore((s) => s.isPremium);
   const { signOut } = useAuth();
 
   const handleLogout = () => {
@@ -268,26 +265,6 @@ export function LandingPage() {
         >
           Leaderboard
         </motion.a>
-        {!isPremium && (
-          <motion.a
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            href="/pricing"
-            className="px-2 py-1 rounded-md text-[10px] font-semibold text-amber-300 hover:text-amber-200 hover:bg-amber-400/10 border border-amber-400/30 transition-colors"
-          >
-            Upgrade
-          </motion.a>
-        )}
-        {isPremium && (
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setRefundOpen(true)}
-            className="px-2 py-1 rounded-md text-[10px] font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-400/5 transition-colors"
-          >
-            Refund
-          </motion.button>
-        )}
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
@@ -369,10 +346,6 @@ export function LandingPage() {
       >
         <div className="flex items-center gap-3 text-[10px] text-slate-600">
           <a href="/terms" className="hover:text-slate-400 transition-colors">Terms</a>
-          <span>·</span>
-          <a href="/refund-policy" className="hover:text-slate-400 transition-colors">Refund Policy</a>
-          <span>·</span>
-          <a href="/pricing" className="hover:text-slate-400 transition-colors">Pricing</a>
         </div>
       </motion.div>
 
@@ -391,7 +364,6 @@ export function LandingPage() {
       </motion.button>
 
       <CoffeeModal isOpen={coffeeOpen} onClose={() => setCoffeeOpen(false)} />
-      <RefundRequestModal isOpen={refundOpen} onClose={() => setRefundOpen(false)} />
     </div>
   );
 }

@@ -7,7 +7,7 @@ interface FeedbackButtonProps {
 export function FeedbackButton({ page }: FeedbackButtonProps) {
   const subject = encodeURIComponent(`Feedback: ${page}`);
   const body = encodeURIComponent(`Page: ${page}\n\nHi,\n\nHere's my feedback:\n\n`);
-  const href = `mailto:technomonstert@gmail.com?subject=${subject}&body=${body}`;
+  const href = `mailto:maheedhartalluri@gmail.com?subject=${subject}&body=${body}`;
 
   return (
     <a

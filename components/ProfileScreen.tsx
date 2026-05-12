@@ -12,7 +12,6 @@ import {
   type UserProfile,
 } from "@/lib/api/profile";
 import { UserAvatar } from "./UserAvatar";
-import { RefundEligibilityCard } from "./RefundEligibilityCard";
 import { ANIMAL_EMOJIS } from "@/lib/avatars";
 
 export function ProfileScreen() {
@@ -23,7 +22,6 @@ export function ProfileScreen() {
   const router = useRouter();
   const userId = useInvestigatorStore((s) => s.userId);
   const userEmail = useInvestigatorStore((s) => s.userEmail);
-  const isPremium = useInvestigatorStore((s) => s.isPremium);
   const totalXP = useInvestigatorStore((s) => s.totalXP);
   const gameHighScores = useInvestigatorStore((s) => s.gameHighScores);
   const setDisplayName = useInvestigatorStore((s) => s.setDisplayName);
@@ -116,15 +114,6 @@ export function ProfileScreen() {
                 {profile?.display_name || userEmail.split("@")[0]}
               </p>
               <p className="text-xs text-slate-400">{userEmail}</p>
-              <span
-                className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${
-                  isPremium
-                    ? "bg-amber-400/15 text-amber-300 border border-amber-400/30"
-                    : "bg-slate-800 text-slate-400 border border-white/[0.08]"
-                }`}
-              >
-                {isPremium ? "Premium user" : "Free user"}
-              </span>
             </div>
           </div>
 
@@ -229,45 +218,7 @@ export function ProfileScreen() {
           {info && !error && (
             <p className="text-xs text-emerald-300 bg-emerald-400/10 border border-emerald-400/20 rounded-md p-2">{info}</p>
           )}
-
-          {!isPremium && (
-            <a
-              href="/pricing"
-              className="block text-center w-full py-2.5 rounded-md text-sm font-medium bg-amber-400/15 text-amber-300 hover:bg-amber-400/25 border border-amber-400/30"
-            >
-              Upgrade to Premium
-            </a>
-          )}
         </motion.div>
-
-        {isPremium && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="glass-panel-strong rounded-xl border border-white/[0.06] p-6 space-y-3"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-slate-100">Refund eligibility</h2>
-              <a
-                href="/refund-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[11px] text-cyan-400 hover:underline"
-              >
-                Policy →
-              </a>
-            </div>
-            <p className="text-xs text-slate-400">
-              Eligibility is checked live against your server-side activity. XP is identical
-              on free and premium cases — premium only unlocks more cases and deeper
-              explanations.
-            </p>
-            <RefundEligibilityCard />
-            <p className="text-[10px] text-slate-500">
-              To submit a refund request, use the &quot;Refund&quot; button in the app header.
-            </p>
-          </motion.div>
-        )}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 export const metadata = {
   title: "Terms & Conditions — DQL Investigator",
   description:
-    "Terms & Conditions for DQL Investigator: an independent learning platform not affiliated with Dynatrace.",
+    "Terms & Conditions for DQL Investigator: an independent, open-source learning platform not affiliated with Dynatrace.",
 };
 
 export default function TermsPage() {
@@ -10,7 +10,7 @@ export default function TermsPage() {
       <div className="max-w-3xl mx-auto space-y-8">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold text-slate-100">Terms &amp; Conditions</h1>
-          <p className="text-sm text-slate-400">Last updated: May 2, 2026 — Version 2026-05-02-v1</p>
+          <p className="text-sm text-slate-400">Last updated: May 12, 2026 — Version 2026-05-12-v1</p>
           <a href="/" className="text-xs text-cyan-400 hover:underline">← Back to app</a>
         </div>
 
@@ -22,10 +22,10 @@ export default function TermsPage() {
           body={
             <>
               DQL Investigator (the &quot;Service&quot;, &quot;we&quot;, &quot;us&quot;) is an independent,
-              third-party educational platform designed to help users practice the syntax,
+              third-party, open-source educational platform designed to help users practice the syntax,
               structure, and problem-solving patterns of query languages used in modern
-              observability tooling. The Service is operated by an independent author for
-              educational purposes only.
+              observability tooling. The Service is built by a Dynatrace enthusiast in collaboration with AI
+              and is operated for educational purposes only.
             </>
           }
         />
@@ -39,12 +39,12 @@ export default function TermsPage() {
               way officially connected with</strong> Dynatrace LLC, Dynatrace Inc., or any of its
               subsidiaries, parents, or affiliates. The names &quot;Dynatrace&quot;, &quot;DQL&quot;, &quot;Grail&quot;,
               and any related marks, logos, or product names are the property of their
-              respective owners. References on the Service are descriptive, fair-use mentions
+              respective owners. This project is <strong>not funded or approved by Dynatrace</strong> in any way.
+              References on the Service are descriptive, fair-use mentions
               made for the sole purpose of identifying the subject matter of the educational
               content. No claim of authorship, partnership, or trademark interest is
               asserted. If a rights-holder believes any content here is misleading or
-              infringing, please contact us through the in-app feedback button and we will
-              respond promptly.
+              infringing, please contact us and we will respond promptly.
             </>
           }
         />
@@ -87,8 +87,7 @@ export default function TermsPage() {
           body={
             <>
               To use the Service you must be at least 13 years old (or the digital-consent
-              age required by your jurisdiction). To purchase premium features you must be
-              at least 18 and authorized to use the payment instrument. You agree to provide
+              age required by your jurisdiction). You agree to provide
               accurate registration information, keep your credentials confidential, and
               promptly notify us of any unauthorized use.
             </>
@@ -107,7 +106,7 @@ export default function TermsPage() {
               name, profile, or communications; (d) upload or transmit unlawful, infringing,
               hateful, or harassing content; (e) use the Service to train commercial machine-
               learning models without prior written permission; or (f) circumvent any access
-              control, paywall, or rate limit. We may suspend or terminate accounts that
+              control or rate limit. We may suspend or terminate accounts that
               violate this section.
             </>
           }
@@ -115,44 +114,14 @@ export default function TermsPage() {
 
         <Section
           n="7"
-          title="Premium content, payments, and currency"
-          body={
-            <>
-              Premium content is sold as a one-time purchase processed via Razorpay. Pricing
-              is displayed in your local currency where supported. International payments may
-              not be available in all jurisdictions. By initiating a purchase, you authorize
-              the charge and confirm the accuracy of your payment details. Razorpay&apos;s own
-              terms and privacy policy apply to payment processing.
-            </>
-          }
-        />
-
-        <Section
-          n="8"
-          title="Refunds"
-          body={
-            <>
-              Refund eligibility is governed by our separate{" "}
-              <a href="/refund-policy" className="text-cyan-400 hover:underline">
-                Refund Policy
-              </a>
-              , which is incorporated into these Terms by reference.
-            </>
-          }
-        />
-
-        <Section
-          n="9"
           title="Privacy and data we store"
           body={
             <>
               We store: your authentication email, an optional public display name, your
-              country (used to display localized currency), the timestamp at which you
-              accepted these Terms (and the Terms version), your premium status, and your
+              country, the timestamp at which you accepted these Terms (and the Terms version), and your
               learning- and game-progress XP totals. Your display name and XP totals appear
               on the public leaderboard once you accept these Terms. We do not sell your
-              data. Authentication is handled by Supabase. Payment data is handled by
-              Razorpay. You may at any time view, edit, or delete your profile information
+              data. Authentication is handled by Supabase. You may at any time view, edit, or delete your profile information
               from inside the app, and you may request account deletion via the feedback
               button.
             </>
@@ -160,7 +129,7 @@ export default function TermsPage() {
         />
 
         <Section
-          n="10"
+          n="8"
           title="Intellectual property"
           body={
             <>
@@ -176,7 +145,7 @@ export default function TermsPage() {
         />
 
         <Section
-          n="11"
+          n="9"
           title="Disclaimers"
           body={
             <>
@@ -192,7 +161,7 @@ export default function TermsPage() {
         />
 
         <Section
-          n="12"
+          n="10"
           title="Limitation of liability"
           body={
             <>
@@ -202,15 +171,13 @@ export default function TermsPage() {
               intangible losses, arising out of or relating to your access to or use of, or
               inability to access or use, the Service, regardless of the legal theory
               (contract, tort, statute, or otherwise) and even if advised of the possibility
-              of such damages. The operator&apos;s aggregate liability for direct damages shall
-              not exceed the total amount you paid to the operator, if any, in the twelve
-              (12) months preceding the event giving rise to the claim.
+              of such damages.
             </>
           }
         />
 
         <Section
-          n="13"
+          n="11"
           title="Indemnity"
           body={
             <>
@@ -224,7 +191,7 @@ export default function TermsPage() {
         />
 
         <Section
-          n="14"
+          n="12"
           title="Governing law and jurisdiction"
           body={
             <>
@@ -239,7 +206,7 @@ export default function TermsPage() {
         />
 
         <Section
-          n="15"
+          n="13"
           title="Changes to these Terms"
           body={
             <>
@@ -252,26 +219,28 @@ export default function TermsPage() {
         />
 
         <Section
-          n="16"
+          n="14"
           title="Severability and entire agreement"
           body={
             <>
               If any provision of these Terms is held unenforceable, the remaining
-              provisions will remain in full force and effect. These Terms, together with
-              the Refund Policy, constitute the entire agreement between you and the operator
+              provisions will remain in full force and effect. These Terms constitute the entire agreement between you and the operator
               regarding the Service and supersede all prior agreements.
             </>
           }
         />
 
         <Section
-          n="17"
+          n="15"
           title="Contact"
           body={
             <>
-              For questions, takedown notices, data-deletion requests, or any other inquiry,
-              please use the in-app feedback button. We aim to respond within a reasonable
-              time.
+              For questions, suggestions, collaboration ideas, data-deletion requests, or any other inquiry,
+              please email{" "}
+              <a href="mailto:maheedhartalluri@gmail.com" className="text-cyan-400 hover:underline">
+                maheedhartalluri@gmail.com
+              </a>
+              . We aim to respond within a reasonable time.
             </>
           }
         />
@@ -285,11 +254,13 @@ function Disclaimer() {
     <div className="rounded-lg border border-amber-400/30 bg-amber-400/5 p-4 text-xs text-amber-200 leading-relaxed">
       <p className="font-semibold text-amber-300 mb-1">Important disclaimer</p>
       <p>
-        DQL Investigator is an <strong>independent learning platform</strong>. It is{" "}
+        DQL Investigator is an <strong>independent, open-source learning platform</strong> built by a
+        Dynatrace enthusiast in collaboration with AI. It is{" "}
         <strong>not affiliated with, endorsed by, or sponsored by Dynatrace</strong>. It does{" "}
         <strong>not run any Grail backend</strong> and does <strong>not integrate with any
         Dynatrace environment, tenant, API, or production system</strong>. All data shown is
-        synthetic and locally generated for educational purposes only.
+        synthetic and locally generated for educational purposes only. This project is
+        <strong>not funded or approved by Dynatrace</strong> in any way.
       </p>
     </div>
   );

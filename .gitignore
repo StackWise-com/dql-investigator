@@ -33,3 +33,15 @@ tsconfig.tsbuildinfo
 # Supabase local dev & schema
 .supabase/
 .env
+
+# AI docs & research (local only)
+.ai/
+.dql/
+
+# Scripts (local only)
+scripts/
+
+# Misc token files
+*.openclawworkspace*
+*git_token*
+*token*

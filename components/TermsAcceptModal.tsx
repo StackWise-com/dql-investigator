@@ -62,20 +62,21 @@ export function TermsAcceptModal() {
 
             <div className="flex-1 overflow-y-auto pr-2 text-xs text-slate-300 space-y-3 leading-relaxed">
               <Section title="1. About this platform">
-                DQL Investigator is an <strong>independent, third-party educational platform</strong>{" "}
-                designed to help users practice and learn the syntax, structure, and
-                problem-solving patterns of query languages used in modern observability
-                tooling. It is operated solely by its independent author for educational
-                purposes.
+                DQL Investigator is an <strong>independent, open-source educational platform</strong>{" "}
+                built by a Dynatrace enthusiast in collaboration with AI. It is designed to help
+                users practice and learn the syntax, structure, and problem-solving patterns of
+                query languages used in modern observability tooling. It is operated for educational
+                purposes only.
               </Section>
 
               <Section title="2. No affiliation with Dynatrace">
-                This site is <strong>not affiliated with, endorsed by, sponsored by, or in any
+                This project is <strong>not affiliated with, endorsed by, sponsored by, or in any
                 way officially connected with Dynatrace LLC, Dynatrace Inc., or any of its
                 subsidiaries or affiliates</strong>. The names &quot;Dynatrace&quot;, &quot;DQL&quot;, &quot;Grail&quot;, and any
                 related marks are the property of their respective owners. References to
                 such names appear only as descriptive, fair-use mentions for the purpose of
-                identifying the subject matter of this learning material.
+                identifying the subject matter of this learning material. This project is <strong>not
+                funded or approved by Dynatrace</strong> in any way.
               </Section>
 
               <Section title="3. No real backend; no production data">
@@ -103,17 +104,7 @@ export function TermsAcceptModal() {
                 Dynatrace personnel, in your display name or profile.
               </Section>
 
-              <Section title="6. Payments, premium content, and refunds">
-                Optional premium content is sold via Razorpay. Pricing, billing currency,
-                and refund eligibility are governed by the separate{" "}
-                <a href="/refund-policy" className="text-cyan-400 hover:underline" target="_blank" rel="noopener noreferrer">
-                  Refund Policy
-                </a>
-                . By purchasing, you confirm you are over 18 and authorized to use the
-                payment instrument.
-              </Section>
-
-              <Section title="7. Intellectual property">
+              <Section title="6. Intellectual property">
                 All original copy, scenarios, exercises, code, design, and synthetic
                 datasets on this platform are the property of the operator and are
                 protected by applicable copyright and database-rights law. You may not
@@ -122,7 +113,7 @@ export function TermsAcceptModal() {
                 of their respective owners.
               </Section>
 
-              <Section title="8. Privacy and data we store">
+              <Section title="7. Privacy and data we store">
                 We store your email, optional display name, country, accepted-terms
                 timestamp, and progress/XP totals. Display name and XP totals appear on the
                 public leaderboard once you accept these terms. We do not sell your data.
@@ -130,7 +121,7 @@ export function TermsAcceptModal() {
                 time.
               </Section>
 
-              <Section title="9. Disclaimers and limitation of liability">
+              <Section title="8. Disclaimers and limitation of liability">
                 The platform is provided <strong>&quot;as is&quot;</strong> and <strong>&quot;as available&quot;</strong>, without
                 warranties of any kind, whether express or implied, including merchantability,
                 fitness for a particular purpose, accuracy, or non-infringement. To the maximum
@@ -140,29 +131,32 @@ export function TermsAcceptModal() {
                 platform.
               </Section>
 
-              <Section title="10. Indemnity">
+              <Section title="9. Indemnity">
                 You agree to indemnify and hold harmless the operator from any claims,
                 damages, or expenses arising out of (a) your misuse of the platform,
                 (b) your breach of these terms, or (c) your infringement of any third-party
                 right.
               </Section>
 
-              <Section title="11. Governing law and jurisdiction">
+              <Section title="10. Governing law and jurisdiction">
                 These terms are governed by the laws of India. Any dispute arising hereunder
                 shall be subject to the exclusive jurisdiction of the courts located in
                 India. If you are accessing the platform from outside India, you do so on
                 your own initiative and are responsible for compliance with local law.
               </Section>
 
-              <Section title="12. Changes to these terms">
+              <Section title="11. Changes to these terms">
                 We may update these terms from time to time. Material changes will require a
                 fresh acceptance the next time you sign in. Continued use of the platform
                 after a non-material change constitutes acceptance of the revised terms.
               </Section>
 
-              <Section title="13. Contact">
-                Questions, takedown requests, or notices of any kind may be sent through the
-                in-app feedback button.
+              <Section title="12. Contact">
+                Questions, suggestions, or collaboration ideas may be sent to{" "}
+                <a href="mailto:maheedhartalluri@gmail.com" className="text-cyan-400 hover:underline">
+                  maheedhartalluri@gmail.com
+                </a>
+                .
               </Section>
             </div>
 

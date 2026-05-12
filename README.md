@@ -1,141 +1,100 @@
-# DQL Investigator
+# DQL Detective
 
-Interactive DQL (Dynatrace Query Language) learning app built with Next.js 14 + TypeScript + Tailwind CSS + Zustand + Supabase + Razorpay.
+An interactive, open-source platform for learning **Dynatrace Query Language (DQL)** and **Dynatrace Pattern Language (DPL)** through hands-on cases, a query sandbox, arcade mini-games, and real-time data visualizations.
 
-Domain: https://stackwise-ai.com
-
----
-
-## Manual Deploy Steps (run one by one on the server)
-
-SSH into the server and run each command. Do **not** run them all at once — verify each step before moving to the next.
-
-### Prerequisites (one-time setup — already done)
-- Node.js 20, nginx, certbot, pm2 are installed.
-- `.env.production` exists at repo root with all secrets.
-- Certbot SSL cert is already issued.
-
-### Step-by-step deploy
-
-**1. Enter the repo**
-```bash
-cd ~/dql-detective
-```
-
-**2. Pull latest dev code**
-```bash
-git fetch origin
-git reset --hard origin/dev
-```
-
-**3. Install dependencies**
-```bash
-npm ci --prefer-offline
-```
-
-**4. Build the app**
-```bash
-NODE_ENV=production npm run build
-```
-
-**5. Load env vars into the shell**
-```bash
-set -a
-source .env.production
-set +a
-```
-
-**6. Stop and delete the old PM2 process**
-```bash
-pm2 delete dql-detective 2>/dev/null || true
-```
-
-**7. Start a fresh PM2 process**
-```bash
-pm2 start npm --name dql-detective -- start -- -p 3000
-pm2 save
-```
-
-**8. Verify the app is responding on port 3000**
-```bash
-curl -s http://127.0.0.1:3000 | head -5
-```
-You should see `<!DOCTYPE html>` or `<html` in the output.
-
-**9. Reload nginx**
-```bash
-systemctl reload nginx
-```
-
-**10. Verify from the public domain**
-```bash
-curl -sS https://stackwise-ai.com | head -5
-```
-
-Open `https://stackwise-ai.com` in your browser.
+> **Disclaimer:** This is an independent, open-source project built by a Dynatrace enthusiast in collaboration with AI. It is **not affiliated with, endorsed by, funded, or approved by Dynatrace** in any way.
 
 ---
 
-## Troubleshooting
+## Features
 
-### App shows "can't reach this page" / ERR_CONNECTION_REFUSED
-1. Check if the app is running:
-```bash
-pm2 status
-```
-2. Check if port 3000 is listening:
-```bash
-ss -tlnp | grep 3000
-```
-3. Check nginx config:
-```bash
-nginx -t
-```
-4. Check firewall (Hetzner Cloud Console → Firewalls → allow TCP 80 and 443).
-
-### Blank white page (app is running but nothing renders)
-1. Check PM2 error logs:
-```bash
-pm2 logs dql-detective --lines 50
-```
-2. Open browser DevTools → Console and look for JavaScript errors.
-
-### HTTPS not working but HTTP works
-The SSL block in nginx may have been wiped. Re-run certbot to recreate it:
-```bash
-certbot --nginx --non-interactive --agree-tos --email technomonstert@gmail.com --redirect -d stackwise-ai.com -d www.stackwise-ai.com
-systemctl reload nginx
-```
-
-### Server Action error: "Cannot read properties of undefined (reading 'workers')"
-This happens when the build cache is stale or mismatched.
-```bash
-rm -rf .next
-NODE_ENV=production npm run build
-pm2 delete dql-detective 2>/dev/null || true
-pm2 start npm --name dql-detective -- start -- -p 3000
-pm2 save
-```
+- **60+ Interactive Cases** — Solve real-world observability incidents across DQL, DPL, and combined tracks.
+- **Query Sandbox** — Write and execute DQL pipelines freely with instant feedback.
+- **Visualize Mode** — Watch how each DQL command transforms data with animated visual signatures.
+- **Arcade** — Timer rush, pipeline builder, and quiz game modes to reinforce learning.
+- **Codex** — Built-in reference guide for DQL commands, operators, and functions.
+- **Leaderboard** — Compete with others on learning XP and arcade scores.
+- **Progress Sync** — Your progress is saved to your account and synced across sessions.
 
 ---
 
-## Stack
+## Tech Stack
 
-- **Framework:** Next.js 14 (App Router)
+- **Framework:** [Next.js 14](https://nextjs.org/) (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
-- **State:** Zustand (with localStorage persistence)
-- **Auth:** Supabase Auth
-- **Payments:** Razorpay (India only)
-- **Deployment:** PM2 + nginx reverse proxy + Let's Encrypt SSL
+- **State Management:** Zustand (with localStorage persistence)
+- **Auth & Database:** [Supabase](https://supabase.com/) (Auth + Postgres)
+- **3D Scene:** Three.js + React Three Fiber (login screen)
+- **Animations:** Framer Motion
+- **Charts:** Recharts
+- **Editor:** Monaco Editor
 
 ---
 
-## Local Dev
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) 18+ (recommended: 20)
+- A [Supabase](https://supabase.com/) project (free tier works fine)
+
+### Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+### Install & Run
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Build for Production
+
+```bash
+npm run build
+npm start
+```
+
+---
+
+## Project Structure
+
+```
+app/              # Next.js App Router pages + API routes
+components/       # React components (screens, panes, modals, arcade, tour)
+lib/
+  auth/           # Supabase auth hooks
+  store/          # Zustand state management
+  api/            # Profile & leaderboard CRUD
+  dql/            # Scenario definitions, query engine, parser
+  dpl/            # DPL parser and matchers
+  supabase/       # Supabase client setup
+  types/          # TypeScript type definitions
+public/           # Static assets
+grail-basin/      # Vite + Three.js 3D login scene (sub-project)
+```
+
+---
+
+## Contributing & Collaboration
+
+This project is open-source under the MIT License. Contributions, suggestions, and collaboration ideas are welcome.
+
+**Reach out:** [maheedhartalluri@gmail.com](mailto:maheedhartalluri@gmail.com)
+
+---
+
+## License
+
+[MIT](LICENSE) — Copyright (c) 2025 maheedhar132
+
+Please credit the original author when using or modifying this project.

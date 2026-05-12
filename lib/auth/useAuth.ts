@@ -31,7 +31,6 @@ export function useAuth() {
   const setUserId = useInvestigatorStore((s) => s.setUserId);
   const setUserEmail = useInvestigatorStore((s) => s.setUserEmail);
   const setUserCountry = useInvestigatorStore((s) => s.setUserCountry);
-  const setIsPremium = useInvestigatorStore((s) => s.setIsPremium);
   const avatarEmoji = useInvestigatorStore((s) => s.avatarEmoji);
   const setAvatarEmoji = useInvestigatorStore((s) => s.setAvatarEmoji);
 
@@ -42,20 +41,18 @@ export function useAuth() {
       if (!userId) {
         setUserId("");
         setUserEmail("");
-        setIsPremium(false);
         return;
       }
       setUserId(userId);
       setUserEmail(email ?? "");
       const { data } = await supabase
         .from("profiles")
-        .select("country_code, is_premium")
+        .select("country_code")
         .eq("id", userId)
         .maybeSingle();
       if (cancelled) return;
       if (data) {
         if (data.country_code) setUserCountry(data.country_code);
-        setIsPremium(Boolean(data.is_premium));
       }
       if (!avatarEmoji && email) {
         setAvatarEmoji(getAnimalEmoji(email));
@@ -75,7 +72,7 @@ export function useAuth() {
       cancelled = true;
       sub.subscription.unsubscribe();
     };
-  }, [supabase, setUserId, setUserEmail, setUserCountry, setIsPremium]);
+  }, [supabase, setUserId, setUserEmail, setUserCountry]);
 
   return useMemo(
     () => ({

@@ -18,7 +18,6 @@ export function useProgressSync() {
   const setDisplayName = useInvestigatorStore((s) => s.setDisplayName);
   const setDisplaySlug = useInvestigatorStore((s) => s.setDisplaySlug);
   const setTermsAcceptedAt = useInvestigatorStore((s) => s.setTermsAcceptedAt);
-  const setIsPremium = useInvestigatorStore((s) => s.setIsPremium);
 
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -37,7 +36,6 @@ export function useProgressSync() {
       setDisplayName(profile.display_name ?? "");
       setDisplaySlug(profile.display_slug ?? "");
       setTermsAcceptedAt(profile.terms_accepted_at);
-      setIsPremium(Boolean(profile.is_premium));
 
       // Take the larger of (server XP, local XP). Local could be ahead if the
       // user earned XP while syncing was paused.

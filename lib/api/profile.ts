@@ -11,8 +11,6 @@ export interface UserProfile {
   display_slug: string | null;
   country_code: string | null;
   currency: string | null;
-  is_premium: boolean;
-  premium_expires_at: string | null;
   terms_accepted_at: string | null;
   terms_version: string | null;
   learning_xp: number;
@@ -33,7 +31,7 @@ export async function fetchOwnProfile(userId: string): Promise<UserProfile | nul
   const { data, error } = await supabase
     .from("profiles")
     .select(
-      "id, email, display_name, display_slug, country_code, currency, is_premium, premium_expires_at, terms_accepted_at, terms_version, learning_xp, game_xp, created_at"
+      "id, email, display_name, display_slug, country_code, currency, terms_accepted_at, terms_version, learning_xp, game_xp, created_at"
     )
     .eq("id", userId)
     .maybeSingle();
@@ -75,7 +73,7 @@ export async function updateDisplayName(userId: string, displayName: string): Pr
   return data as UserProfile;
 }
 
-export const TERMS_VERSION = "2026-05-02-v1";
+export const TERMS_VERSION = "2026-05-12-v1";
 
 export async function acceptTerms(userId: string): Promise<void> {
   const { error } = await supabase
