@@ -25,7 +25,7 @@ declare global {
   interface Window {
     Razorpay: new (options: Record<string, unknown>) => {
       open: () => void;
-      on: (event: string, handler: (response: RazorpayResponse) => void) => void;
+      on: (event: string, handler: (response: unknown) => void) => void;
     };
   }
 }
@@ -101,6 +101,20 @@ export function convertToTestAmount(originalAmount: number, originalCurrency: st
   return originalAmount;
 }
 
+export interface RazorpayErrorResponse {
+  error: {
+    code: string;
+    description: string;
+    source: string;
+    step: string;
+    reason: string;
+    metadata: {
+      order_id: string;
+      payment_id: string;
+    };
+  };
+}
+
 export async function openRazorpayCheckout(options: {
   amount: number;
   currency: string;
@@ -159,9 +173,14 @@ export async function openRazorpayCheckout(options: {
     },
   });
 
-  rzp.on("payment.failed", (response: RazorpayResponse) => {
+  rzp.on("payment.failed", (response: unknown) => {
+    const err = response as RazorpayErrorResponse | undefined;
+    const description = err?.error?.description || "Payment failed";
+    const reason = err?.error?.reason || "";
+    const code = err?.error?.code || "";
+    const fullMsg = reason ? `${description} (${code}: ${reason})` : `${description} (${code})`;
     if (options.onError) {
-      options.onError(response);
+      options.onError(new Error(fullMsg));
     }
   });
 
