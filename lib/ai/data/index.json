@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "generated_by": "claude-opus-4-7 ingest pipeline",
+  "last_updated": "2026-05-02",
+  "sources": {
+    "dql": {
+      "base_url": "https://docs.dynatrace.com/docs/platform/grail/dynatrace-query-language",
+      "expected_pages": 28,
+      "fetched": [
+        { "path": ".ai/docs/dql/overview.md", "source": "dynatrace-docs-dql-overview", "status": "fetched" },
+        { "path": ".ai/docs/dql/guide.md", "source": "dynatrace-docs-dql-guide", "status": "fetched" },
+        { "path": ".ai/docs/dql/comparison.md", "source": "dynatrace-docs-dql-comparison", "status": "fetched" },
+        { "path": ".ai/docs/dql/reference.md", "source": "dynatrace-docs-dql-reference", "status": "fetched" },
+        { "path": ".ai/docs/dql/operators.md", "source": "dynatrace-docs-dql-operators", "status": "fetched" },
+        { "path": ".ai/docs/dql/data-types.md", "source": "dynatrace-docs-dql-data-types", "status": "fetched" },
+        { "path": ".ai/docs/dql/best-practices.md", "source": "dynatrace-docs-dql-best-practices", "status": "fetched" },
+        { "path": ".ai/docs/dql/functions.md", "source": "dynatrace-docs-dql-functions", "status": "fetched" },
+        { "path": ".ai/docs/dql/commands/index.md", "source": "dynatrace-docs-dql-commands", "status": "fetched" },
+        { "path": ".ai/docs/dql/commands/aggregation.md", "source": "dynatrace-docs-dql-aggregation", "status": "fetched" }
+      ]
+    },
+    "dpl": {
+      "base_url": "https://docs.dynatrace.com/docs/platform/grail/dynatrace-pattern-language",
+      "expected_pages": 24,
+      "fetched": [
+        { "path": ".ai/docs/dpl/overview.md", "source": "dynatrace-docs-dpl-overview", "status": "fetched" },
+        { "path": ".ai/docs/dpl/grammar.md", "source": "dynatrace-docs-dpl-grammar", "status": "fetched" },
+        { "path": ".ai/docs/dpl/modifiers.md", "source": "dynatrace-docs-dpl-modifiers", "status": "fetched" },
+        { "path": ".ai/docs/dpl/literal-expression.md", "source": "dynatrace-docs-dpl-literals", "status": "fetched" },
+        { "path": ".ai/docs/dpl/positional-matchers.md", "source": "dynatrace-docs-dpl-matchers", "status": "fetched" },
+        { "path": ".ai/docs/dpl/lines-strings.md", "source": "dynatrace-docs-dpl-lines-strings", "status": "fetched" },
+        { "path": ".ai/docs/dpl/sequence-group.md", "source": "dynatrace-docs-dpl-sequence-group", "status": "fetched" },
+        { "path": ".ai/docs/dpl/alternatives-group.md", "source": "dynatrace-docs-dpl-alternatives-group", "status": "fetched" },
+        { "path": ".ai/docs/dpl/json-object.md", "source": "dynatrace-docs-dpl-json-object", "status": "fetched" },
+        { "path": ".ai/docs/dpl/json-array.md", "source": "dynatrace-docs-dpl-json-array", "status": "fetched" },
+        { "path": ".ai/docs/dpl/json-value.md", "source": "dynatrace-docs-dpl-json-value", "status": "fetched" },
+        { "path": ".ai/docs/dpl/key-value-pairs.md", "source": "dynatrace-docs-dpl-key-value-pairs", "status": "fetched" },
+        { "path": ".ai/docs/dpl/array.md", "source": "dynatrace-docs-dpl-array", "status": "fetched" },
+        { "path": ".ai/docs/dpl/structure.md", "source": "dynatrace-docs-dpl-structure", "status": "fetched" },
+        { "path": ".ai/docs/dpl/enum.md", "source": "dynatrace-docs-dpl-enum", "status": "fetched" },
+        { "path": ".ai/docs/dpl/macros.md", "source": "dynatrace-docs-dpl-macros", "status": "fetched" },
+        { "path": ".ai/docs/dpl/architect.md", "source": "dynatrace-docs-dpl-architect", "status": "fetched" },
+        { "path": ".ai/docs/dpl/time-date.md", "source": "dynatrace-docs-dpl-time-date", "status": "fetched" },
+        { "path": ".ai/docs/dpl/numeric.md", "source": "dynatrace-docs-dpl-numeric", "status": "fetched" },
+        { "path": ".ai/docs/dpl/credit-card.md", "source": "dynatrace-docs-dpl-credit-card", "status": "fetched" },
+        { "path": ".ai/docs/dpl/smartscape.md", "source": "dynatrace-docs-dpl-smartscape", "status": "fetched" },
+        { "path": ".ai/docs/dpl/network.md", "source": "dynatrace-docs-dpl-network", "status": "fetched" }
+      ]
+    }
+  },
+  "schemas": {
+    "commands.json": "DQL commands extracted from CodexScreen reference tables",
+    "functions.json": "DQL functions extracted from CodexScreen reference tables",
+    "operators.json": "DQL operators from CodexScreen precedence table",
+    "data-types.json": "DQL data types from CodexScreen types section",
+    "dpl-matchers.json": "DPL matchers derived from lib/dpl/matchers.ts registry",
+    "known-fields.json": "Curated canonical Dynatrace field names",
+    "explainers.json": "Plain-English explanations for in-app ExplainerCard"
+  }
+}

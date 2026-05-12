@@ -1,17 +1,17 @@
 /**
- * AI context loader — loads the `.ai/` knowledge base at build time and
+ * AI context loader — loads the knowledge base at build time and
  * exposes it to the app. No live model calls; this is the foundation for
  * a future Anthropic/OpenAI integration.
  */
 
-import knownFieldsJson from "../../.ai/schema/known-fields.json";
-import explainersJson from "../../.ai/schema/explainers.json";
-import commandsJson from "../../.ai/schema/commands.json";
-import functionsJson from "../../.ai/schema/functions.json";
-import operatorsJson from "../../.ai/schema/operators.json";
-import dataTypesJson from "../../.ai/schema/data-types.json";
-import dplMatchersJson from "../../.ai/schema/dpl-matchers.json";
-import indexJson from "../../.ai/index.json";
+import knownFieldsJson from "./data/known-fields.json";
+import explainersJson from "./data/explainers.json";
+import commandsJson from "./data/commands.json";
+import functionsJson from "./data/functions.json";
+import operatorsJson from "./data/operators.json";
+import dataTypesJson from "./data/data-types.json";
+import dplMatchersJson from "./data/dpl-matchers.json";
+import indexJson from "./data/index.json";
 
 export interface KnownField {
   canonical: string;

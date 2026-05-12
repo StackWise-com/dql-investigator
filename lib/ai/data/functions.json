@@ -1,0 +1,290 @@
+[
+  {
+    "name": "count",
+    "signature": "count()",
+    "category": "aggregation",
+    "returnType": "long",
+    "description": "Number of rows in the group.",
+    "example": "count()"
+  },
+  {
+    "name": "countIf",
+    "signature": "countIf(condition)",
+    "category": "aggregation",
+    "returnType": "long",
+    "description": "Count rows matching condition.",
+    "example": "countIf(status == \"ERROR\")"
+  },
+  {
+    "name": "sum",
+    "signature": "sum(field)",
+    "category": "aggregation",
+    "returnType": "double",
+    "description": "Total of numeric values.",
+    "example": "sum(amount)"
+  },
+  {
+    "name": "avg",
+    "signature": "avg(field)",
+    "category": "aggregation",
+    "returnType": "double",
+    "description": "Arithmetic mean.",
+    "example": "avg(duration_ms)"
+  },
+  {
+    "name": "min",
+    "signature": "min(field)",
+    "category": "aggregation",
+    "returnType": "any",
+    "description": "Smallest value.",
+    "example": "min(timestamp)"
+  },
+  {
+    "name": "max",
+    "signature": "max(field)",
+    "category": "aggregation",
+    "returnType": "any",
+    "description": "Largest value.",
+    "example": "max(duration_ms)"
+  },
+  {
+    "name": "stddev",
+    "signature": "stddev(field)",
+    "category": "aggregation",
+    "returnType": "double",
+    "description": "Standard deviation.",
+    "example": "stddev(latency)"
+  },
+  {
+    "name": "percentile",
+    "signature": "percentile(field, p)",
+    "category": "aggregation",
+    "returnType": "double",
+    "description": "P-th percentile.",
+    "example": "percentile(duration, 95)"
+  },
+  {
+    "name": "collectArray",
+    "signature": "collectArray(field)",
+    "category": "aggregation",
+    "returnType": "array",
+    "description": "Array of all values.",
+    "example": "collectArray(trace_id)"
+  },
+  {
+    "name": "collectDistinct",
+    "signature": "collectDistinct(field)",
+    "category": "aggregation",
+    "returnType": "array",
+    "description": "Set of unique values.",
+    "example": "collectDistinct(host)"
+  },
+  {
+    "name": "concat",
+    "signature": "concat(s1, s2, ...)",
+    "category": "string",
+    "returnType": "string",
+    "description": "Concatenated string.",
+    "example": "concat(\"Error: \", message)"
+  },
+  {
+    "name": "contains",
+    "signature": "contains(haystack, needle)",
+    "category": "string",
+    "returnType": "boolean",
+    "description": "True if substring found.",
+    "example": "contains(content, \"timeout\")"
+  },
+  {
+    "name": "startsWith",
+    "signature": "startsWith(s, prefix)",
+    "category": "string",
+    "returnType": "boolean",
+    "description": "True if prefix match.",
+    "example": "startsWith(endpoint, \"/api/v2\")"
+  },
+  {
+    "name": "endsWith",
+    "signature": "endsWith(s, suffix)",
+    "category": "string",
+    "returnType": "boolean",
+    "description": "True if suffix match.",
+    "example": "endsWith(host, \".internal\")"
+  },
+  {
+    "name": "indexOf",
+    "signature": "indexOf(s, substring)",
+    "category": "string",
+    "returnType": "long",
+    "description": "Index or -1.",
+    "example": "indexOf(content, \"failed\")"
+  },
+  {
+    "name": "splitString",
+    "signature": "splitString(s, delimiter)",
+    "category": "string",
+    "returnType": "array",
+    "description": "Array of parts.",
+    "example": "splitString(tags, \",\")"
+  },
+  {
+    "name": "trim",
+    "signature": "trim(s)",
+    "category": "string",
+    "returnType": "string",
+    "description": "Remove leading and trailing whitespace.",
+    "example": "trim(\"  hello  \")"
+  },
+  {
+    "name": "lower",
+    "signature": "lower(s)",
+    "category": "string",
+    "returnType": "string",
+    "description": "Lowercase.",
+    "example": "lower(\"HTTP\")"
+  },
+  {
+    "name": "upper",
+    "signature": "upper(s)",
+    "category": "string",
+    "returnType": "string",
+    "description": "Uppercase.",
+    "example": "upper(\"http\")"
+  },
+  {
+    "name": "jsonPath",
+    "signature": "jsonPath(s, path)",
+    "category": "string",
+    "returnType": "any",
+    "description": "Extracted JSON value.",
+    "example": "jsonPath(payload, \"$.user.id\")"
+  },
+  {
+    "name": "now",
+    "signature": "now()",
+    "category": "time",
+    "returnType": "timestamp",
+    "description": "Current timestamp.",
+    "example": "now()"
+  },
+  {
+    "name": "duration",
+    "signature": "duration(string)",
+    "category": "time",
+    "returnType": "duration",
+    "description": "Duration value.",
+    "example": "duration(\"1h\")"
+  },
+  {
+    "name": "getHour",
+    "signature": "getHour(ts)",
+    "category": "time",
+    "returnType": "long",
+    "description": "Hour of day (0-23).",
+    "example": "getHour(timestamp)"
+  },
+  {
+    "name": "getDayOfWeek",
+    "signature": "getDayOfWeek(ts)",
+    "category": "time",
+    "returnType": "long",
+    "description": "Day index (1-7).",
+    "example": "getDayOfWeek(timestamp)"
+  },
+  {
+    "name": "formatTimestamp",
+    "signature": "formatTimestamp(ts, fmt)",
+    "category": "time",
+    "returnType": "string",
+    "description": "Formatted string.",
+    "example": "formatTimestamp(ts, \"yyyy-MM-dd\")"
+  },
+  {
+    "name": "timestampFromUnixMillis",
+    "signature": "timestampFromUnixMillis(ms)",
+    "category": "time",
+    "returnType": "timestamp",
+    "description": "Timestamp from epoch.",
+    "example": "timestampFromUnixMillis(1705312200000)"
+  },
+  {
+    "name": "toLong",
+    "signature": "toLong(value)",
+    "category": "conversion",
+    "returnType": "long",
+    "description": "Convert to long.",
+    "example": "toLong(\"42\")"
+  },
+  {
+    "name": "toDouble",
+    "signature": "toDouble(value)",
+    "category": "conversion",
+    "returnType": "double",
+    "description": "Convert to double.",
+    "example": "toDouble(\"3.14\")"
+  },
+  {
+    "name": "toString",
+    "signature": "toString(value)",
+    "category": "conversion",
+    "returnType": "string",
+    "description": "Convert to string.",
+    "example": "toString(42)"
+  },
+  {
+    "name": "toTimestamp",
+    "signature": "toTimestamp(value)",
+    "category": "conversion",
+    "returnType": "timestamp",
+    "description": "Convert to timestamp.",
+    "example": "toTimestamp(\"2024-01-15\")"
+  },
+  {
+    "name": "toDuration",
+    "signature": "toDuration(value)",
+    "category": "conversion",
+    "returnType": "duration",
+    "description": "Convert to duration.",
+    "example": "toDuration(\"1h\")"
+  },
+  {
+    "name": "toBoolean",
+    "signature": "toBoolean(value)",
+    "category": "conversion",
+    "returnType": "boolean",
+    "description": "Convert to boolean.",
+    "example": "toBoolean(\"true\")"
+  },
+  {
+    "name": "toIp",
+    "signature": "toIp(value)",
+    "category": "conversion",
+    "returnType": "IpAddress",
+    "description": "Convert to IP address.",
+    "example": "toIp(\"192.168.1.1\")"
+  },
+  {
+    "name": "toUid",
+    "signature": "toUid(value)",
+    "category": "conversion",
+    "returnType": "UID",
+    "description": "Convert to UID.",
+    "example": "toUid(\"0xabc123\")"
+  },
+  {
+    "name": "if",
+    "signature": "if(condition, then, else)",
+    "category": "conditional",
+    "returnType": "any",
+    "description": "Conditional expression.",
+    "example": "if(code >= 500, \"critical\", \"ok\")"
+  },
+  {
+    "name": "coalesce",
+    "signature": "coalesce(...)",
+    "category": "conditional",
+    "returnType": "any",
+    "description": "First non-null value.",
+    "example": "coalesce(nickname, username, \"anonymous\")"
+  }
+]
