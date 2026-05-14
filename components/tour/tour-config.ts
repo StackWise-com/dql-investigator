@@ -180,44 +180,51 @@ export const TOUR_SEGMENTS: TourSegment[] = [
     steps: [
       {
         targetId: "case-brief",
-        title: "Mission Brief",
+        title: "The Mission Brief",
         description:
-          "Read the story behind the incident. Understanding the context is half the investigation.",
+          "Every case starts with a story. Read the narrative to understand what happened, who was involved, and what you're looking for. The chibi detective on the right reacts as you progress.",
         placement: "right",
       },
       {
         targetId: "case-objective",
         title: "Your Objective",
         description:
-          "This tells you exactly what your query needs to produce. Match the expected output to close the case.",
+          "This is your mission target. It tells you exactly what the evidence should look like when you've built the right query.",
         placement: "right",
       },
       {
         targetId: "case-hint",
         title: "Need a Clue?",
         description:
-          "Stuck? Click Show Hint to reveal the command or approach you should try. No penalty for using hints.",
+          "Stuck? Click Show Hint to reveal the DQL command or approach you should try. No penalty — detectives use every tool available.",
         placement: "right",
       },
       {
         targetId: "dataview",
-        title: "Inspect the Evidence",
+        title: "The Evidence Board",
         description:
-          "Look at the raw data. Identify patterns, outliers, and the fields you'll need to filter or aggregate.",
+          "This is your data table — the raw logs you're investigating. Watch rows transform as you add DQL commands. Red rows were filtered out, green rows are new, and swapped rows show a sort.",
         placement: "left",
       },
       {
         targetId: "commanddeck",
-        title: "Build the Solution",
+        title: "The Query Deck",
         description:
-          "Construct your DQL pipeline in the Command Deck. Use the editor for full control or cards for a guided build.",
+          "Type your DQL pipeline here, one command per line with | between them. Use the quick-command chips to insert common commands. Press Ctrl+Enter or click Run Pipeline to execute.",
         placement: "left",
       },
       {
-        targetId: "case-check",
-        title: "Close the Case",
+        targetId: "run-button",
+        title: "Run the Analysis",
         description:
-          "When you think your pipeline is correct, click Check Solution. If it matches the expected output, the case is closed and you earn XP.",
+          "Hit Run Pipeline to execute your query and watch the Evidence Board update in real time. You can re-run as many times as you need.",
+        placement: "top",
+      },
+      {
+        targetId: "case-check",
+        title: "Advance the Investigation",
+        description:
+          "When your pipeline produces the right evidence, click Next Clue to move to the next step. Solve all steps to close the case and earn XP.",
         placement: "top",
       },
     ],

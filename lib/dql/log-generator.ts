@@ -1,5 +1,15 @@
 import type { DQLRecord } from "@/lib/types/dql";
 
+let overrideSeed: number | null = null;
+
+export function setOverrideSeed(seed: number | null) {
+  overrideSeed = seed;
+}
+
+export function getEffectiveSeed(explicitSeed: number): number {
+  return overrideSeed ?? explicitSeed;
+}
+
 // Simple seeded LCG for deterministic output
 function seededRandom(seed: number) {
   let s = seed % 2147483647;
@@ -29,7 +39,7 @@ function formatTimestamp(base: Date, offsetSeconds: number) {
 
 // ─── Auth Logs (case-001) ───
 export function generateAuthLogs(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T08:30:00Z");
   const users = [
     "alice", "bob", "charlie", "dave", "eve", "frank", "grace", "heidi",
@@ -85,7 +95,7 @@ export function generateAuthLogs(count: number, seed: number): DQLRecord[] {
 
 // ─── Database Logs (case-002) ───
 export function generateDbLogs(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T12:00:00Z");
   const queries = [
     "SELECT * FROM orders WHERE created_at > now() - 1h",
@@ -144,7 +154,7 @@ export function generateDbLogs(count: number, seed: number): DQLRecord[] {
 
 // ─── Events (case-002) ───
 export function generateEvents(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T09:00:00Z");
   const services = [
     "checkout", "cart", "catalog", "payment", "shipping",
@@ -196,7 +206,7 @@ export function generateEvents(count: number, seed: number): DQLRecord[] {
 
 // ─── Business Events (case-003) ───
 export function generateBizEvents(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T10:00:00Z");
   const products = ["widget", "gadget", "thingamajig", "doohickey", "gizmo", "sprocket"];
   const methods = ["card", "paypal", "stripe", "applepay", "googlepay"];
@@ -247,7 +257,7 @@ export function generateBizEvents(count: number, seed: number): DQLRecord[] {
 
 // ─── Spans (case-004) ───
 export function generateSpans(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T11:00:00Z");
   const endpoints = [
     "/api/users", "/api/orders", "/api/products", "/api/payment",
@@ -290,7 +300,7 @@ export function generateSpans(count: number, seed: number): DQLRecord[] {
 
 // ─── Events with Tags (case-022) ───
 export function generateEventsWithTags(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T09:00:00Z");
   const services = [
     "checkout", "cart", "catalog", "payment", "shipping",
@@ -350,7 +360,7 @@ export function generateEventsWithTags(count: number, seed: number): DQLRecord[]
 
 // ─── Application Logs (case-005) ───
 export function generateAppLogs(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T08:00:00Z");
   const errorMessages = [
     "Database connection timeout",
@@ -430,7 +440,7 @@ export function generateAppLogs(count: number, seed: number): DQLRecord[] {
 
 // ─── Nginx Access Logs (DPL cases) ───
 export function generateNginxLogs(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T08:00:00Z");
   const ips = Array.from({ length: 50 }, (_, i) => {
     const a = randInt(rng, 10, 223);
@@ -469,7 +479,7 @@ export function generateNginxLogs(count: number, seed: number): DQLRecord[] {
 
 // ─── Syslog Lines (DPL cases) ───
 export function generateSyslogLines(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T08:00:00Z");
   const hosts = ["prod-01", "prod-02", "prod-03", "db-01", "db-02", "app-01", "app-02"];
   const apps = ["sshd", "nginx", "kernel", "cron", "systemd", "docker", "postgres"];
@@ -512,7 +522,7 @@ export function generateSyslogLines(count: number, seed: number): DQLRecord[] {
 
 // ─── Firewall Logs (DPL cases) ───
 export function generateFirewallLogs(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T08:00:00Z");
   const actions = ["ALLOW", "DENY", "DROP"];
   const protocols = ["TCP", "UDP", "ICMP"];
@@ -544,7 +554,7 @@ export function generateFirewallLogs(count: number, seed: number): DQLRecord[] {
 
 // ─── JSON Logs (DPL cases) ───
 export function generateJsonLogs(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T08:00:00Z");
   const services = ["user-service", "order-service", "payment-service", "catalog-service"];
   const levels = ["INFO", "WARN", "ERROR"];
@@ -572,7 +582,7 @@ export function generateJsonLogs(count: number, seed: number): DQLRecord[] {
 
 // ─── Apache Access Logs (DPL cases) ───
 export function generateApacheLogs(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T08:00:00Z");
   const ips = Array.from({ length: 40 }, (_, i) => `${randInt(rng, 10, 223)}.${randInt(rng, 0, 255)}.${randInt(rng, 0, 255)}.${randInt(rng, 1, 254)}`);
   const methods = ["GET", "POST", "HEAD"];
@@ -605,7 +615,7 @@ export function generateApacheLogs(count: number, seed: number): DQLRecord[] {
 
 // ─── Payment Gateway Logs (premium cases) ───
 export function generatePaymentLogs(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T08:00:00Z");
   const currencies = ["USD", "EUR", "GBP", "INR", "JPY"];
   const methods = ["card", "paypal", "stripe", "applepay", "crypto"];
@@ -639,7 +649,7 @@ export function generatePaymentLogs(count: number, seed: number): DQLRecord[] {
 
 // ─── Kubernetes Pod Logs (premium cases) ───
 export function generateK8sLogs(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T08:00:00Z");
   const namespaces = ["production", "staging", "monitoring", "data-pipeline", "ingress-nginx"];
   const pods = ["api-gateway", "user-service", "order-processor", "notification-worker", "cache-redis", "db-postgres", "log-aggregator"];
@@ -683,7 +693,7 @@ export function generateK8sLogs(count: number, seed: number): DQLRecord[] {
 
 // ─── API Gateway Logs (premium cases) ───
 export function generateApiGatewayLogs(count: number, seed: number): DQLRecord[] {
-  const rng = seededRandom(seed);
+  const rng = seededRandom(getEffectiveSeed(seed));
   const baseTime = new Date("2024-01-15T08:00:00Z");
   const apis = ["/v1/users", "/v1/orders", "/v1/payments", "/v1/inventory", "/v1/reports", "/v1/search", "/v1/webhooks"];
   const keys = Array.from({ length: 20 }, (_, i) => `key_${randInt(rng, 1000, 9999)}`);

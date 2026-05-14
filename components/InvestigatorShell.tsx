@@ -1,9 +1,12 @@
 "use client";
 
+// MUST be the first import so that the log-generator seed override
+// is applied before any scenario modules are loaded.
+import "@/lib/dql/seed-override";
+
 import { useState } from "react";
 import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
 import { useHashRouter } from "@/lib/hooks/useHashRouter";
-import { CaseFilePane } from "./panes/CaseFilePane";
 import { DataViewPane } from "./panes/DataViewPane";
 import { CommandDeckPane } from "./panes/CommandDeckPane";
 import { ScenarioSelector } from "./ScenarioSelector";
@@ -13,6 +16,7 @@ import { LandingPage } from "./LandingPage";
 import { LoginPage } from "./LoginPage";
 import { ArcadeScreen } from "./arcade/ArcadeScreen";
 import { FeedbackButton } from "./FeedbackButton";
+import { CaseWorkspace } from "./CaseWorkspace";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProgressSync } from "@/lib/auth/useProgressSync";
 import { TermsAcceptModal } from "./TermsAcceptModal";
@@ -155,6 +159,8 @@ export function InvestigatorShell() {
   const activeScenario = useInvestigatorStore((s) => s.activeScenario);
   const showLanding = useInvestigatorStore((s) => s.showLanding);
   const userEmail = useInvestigatorStore((s) => s.userEmail);
+  const hasSeenDemo = useInvestigatorStore((s) => s.hasSeenDemo);
+  const setHasSeenDemo = useInvestigatorStore((s) => s.setHasSeenDemo);
 
   if (!userEmail) {
     return <LoginPage />;
@@ -164,15 +170,20 @@ export function InvestigatorShell() {
 
   const renderCasesPhase = () => {
     if (!activeScenario) {
+      // First-time demo gate: if user hasn't seen the demo and lands on Cases,
+      // auto-start the demo scenario.
+      if (!hasSeenDemo && currentPhase === 3) {
+        const { funScenarios } = require("@/lib/dql/fun-scenarios");
+        const demo = funScenarios.find((s: { id: string }) => s.id === "demo-001");
+        if (demo) {
+          const setScenario = useInvestigatorStore.getState().setScenario;
+          setScenario(demo);
+          return null; // will re-render with activeScenario set
+        }
+      }
       return <ScenarioSelector />;
     }
-    return (
-      <>
-        <CaseFilePane />
-        <DataViewPane />
-        <CommandDeckPane />
-      </>
-    );
+    return <CaseWorkspace />;
   };
 
   return (

@@ -454,6 +454,10 @@ function evaluateExpression(expr: string, row: DQLRecord): unknown {
 function resolveValue(token: string, row: DQLRecord): unknown {
   const t = token.trim();
   if (t in row) return row[t];
+  const lowerT = t.toLowerCase();
+  for (const key of Object.keys(row)) {
+    if (key.toLowerCase() === lowerT) return row[key];
+  }
   if (t.startsWith('"') && t.endsWith('"')) return t.slice(1, -1);
   if (t.startsWith("'") && t.endsWith("'")) return t.slice(1, -1);
   if (t === "true") return true;

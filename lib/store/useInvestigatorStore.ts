@@ -69,6 +69,16 @@ interface InvestigatorState {
   // Unlocks
   unlockedScenarios: string[];
 
+  // Session restore
+  activeScenarioId: string;
+  setActiveScenarioId: (id: string) => void;
+  lastActiveAt: string | null;
+  setLastActiveAt: (at: string | null) => void;
+
+  // Demo
+  hasSeenDemo: boolean;
+  setHasSeenDemo: (seen: boolean) => void;
+
   // User profile (hydrated from Supabase by useAuth, not persisted locally)
   userId: string;
   setUserId: (id: string) => void;
@@ -128,19 +138,23 @@ export const useInvestigatorStore = create<InvestigatorState>()(
           active: i === index,
           completed: i < index ? true : p.completed,
         }));
-        set({ currentPhase: index, phases });
+        set({ currentPhase: index, phases, lastActiveAt: new Date().toISOString() });
       },
 
       activeScenario: null,
+      activeScenarioId: "",
+      setActiveScenarioId: (activeScenarioId) => set({ activeScenarioId }),
       currentStepIndex: 0,
       setScenario: (scenario) =>
         set({
           activeScenario: scenario,
+          activeScenarioId: scenario?.id ?? "",
           currentStepIndex: 0,
           pipeline: [],
           editorValue: "",
           stageResults: [],
           selectedStageIndex: -1,
+          lastActiveAt: new Date().toISOString(),
         }),
       nextStep: () => {
         const s = get().activeScenario;
@@ -148,19 +162,22 @@ export const useInvestigatorStore = create<InvestigatorState>()(
         const next = Math.min(get().currentStepIndex + 1, s.steps.length - 1);
         set({
           currentStepIndex: next,
-          pipeline: [],
-          editorValue: "",
-          stageResults: [],
-          selectedStageIndex: -1,
+          lastActiveAt: new Date().toISOString(),
         });
       },
       prevStep: () => {
         const prev = Math.max(get().currentStepIndex - 1, 0);
-        set({ currentStepIndex: prev });
+        set({ currentStepIndex: prev, lastActiveAt: new Date().toISOString() });
       },
 
       showLanding: true,
-      setShowLanding: (showLanding) => set({ showLanding }),
+      setShowLanding: (showLanding) => set({ showLanding, lastActiveAt: new Date().toISOString() }),
+
+      lastActiveAt: null,
+      setLastActiveAt: (lastActiveAt) => set({ lastActiveAt }),
+
+      hasSeenDemo: false,
+      setHasSeenDemo: (hasSeenDemo) => set({ hasSeenDemo }),
 
       unlockedScenarios: [
         // All DQL cases (free)
@@ -291,6 +308,16 @@ export const useInvestigatorStore = create<InvestigatorState>()(
         phases: state.phases,
         unlockedScenarios: state.unlockedScenarios,
         tourCompletedSegments: state.tourCompletedSegments,
+        currentPhase: state.currentPhase,
+        showLanding: state.showLanding,
+        activeScenarioId: state.activeScenarioId,
+        currentStepIndex: state.currentStepIndex,
+        lastActiveAt: state.lastActiveAt,
+        completedScenarios: state.completedScenarios,
+        totalXP: state.totalXP,
+        gameHighScores: state.gameHighScores,
+        gameScores: state.gameScores,
+        hasSeenDemo: state.hasSeenDemo,
       }),
     }
   )

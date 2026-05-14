@@ -2,7 +2,12 @@
 
 import { useEffect, useRef } from "react";
 import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
-import { fetchOwnProfile, syncXP } from "@/lib/api/profile";
+import {
+  fetchOwnProfile,
+  syncXP,
+  fetchPlayerProgress,
+  syncPlayerProgress,
+} from "@/lib/api/profile";
 
 // Bridges the Zustand progress state with the Supabase profile row.
 // - On login: pulls learning_xp / game_xp from the server and seeds the store.
@@ -12,14 +17,18 @@ export function useProgressSync() {
   const totalXP = useInvestigatorStore((s) => s.totalXP);
   const gameHighScores = useInvestigatorStore((s) => s.gameHighScores);
   const progressHydrated = useInvestigatorStore((s) => s.progressHydrated);
+  const hasSeenDemo = useInvestigatorStore((s) => s.hasSeenDemo);
+  const completedScenarios = useInvestigatorStore((s) => s.completedScenarios);
   const setTotalXP = useInvestigatorStore((s) => s.setTotalXP);
   const setGameHighScores = useInvestigatorStore((s) => s.setGameHighScores);
   const setProgressHydrated = useInvestigatorStore((s) => s.setProgressHydrated);
   const setDisplayName = useInvestigatorStore((s) => s.setDisplayName);
   const setDisplaySlug = useInvestigatorStore((s) => s.setDisplaySlug);
   const setTermsAcceptedAt = useInvestigatorStore((s) => s.setTermsAcceptedAt);
+  const setHasSeenDemo = useInvestigatorStore((s) => s.setHasSeenDemo);
 
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressSyncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Hydrate on login (or change of user).
   useEffect(() => {
@@ -48,6 +57,15 @@ export function useProgressSync() {
         setGameHighScores({ ...gameHighScores, _server: profile.game_xp });
       }
 
+      // Hydrate has_seen_demo from player_progress table.
+      const progress = await fetchPlayerProgress(userId);
+      if (!cancelled && progress) {
+        // Only override local if server says true (user has seen demo somewhere).
+        if (progress.has_seen_demo) {
+          setHasSeenDemo(true);
+        }
+      }
+
       setProgressHydrated(true);
     })();
 
@@ -57,7 +75,7 @@ export function useProgressSync() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
-  // Debounced push on every change.
+  // Debounced push on every XP change.
   useEffect(() => {
     if (!userId || !progressHydrated) return;
     if (syncTimer.current) clearTimeout(syncTimer.current);
@@ -71,4 +89,21 @@ export function useProgressSync() {
       if (syncTimer.current) clearTimeout(syncTimer.current);
     };
   }, [userId, progressHydrated, totalXP, gameHighScores]);
+
+  // Debounced push for player_progress (has_seen_demo, completed_scenarios).
+  useEffect(() => {
+    if (!userId || !progressHydrated) return;
+    if (progressSyncTimer.current) clearTimeout(progressSyncTimer.current);
+    progressSyncTimer.current = setTimeout(() => {
+      void syncPlayerProgress(userId, {
+        has_seen_demo: hasSeenDemo,
+        completed_scenarios: completedScenarios,
+        total_xp: totalXP,
+      });
+    }, 1200);
+
+    return () => {
+      if (progressSyncTimer.current) clearTimeout(progressSyncTimer.current);
+    };
+  }, [userId, progressHydrated, hasSeenDemo, completedScenarios, totalXP]);
 }

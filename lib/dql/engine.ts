@@ -16,7 +16,7 @@ export function runPipeline(
   initialData: DQLRecord[]
 ): StageResult[] {
   const results: StageResult[] = [];
-  let currentData = [...initialData];
+  let currentData = normalizeKeys([...initialData]);
   let currentColumns = inferColumns(currentData);
 
   for (const stage of pipeline) {
@@ -48,6 +48,16 @@ export function inferColumns(data: DQLRecord[]): DQLColumn[] {
   return Array.from(keys).map((name) => {
     const val = data.find((r) => r[name] !== undefined && r[name] !== null)?.[name];
     return { name, type: inferType(val) };
+  });
+}
+
+function normalizeKeys(data: DQLRecord[]): DQLRecord[] {
+  return data.map((row) => {
+    const normalized: DQLRecord = {};
+    for (const [key, value] of Object.entries(row)) {
+      normalized[key.toLowerCase()] = value;
+    }
+    return normalized;
   });
 }
 

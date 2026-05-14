@@ -26,7 +26,12 @@ export function useHashRouter() {
       const state = useInvestigatorStore.getState();
 
       if (!hash || hash === "") {
-        if (!state.showLanding) setShowLanding(true);
+        if (!state.showLanding) {
+          // User pressed Back to empty hash while in a case — stay in case,
+          // just fix the URL silently so they don't lose their place.
+          const targetHash = PHASE_HASHES[state.currentPhase] ?? "";
+          window.history.replaceState(null, "", `#${targetHash}`);
+        }
       } else {
         const idx = PHASE_HASHES.indexOf(hash);
         if (idx !== -1) {
@@ -50,8 +55,10 @@ export function useHashRouter() {
 
     if (!hash || hash === "") {
       if (!state.showLanding) {
-        // URL wants landing, store is somewhere else → reset to landing
-        setShowLanding(true);
+        // Returning user was in a case. Restore the URL to match their
+        // persisted state without touching the store.
+        const targetHash = PHASE_HASHES[state.currentPhase] ?? "";
+        window.history.replaceState(null, "", `#${targetHash}`);
       }
     } else {
       const idx = PHASE_HASHES.indexOf(hash);

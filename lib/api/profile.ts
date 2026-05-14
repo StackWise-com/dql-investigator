@@ -50,6 +50,41 @@ export async function syncXP(userId: string, learningXP: number, gameXP: number)
   if (error) console.warn("[profile] xp sync failed:", error.message);
 }
 
+export interface PlayerProgressRow {
+  user_id: string;
+  total_xp: number;
+  completed_scenarios: string[];
+  unlocked_scenarios: string[];
+  phases: unknown;
+  has_seen_demo: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function fetchPlayerProgress(userId: string): Promise<PlayerProgressRow | null> {
+  const { data, error } = await supabase
+    .from("player_progress")
+    .select("user_id, total_xp, completed_scenarios, unlocked_scenarios, phases, has_seen_demo, created_at, updated_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) {
+    console.warn("[player_progress] fetch failed:", error.message);
+    return null;
+  }
+  return data as PlayerProgressRow | null;
+}
+
+export async function syncPlayerProgress(
+  userId: string,
+  updates: Partial<Pick<PlayerProgressRow, "has_seen_demo" | "completed_scenarios" | "total_xp">>
+): Promise<void> {
+  const { error } = await supabase
+    .from("player_progress")
+    .update(updates)
+    .eq("user_id", userId);
+  if (error) console.warn("[player_progress] sync failed:", error.message);
+}
+
 export async function updateDisplayName(userId: string, displayName: string): Promise<UserProfile | null> {
   const trimmed = displayName.trim();
   if (trimmed.length < 2 || trimmed.length > 32) {

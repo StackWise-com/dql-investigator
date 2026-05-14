@@ -6,6 +6,7 @@ import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
 import { CoffeeModal } from "./CoffeeModal";
 import { UserAvatar } from "./UserAvatar";
 import { useAuth } from "@/lib/auth/useAuth";
+import { getCurrentBucketId, BUCKET_MS } from "@/lib/dql/bucket";
 import landingImage from "@/images/landing_page.png";
 
 interface Hotspot {
@@ -211,6 +212,13 @@ export function LandingPage() {
     };
   })();
 
+  const lastActiveAt = useInvestigatorStore((s) => s.lastActiveAt);
+  const hasNewIntel = (() => {
+    if (!lastActiveAt) return false;
+    const lastBucket = Math.floor(new Date(lastActiveAt).getTime() / BUCKET_MS);
+    return lastBucket !== getCurrentBucketId();
+  })();
+
   return (
     <div className="h-full w-full relative overflow-hidden bg-slate-950">
       {/* Background image */}
@@ -238,6 +246,19 @@ export function LandingPage() {
         <p className="text-xs text-slate-400 max-w-xs leading-relaxed">
           Make the invisible visible. Learn Dynatrace Query Language by investigating real incidents.
         </p>
+        {hasNewIntel && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-2 inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-rose-400/10 border border-rose-400/30 text-rose-300 text-[10px] font-medium"
+          >
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-rose-400" />
+            </span>
+            New intel available — logs rotated
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Auth buttons / Avatar */}

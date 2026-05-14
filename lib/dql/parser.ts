@@ -1,8 +1,13 @@
 import type { PipelineStage, DQLCommandName } from "@/lib/types/dql";
 
+function stripBlockComments(query: string): string {
+  return query.replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
 export function parsePipeline(query: string): PipelineStage[] {
   const stages: PipelineStage[] = [];
-  const parts = query.split("|").map((p) => p.trim()).filter(Boolean);
+  const cleaned = stripBlockComments(query);
+  const parts = cleaned.split("|").map((p) => p.trim()).filter(Boolean);
   let idCounter = 0;
 
   for (const part of parts) {
@@ -68,7 +73,7 @@ function parseCommand(raw: string): { name: DQLCommandName; args: Record<string,
       {
         const sortMatch = rest.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*(asc|desc)?/i);
         if (sortMatch) {
-          args.field = sortMatch[1];
+          args.field = sortMatch[1].toLowerCase();
           args.direction = (sortMatch[2] || "asc").toLowerCase();
         }
       }
@@ -82,10 +87,17 @@ function parseCommand(raw: string): { name: DQLCommandName; args: Record<string,
         args.alias = aggMatch[1];
         args.aggregation = aggMatch[2];
         args.aggField = aggMatch[3];
+      } else {
+        const simpleAgg = rest.match(/(\w+)\(([^)]*)\)/);
+        if (simpleAgg) {
+          args.aggregation = simpleAgg[1];
+          args.aggField = simpleAgg[2];
+          args.alias = simpleAgg[1];
+        }
       }
       const byMatch = rest.match(/by:\s*\{?([^}]+)\}?/);
       if (byMatch) {
-        args.by = byMatch[1].trim();
+        args.by = byMatch[1].trim().toLowerCase();
       }
       break;
     }
@@ -95,6 +107,13 @@ function parseCommand(raw: string): { name: DQLCommandName; args: Record<string,
         args.alias = aggMatch[1];
         args.aggregation = aggMatch[2];
         args.aggField = aggMatch[3];
+      } else {
+        const simpleAgg = rest.match(/(\w+)\(([^)]*)\)/);
+        if (simpleAgg) {
+          args.aggregation = simpleAgg[1];
+          args.aggField = simpleAgg[2];
+          args.alias = simpleAgg[1];
+        }
       }
       const intervalMatch = rest.match(/interval:\s*(\S+)/);
       if (intervalMatch) {
@@ -102,23 +121,23 @@ function parseCommand(raw: string): { name: DQLCommandName; args: Record<string,
       }
       const byMatch = rest.match(/by:\s*\{?([^}]+)\}?/);
       if (byMatch) {
-        args.by = byMatch[1].trim();
+        args.by = byMatch[1].trim().toLowerCase();
       }
       break;
     }
     case "dedup":
-      args.field = rest.split(",")[0].trim();
+      args.field = rest.split(",")[0].trim().toLowerCase();
       break;
     case "parse": {
       const parseMatch = rest.match(/^([A-Za-z_][A-Za-z0-9_]*),\s*"(.+?)"/);
       if (parseMatch) {
-        args.field = parseMatch[1];
+        args.field = parseMatch[1].toLowerCase();
         args.pattern = parseMatch[2];
       }
       break;
     }
     case "expand":
-      args.field = rest.trim();
+      args.field = rest.trim().toLowerCase();
       break;
     case "append":
       args.raw = rest;
@@ -141,6 +160,13 @@ function tokenize(input: string): string[] {
 
   for (let i = 0; i < input.length; i++) {
     const ch = input[i];
+    const next = input[i + 1];
+
+    // Line comment: stop tokenizing rest of this part
+    if (!inQuotes && ch === "/" && next === "/") {
+      break;
+    }
+
     if (!inQuotes && (ch === '"' || ch === "'")) {
       if (current.trim()) {
         tokens.push(current.trim());

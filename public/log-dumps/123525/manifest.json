@@ -1,0 +1,21 @@
+{
+  "bucketId": 123525,
+  "createdAt": "2026-05-14T12:25:24.351Z",
+  "files": {
+    "auth": "auth.json",
+    "db": "db.json",
+    "events": "events.json",
+    "biz-events": "biz-events.json",
+    "spans": "spans.json",
+    "app": "app.json",
+    "events-with-tags": "events-with-tags.json",
+    "nginx": "nginx.json",
+    "syslog": "syslog.json",
+    "firewall": "firewall.json",
+    "json": "json.json",
+    "apache": "apache.json",
+    "payment": "payment.json",
+    "k8s": "k8s.json",
+    "api-gateway": "api-gateway.json"
+  }
+}
