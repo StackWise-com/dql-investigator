@@ -36,42 +36,63 @@ export function useAuth() {
 
   useEffect(() => {
     let cancelled = false;
+    let unsubscribe: (() => void) | null = null;
 
-    const hydrate = async (userId: string | null, email: string | null) => {
-      if (!userId) {
-        setUserId("");
-        setUserEmail("");
-        return;
+    const init = async () => {
+      const sessionActive = sessionStorage.getItem("dql-session-active");
+      if (!sessionActive) {
+        const { data } = await supabase.auth.getSession();
+        if (!cancelled && data.session) {
+          await supabase.auth.signOut();
+          setUserId("");
+          setUserEmail("");
+          setUserCountry("US");
+        }
       }
-      setUserId(userId);
-      setUserEmail(email ?? "");
-      const { data } = await supabase
-        .from("profiles")
-        .select("country_code")
-        .eq("id", userId)
-        .maybeSingle();
+      sessionStorage.setItem("dql-session-active", "true");
+
       if (cancelled) return;
-      if (data) {
-        if (data.country_code) setUserCountry(data.country_code);
-      }
-      if (!avatarEmoji && email) {
-        setAvatarEmoji(getAnimalEmoji(email));
-      }
+
+      const hydrate = async (userId: string | null, email: string | null) => {
+        if (!userId) {
+          setUserId("");
+          setUserEmail("");
+          return;
+        }
+        setUserId(userId);
+        setUserEmail(email ?? "");
+        const { data } = await supabase
+          .from("profiles")
+          .select("country_code")
+          .eq("id", userId)
+          .maybeSingle();
+        if (cancelled) return;
+        if (data) {
+          if (data.country_code) setUserCountry(data.country_code);
+        }
+        if (!avatarEmoji && email) {
+          setAvatarEmoji(getAnimalEmoji(email));
+        }
+      };
+
+      const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+        if (cancelled) return;
+        if (event === "SIGNED_IN") {
+          hydrate(session?.user.id ?? null, session?.user.email ?? null);
+        }
+        if (event === "SIGNED_OUT") {
+          hydrate(null, null);
+        }
+      });
+
+      unsubscribe = () => sub.subscription.unsubscribe();
     };
 
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (cancelled) return;
-      if (event === "SIGNED_IN") {
-        hydrate(session?.user.id ?? null, session?.user.email ?? null);
-      }
-      if (event === "SIGNED_OUT") {
-        hydrate(null, null);
-      }
-    });
+    init();
 
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, [supabase, setUserId, setUserEmail, setUserCountry]);
 

@@ -27,10 +27,8 @@ export function useHashRouter() {
 
       if (!hash || hash === "") {
         if (!state.showLanding) {
-          // User pressed Back to empty hash while in a case — stay in case,
-          // just fix the URL silently so they don't lose their place.
-          const targetHash = PHASE_HASHES[state.currentPhase] ?? "";
-          window.history.replaceState(null, "", `#${targetHash}`);
+          // User pressed Back to empty hash — return to landing page
+          setShowLanding(true);
         }
       } else {
         const idx = PHASE_HASHES.indexOf(hash);
@@ -55,17 +53,21 @@ export function useHashRouter() {
 
     if (!hash || hash === "") {
       if (!state.showLanding) {
-        // Returning user was in a case. Restore the URL to match their
-        // persisted state without touching the store.
-        const targetHash = PHASE_HASHES[state.currentPhase] ?? "";
-        window.history.replaceState(null, "", `#${targetHash}`);
+        // Fresh session: empty hash should always land on home page
+        setShowLanding(true);
       }
     } else {
       const idx = PHASE_HASHES.indexOf(hash);
       if (idx !== -1) {
-        if (state.showLanding || state.currentPhase !== idx) {
-          setPhase(idx);
-          setShowLanding(false);
+        // Only restore hash if user is already past landing in this session.
+        // On a fresh session (showLanding true) we stay on the home page.
+        if (!state.showLanding) {
+          if (state.currentPhase !== idx) {
+            setPhase(idx);
+          }
+        } else {
+          // Fresh session with a hash in the URL: strip it to stay on home page
+          window.history.replaceState(null, "", "");
         }
       }
     }

@@ -308,8 +308,6 @@ export const useInvestigatorStore = create<InvestigatorState>()(
         phases: state.phases,
         unlockedScenarios: state.unlockedScenarios,
         tourCompletedSegments: state.tourCompletedSegments,
-        currentPhase: state.currentPhase,
-        showLanding: state.showLanding,
         activeScenarioId: state.activeScenarioId,
         currentStepIndex: state.currentStepIndex,
         lastActiveAt: state.lastActiveAt,
