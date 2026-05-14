@@ -59,13 +59,14 @@ export function useAuth() {
       }
     };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return;
-      hydrate(session?.user.id ?? null, session?.user.email ?? null);
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      hydrate(session?.user.id ?? null, session?.user.email ?? null);
+      if (event === "SIGNED_IN") {
+        hydrate(session?.user.id ?? null, session?.user.email ?? null);
+      }
+      if (event === "SIGNED_OUT") {
+        hydrate(null, null);
+      }
     });
 
     return () => {
