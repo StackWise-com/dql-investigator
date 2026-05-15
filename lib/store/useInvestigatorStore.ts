@@ -127,6 +127,10 @@ interface InvestigatorState {
   trackProgress: Record<string, { completedLessons: string[]; currentLessonId: string }>;
   markLessonComplete: (trackId: string, lessonId: string, nextLessonId: string) => void;
 
+  // Lesson mode context (set when launched from a track; null in free-case mode)
+  activeLessonContext: { trackId: string; lessonId: string } | null;
+  setActiveLessonContext: (ctx: { trackId: string; lessonId: string } | null) => void;
+
   // Arcade
   gameScores: GameScore[];
   addGameScore: (score: GameScore) => void;
@@ -316,6 +320,9 @@ export const useInvestigatorStore = create<InvestigatorState>()(
         })),
 
       weeklyXPLedger: [],
+
+      activeLessonContext: null,
+      setActiveLessonContext: (activeLessonContext) => set({ activeLessonContext }),
 
       trackProgress: {},
       markLessonComplete: (trackId, lessonId, nextLessonId) =>

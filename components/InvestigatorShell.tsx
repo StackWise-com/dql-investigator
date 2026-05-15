@@ -17,6 +17,7 @@ import { LoginPage } from "./LoginPage";
 import { ArcadeScreen } from "./arcade/ArcadeScreen";
 import { FeedbackButton } from "./FeedbackButton";
 import { CaseWorkspace } from "./CaseWorkspace";
+import { LessonShell } from "./curriculum/LessonShell";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProgressSync } from "@/lib/auth/useProgressSync";
 import { TermsAcceptModal } from "./TermsAcceptModal";
@@ -156,6 +157,7 @@ export function InvestigatorShell() {
 
   const currentPhase = useInvestigatorStore((s) => s.currentPhase);
   const activeScenario = useInvestigatorStore((s) => s.activeScenario);
+  const activeLessonContext = useInvestigatorStore((s) => s.activeLessonContext);
   const showLanding = useInvestigatorStore((s) => s.showLanding);
   const userEmail = useInvestigatorStore((s) => s.userEmail);
   const hasSeenDemo = useInvestigatorStore((s) => s.hasSeenDemo);
@@ -181,6 +183,10 @@ export function InvestigatorShell() {
         }
       }
       return <ScenarioSelector />;
+    }
+    // Lesson mode: wrap in LessonShell for intro → scenario → check → complete flow
+    if (activeLessonContext) {
+      return <LessonShell />;
     }
     return <CaseWorkspace />;
   };

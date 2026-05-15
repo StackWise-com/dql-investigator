@@ -14,7 +14,9 @@ export function VictoryModal() {
   const setScenario = useInvestigatorStore((s) => s.setScenario);
   const setPhase = useInvestigatorStore((s) => s.setPhase);
 
-  const isComplete = activeScenario && completedScenarios.includes(activeScenario.id);
+  const activeLessonContext = useInvestigatorStore((s) => s.activeLessonContext);
+  // Lesson mode has its own completion UI — suppress the generic modal
+  const isComplete = !activeLessonContext && activeScenario && completedScenarios.includes(activeScenario.id);
 
   const scenarioXP = activeScenario
     ? activeScenario.steps.reduce(

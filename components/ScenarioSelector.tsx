@@ -49,6 +49,7 @@ function getCaseTag(scenario: FunScenario): string {
 
 export function ScenarioSelector() {
   const setScenario = useInvestigatorStore((s) => s.setScenario);
+  const setActiveLessonContext = useInvestigatorStore((s) => s.setActiveLessonContext);
   const completedScenarios = useInvestigatorStore((s) => s.completedScenarios);
 
   // Filter out the demo from the selector — it's auto-shown on first visit
@@ -78,7 +79,7 @@ export function ScenarioSelector() {
                 transition={{ delay: i * 0.06 }}
               >
                 <motion.button
-                  onClick={() => setScenario(scenario)}
+                  onClick={() => { setActiveLessonContext(null); setScenario(scenario); }}
                   className={`w-full glass-panel-strong rounded-xl p-5 text-left border border-white/[0.06] ${borderTheme} transition-colors relative overflow-hidden`}
                 >
                   {/* Theme accent bar */}

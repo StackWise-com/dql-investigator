@@ -27,6 +27,7 @@ export function LandingPage() {
   const setPhase = useInvestigatorStore((s) => s.setPhase);
   const setShowLanding = useInvestigatorStore((s) => s.setShowLanding);
   const setScenario = useInvestigatorStore((s) => s.setScenario);
+  const setActiveLessonContext = useInvestigatorStore((s) => s.setActiveLessonContext);
   const { signOut } = useAuth();
 
   const handleGoToPhase = (phaseIndex: number) => {
@@ -35,15 +36,15 @@ export function LandingPage() {
   };
 
   const handleStartLesson = (trackId: string, lessonId: string) => {
-    // Find the scenario and load it
     const allScenarios = getAllScenarios();
     const scenario = allScenarios.find((s) => s.id === lessonId);
     if (scenario) {
+      setActiveLessonContext({ trackId, lessonId });
       setScenario(scenario);
-      setPhase(2); // Cases phase to render the scenario
+      setPhase(2);
       setShowLanding(false);
     } else {
-      // Fallback to Learn phase
+      setActiveLessonContext(null);
       setPhase(0);
       setShowLanding(false);
     }
