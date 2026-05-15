@@ -10,6 +10,7 @@ import { StreakBanner } from "./landing/StreakBanner";
 import { ContinueCard } from "./landing/ContinueCard";
 import { TrackGrid } from "./landing/TrackCard";
 import { getAllScenarios } from "@/lib/dql/scenario-registry";
+import { TRACKS, getNextLesson } from "@/lib/curriculum/tracks";
 
 // Quick-nav items (the 4 main modes)
 const NAV_MODES = [
@@ -34,6 +35,15 @@ export function LandingPage() {
     setPhase(phaseIndex);
     setShowLanding(false);
   };
+
+  const trackProgress = useInvestigatorStore((s) => s.trackProgress);
+  const activeTrack = TRACKS.find((t) => {
+    const progress = trackProgress[t.id];
+    return progress && progress.completedLessons.length > 0 && progress.completedLessons.length < t.lessons.length;
+  }) || TRACKS[0];
+  const activeTrackProgress = trackProgress[activeTrack.id];
+  const activeCompleted = activeTrackProgress?.completedLessons.length ?? 0;
+  const nextLesson = getNextLesson(activeTrack.id, trackProgress);
 
   const handleStartLesson = (trackId: string, lessonId: string) => {
     const allScenarios = getAllScenarios();
@@ -73,6 +83,18 @@ export function LandingPage() {
             </button>
           ))}
         </nav>
+        {/* Progress indicator */}
+        {nextLesson && (
+          <button
+            onClick={() => handleStartLesson(activeTrack.id, nextLesson.id)}
+            className="hidden lg:flex items-center gap-2 px-3 py-1 rounded-md bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] transition-colors"
+          >
+            <span className="text-[10px] text-slate-500 uppercase tracking-wider">{activeTrack.title}</span>
+            <span className="text-[10px] text-slate-300 font-medium">{activeCompleted}/{activeTrack.lessons.length}</span>
+            <span className="text-[10px] text-slate-500">· {nextLesson.title}</span>
+          </button>
+        )}
+
         {/* User */}
         <div className="flex items-center gap-2">
           <UserAvatar email={userEmail} xp={totalXP} size={28} showTitle emoji={avatarEmoji} />
@@ -108,23 +130,6 @@ export function LandingPage() {
               <span className="text-xs text-slate-500">5 tracks · 60+ scenarios · always free</span>
             </div>
             <TrackGrid onStart={handleStartLesson} />
-          </section>
-
-          {/* Quick modes */}
-          <section>
-            <h2 className="text-base font-semibold text-slate-100 mb-4">Quick access</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {NAV_MODES.map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => handleGoToPhase(m.phaseIndex)}
-                  className="group flex flex-col gap-2 p-4 bg-slate-900/60 border border-white/[0.06] rounded-xl hover:bg-slate-900 hover:border-white/[0.10] transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                >
-                  <span className="text-sm font-semibold text-slate-200">{m.label}</span>
-                  <span className="text-xs text-slate-500">{m.desc}</span>
-                </button>
-              ))}
-            </div>
           </section>
 
           {/* Footer */}

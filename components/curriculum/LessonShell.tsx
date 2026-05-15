@@ -202,9 +202,6 @@ function CheckScreen({
             <p className="text-xs font-medium text-slate-500 mb-0.5">Quick check</p>
             <p className="text-xs text-slate-600">{idx + 1} / {questions.length}</p>
           </div>
-          <button onClick={onSkip} className="text-xs text-slate-600 hover:text-slate-400 transition-colors">
-            Skip check →
-          </button>
         </div>
 
         {/* Progress bar */}

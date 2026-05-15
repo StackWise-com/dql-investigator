@@ -78,12 +78,19 @@ export function ArcadeScreen() {
   const [mode, setMode] = useState<ArcadeMode>("menu");
   const gameScores = useInvestigatorStore((s) => s.gameScores);
   const gameHighScores = useInvestigatorStore((s) => s.gameHighScores);
+  const trackProgress = useInvestigatorStore((s) => s.trackProgress);
+
+  const dplCompleted = (trackProgress["dpl-mastery"]?.completedLessons.length ?? 0) > 0;
 
   const statsFor = (modeKey: string) => {
     const scores = gameScores.filter((s) => s.mode === modeKey);
     const played = scores.length;
     const best = gameHighScores[modeKey] ?? 0;
     return { played, best };
+  };
+
+  const isLocked = (cardId: string) => {
+    return (cardId === "dpl-matcher" || cardId === "dpl-builder") && !dplCompleted;
   };
 
   if (mode === "timer") return <TimerGame onExit={() => setMode("menu")} />;
@@ -105,15 +112,29 @@ export function ArcadeScreen() {
         <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5" data-tour-target="arcade-modes">
           {MODE_CARDS.map((card, i) => {
             const stats = statsFor(card.id);
+            const locked = isLocked(card.id);
             return (
               <motion.button
                 key={card.id}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                onClick={() => setMode(card.id)}
-                className={`glass-panel-strong rounded-xl border p-6 text-left transition-colors ${card.color}`}
+                onClick={() => !locked && setMode(card.id)}
+                disabled={locked}
+                className={`glass-panel-strong rounded-xl border p-6 text-left transition-colors relative ${
+                  locked ? "opacity-50 cursor-not-allowed border-slate-700/50" : card.color
+                }`}
               >
+                {locked && (
+                  <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-slate-950/40">
+                    <div className="flex flex-col items-center gap-1">
+                      <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                      </svg>
+                      <span className="text-[10px] text-slate-400 font-medium">Complete DPL Mastery track</span>
+                    </div>
+                  </div>
+                )}
                 <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-4 ${card.iconBg}`}>
                   {card.icon}
                 </div>

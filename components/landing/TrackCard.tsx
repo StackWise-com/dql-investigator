@@ -72,8 +72,10 @@ export function TrackCard({ track, onStart }: TrackCardProps) {
 export function TrackGrid({ onStart }: { onStart: (trackId: string, lessonId: string) => void }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-      {TRACKS.map((track) => (
-        <TrackCard key={track.id} track={track} onStart={onStart} />
+      {TRACKS.map((track, i) => (
+        <div key={track.id} className={i === 0 ? "xl:col-span-2" : undefined}>
+          <TrackCard track={track} onStart={onStart} />
+        </div>
       ))}
     </div>
   );

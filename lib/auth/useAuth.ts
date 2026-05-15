@@ -144,6 +144,15 @@ export function useAuth() {
         });
         if (error) throw new Error(friendlyAuthError(error.message));
       },
+      signInWithOAuth: async (provider: "google") => {
+        const { error } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo: typeof window !== "undefined" ? `${window.location.origin}/auth/callback` : undefined,
+          },
+        });
+        if (error) throw new Error(friendlyAuthError(error.message));
+      },
     }),
     [supabase]
   );

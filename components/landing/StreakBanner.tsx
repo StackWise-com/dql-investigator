@@ -23,8 +23,14 @@ export function StreakBanner() {
       <div className="flex items-center gap-2">
         <span className="text-base">🔥</span>
         <div>
-          <span className="text-sm font-semibold text-slate-100">{streak.current}</span>
-          <span className="text-xs text-slate-500 ml-1">day streak</span>
+          {streak.current === 0 ? (
+            <span className="text-xs text-slate-400">Day 1 — complete a lesson to start your streak</span>
+          ) : (
+            <>
+              <span className="text-sm font-semibold text-slate-100">{streak.current}</span>
+              <span className="text-xs text-slate-500 ml-1">day streak</span>
+            </>
+          )}
         </div>
       </div>
       <div className="w-px h-4 bg-white/[0.08]" />

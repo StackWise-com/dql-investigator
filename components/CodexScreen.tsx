@@ -9,6 +9,22 @@ import {
   type QueryDifficulty,
 } from "@/lib/dql/query-library";
 import { ExplainerCard } from "./ExplainerCard";
+import { TRACKS, getNextLesson } from "@/lib/curriculum/tracks";
+import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
+import { getAllScenarios } from "@/lib/dql/scenario-registry";
+
+const SECTION_TRACK_MAP: Record<string, string> = {
+  overview: "fundamentals",
+  agents: "fundamentals",
+  squads: "fundamentals",
+  philosophy: "fundamentals",
+  commands: "fundamentals",
+  types: "logs-deep-dive",
+  operators: "fundamentals",
+  functions: "logs-deep-dive",
+  examples: "real-incidents",
+  "query-cookbook": "real-incidents",
+};
 
 type ContentBlock =
   | { type: "paragraph"; text: string }
@@ -859,6 +875,54 @@ function renderBlock(block: ContentBlock, idx: number) {
   }
 }
 
+function PracticeCTA({ sectionId }: { sectionId: string }) {
+  const trackProgress = useInvestigatorStore((s) => s.trackProgress);
+  const setActiveLessonContext = useInvestigatorStore((s) => s.setActiveLessonContext);
+  const setScenario = useInvestigatorStore((s) => s.setScenario);
+  const setPhase = useInvestigatorStore((s) => s.setPhase);
+  const setShowLanding = useInvestigatorStore((s) => s.setShowLanding);
+
+  const trackId = SECTION_TRACK_MAP[sectionId];
+  if (!trackId) return null;
+
+  const track = TRACKS.find((t) => t.id === trackId);
+  if (!track) return null;
+
+  const nextLesson = getNextLesson(trackId, trackProgress);
+  if (!nextLesson) return null;
+
+  const handleStart = () => {
+    const scenario = getAllScenarios().find((s) => s.id === nextLesson.id);
+    if (scenario) {
+      setActiveLessonContext({ trackId, lessonId: nextLesson.id });
+      setScenario(scenario);
+      setPhase(2);
+      setShowLanding(false);
+    }
+  };
+
+  const colors: Record<string, string> = {
+    cyan: "text-cyan-400 border-cyan-400/30 hover:bg-cyan-400/10",
+    violet: "text-violet-400 border-violet-400/30 hover:bg-violet-400/10",
+    emerald: "text-emerald-400 border-emerald-400/30 hover:bg-emerald-400/10",
+    amber: "text-amber-400 border-amber-400/30 hover:bg-amber-400/10",
+    rose: "text-rose-400 border-rose-400/30 hover:bg-rose-400/10",
+  };
+  const colorClass = colors[track.color] || colors.cyan;
+
+  return (
+    <div className="mt-8 pt-6 border-t border-white/[0.06]">
+      <button
+        onClick={handleStart}
+        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${colorClass}`}
+      >
+        Practice this →
+        <span className="text-xs text-slate-500 ml-1">{track.title} · {nextLesson.title}</span>
+      </button>
+    </div>
+  );
+}
+
 export function CodexScreen() {
   const [activeSection, setActiveSection] = useState("overview");
   const section = SECTIONS.find((s) => s.id === activeSection);
@@ -905,6 +969,7 @@ export function CodexScreen() {
               ) : (
                 section.blocks.map((block, i) => renderBlock(block, i))
               )}
+              <PracticeCTA sectionId={section.id} />
             </motion.div>
           )}
         </AnimatePresence>

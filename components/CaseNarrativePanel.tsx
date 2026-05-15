@@ -39,10 +39,13 @@ export function CaseNarrativePanel() {
   const markScenarioComplete = useInvestigatorStore((s) => s.markScenarioComplete);
   const setScenario = useInvestigatorStore((s) => s.setScenario);
   const setHasSeenDemo = useInvestigatorStore((s) => s.setHasSeenDemo);
+  const activeLessonContext = useInvestigatorStore((s) => s.activeLessonContext);
 
   const [checkResult, setCheckResult] = useState<{ correct: boolean; message: string } | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [characterMood, setCharacterMood] = useState<"neutral" | "thinking" | "excited" | "victory">("neutral");
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [revealedAnswer, setRevealedAnswer] = useState(false);
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -56,6 +59,13 @@ export function CaseNarrativePanel() {
     else if (pipeline.length > 0) setCharacterMood("thinking");
     else setCharacterMood("neutral");
   }, [checkResult, pipeline.length]);
+
+  // Reset failed attempts and revealed answer when step changes
+  useEffect(() => {
+    setFailedAttempts(0);
+    setRevealedAnswer(false);
+    setCheckResult(null);
+  }, [currentStepIndex, activeScenario?.id]);
 
   const step = activeScenario?.steps[currentStepIndex];
   const themeColor = activeScenario?.themeColor || "cyan";
@@ -101,12 +111,14 @@ export function CaseNarrativePanel() {
           }
         }, 1500);
       } else {
+        setFailedAttempts((c) => c + 1);
         setCheckResult({
           correct: false,
           message: `Expected ${lastExpected.recordCount} rows with [${expectedKeys.join(", ")}]. Got ${lastResult.recordCount} rows with [${resultKeys.join(", ")}].`,
         });
       }
     } catch {
+      setFailedAttempts((c) => c + 1);
       setCheckResult({ correct: false, message: "Pipeline error — check your syntax." });
     }
   };
@@ -121,6 +133,14 @@ export function CaseNarrativePanel() {
       nextStep();
     }
   };
+
+  const handleRevealAnswer = () => {
+    setRevealedAnswer(true);
+  };
+
+  const expectedQuery = step
+    ? step.expectedPipeline.map((s) => s.raw).join("\n| ")
+    : "";
 
   if (!activeScenario || !step) {
     return (
@@ -258,6 +278,30 @@ export function CaseNarrativePanel() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Reveal answer after 3 failed attempts */}
+        {!checkResult?.correct && failedAttempts >= 3 && !revealedAnswer && (
+          <button
+            onClick={handleRevealAnswer}
+            className="w-full py-2 rounded-lg text-xs font-medium bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 border border-amber-400/30 transition-colors"
+          >
+            Reveal answer
+          </button>
+        )}
+
+        {revealedAnswer && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-md p-3 bg-slate-900/80 border border-white/[0.08]"
+          >
+            <p className="text-[10px] font-medium text-slate-500 mb-1.5 uppercase tracking-wider">Expected answer</p>
+            <pre className="text-xs font-mono text-slate-300 bg-slate-950/80 rounded-lg p-3 overflow-x-auto border border-white/[0.06] leading-relaxed">
+              {expectedQuery}
+            </pre>
+          </motion.div>
+        )}
+
         <div className="flex gap-2">
           <button
             onClick={prevStep}
@@ -273,13 +317,15 @@ export function CaseNarrativePanel() {
           >
             Check answer
           </button>
-          <button
-            onClick={handleSkip}
-            disabled={currentStepIndex >= activeScenario.steps.length - 1 && !isDemo}
-            className="flex-1 py-2 rounded-lg text-xs font-medium bg-white/[0.04] text-slate-400 hover:bg-white/[0.08] hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed border border-white/[0.06] transition-colors"
-          >
-            Skip
-          </button>
+          {!activeLessonContext && (
+            <button
+              onClick={handleSkip}
+              disabled={currentStepIndex >= activeScenario.steps.length - 1 && !isDemo}
+              className="flex-1 py-2 rounded-lg text-xs font-medium bg-white/[0.04] text-slate-400 hover:bg-white/[0.08] hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed border border-white/[0.06] transition-colors"
+            >
+              Skip
+            </button>
+          )}
         </div>
       </div>
     </div>

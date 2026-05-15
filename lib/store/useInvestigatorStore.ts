@@ -83,6 +83,10 @@ interface InvestigatorState {
   hasSeenDemo: boolean;
   setHasSeenDemo: (seen: boolean) => void;
 
+  // Welcome
+  hasSeenWelcome: boolean;
+  setHasSeenWelcome: (seen: boolean) => void;
+
   // User profile (hydrated from Supabase by useAuth, not persisted locally)
   userId: string;
   setUserId: (id: string) => void;
@@ -202,6 +206,9 @@ export const useInvestigatorStore = create<InvestigatorState>()(
 
       hasSeenDemo: false,
       setHasSeenDemo: (hasSeenDemo) => set({ hasSeenDemo }),
+
+      hasSeenWelcome: false,
+      setHasSeenWelcome: (hasSeenWelcome) => set({ hasSeenWelcome }),
 
       unlockedScenarios: [
         // All DQL cases (free)
@@ -425,6 +432,7 @@ export const useInvestigatorStore = create<InvestigatorState>()(
         gameHighScores: state.gameHighScores,
         gameScores: state.gameScores,
         hasSeenDemo: state.hasSeenDemo,
+        hasSeenWelcome: state.hasSeenWelcome,
         streak: state.streak,
         earnedBadges: state.earnedBadges,
         weeklyXPLedger: state.weeklyXPLedger,

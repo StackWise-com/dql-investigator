@@ -21,6 +21,7 @@ import { LessonShell } from "./curriculum/LessonShell";
 import { useAuth } from "@/lib/auth/useAuth";
 import { useProgressSync } from "@/lib/auth/useProgressSync";
 import { TermsAcceptModal } from "./TermsAcceptModal";
+import { WelcomeModal } from "./WelcomeModal";
 import { TourProvider } from "./tour/TourProvider";
 import { TourAutoTrigger } from "./tour/TourAutoTrigger";
 
@@ -215,6 +216,7 @@ export function InvestigatorShell() {
         </div>
         <VictoryModal />
         <TermsAcceptModal />
+        <WelcomeModal />
         <FeedbackButton page={pageName} />
       </div>
     </TourProvider>
