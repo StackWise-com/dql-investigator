@@ -106,7 +106,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
             <form onSubmit={handleSubmit} className="space-y-3">
               <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Email</label>
+                <label className="text-xs font-medium text-slate-500">Email</label>
                 <input
                   type="email"
                   value={email}
@@ -120,12 +120,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               {mode !== "forgot" && (
                 <div>
                   <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Password</label>
+                    <label className="text-xs font-medium text-slate-500">Password</label>
                     {mode === "login" && (
                       <button
                         type="button"
                         onClick={() => switchMode("forgot")}
-                        className="text-[10px] text-cyan-400 hover:text-cyan-300 hover:underline"
+                        className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline"
                       >
                         Forgot password?
                       </button>
@@ -144,7 +144,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
               {mode === "signup" && (
                 <div>
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Country</label>
+                  <label className="text-xs font-medium text-slate-500">Country</label>
                   <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
@@ -168,8 +168,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               )}
 
               <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
                 type="submit"
                 disabled={loading}
                 className="w-full py-2.5 rounded-md text-sm font-medium bg-cyan-400/15 text-cyan-300 hover:bg-cyan-400/25 border border-cyan-400/30 transition-colors disabled:opacity-50"

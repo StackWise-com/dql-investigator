@@ -14,7 +14,9 @@ export function VictoryModal() {
   const setScenario = useInvestigatorStore((s) => s.setScenario);
   const setPhase = useInvestigatorStore((s) => s.setPhase);
 
-  const isComplete = activeScenario && completedScenarios.includes(activeScenario.id);
+  const activeLessonContext = useInvestigatorStore((s) => s.activeLessonContext);
+  // Lesson mode has its own completion UI — suppress the generic modal
+  const isComplete = !activeLessonContext && activeScenario && completedScenarios.includes(activeScenario.id);
 
   const scenarioXP = activeScenario
     ? activeScenario.steps.reduce(
@@ -88,8 +90,6 @@ export function VictoryModal() {
 
             <div className="flex gap-3">
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => {
                   setScenario(null);
                   setPhase(3);
@@ -99,8 +99,6 @@ export function VictoryModal() {
                 New Case
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={handleShare}
                 className="flex-1 py-3 rounded-lg text-sm font-medium bg-white/5 text-slate-300 hover:bg-white/10 border border-white/[0.06]"
               >

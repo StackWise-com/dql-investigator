@@ -105,13 +105,13 @@ export function CaseFilePane() {
   };
 
   return (
-    <div className="w-[28%] min-w-[280px] glass-panel border-r border-cyan-400/20 flex flex-col">
+    <div className="w-[28%] min-w-[280px] glass-panel border-r border-white/[0.06] flex flex-col">
       <div className="h-10 flex items-center px-4 border-b border-white/[0.06] justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">Case File</span>
+        <span className="text-xs font-medium text-slate-300">Case File</span>
         {activeScenario && (
           <button
             onClick={() => setScenario(null)}
-            className="text-[10px] text-slate-500 hover:text-slate-300"
+            className="text-xs text-slate-500 hover:text-slate-300"
           >
             Close Case
           </button>
@@ -125,7 +125,7 @@ export function CaseFilePane() {
               <h2 className="text-base font-semibold text-slate-100">{activeScenario.title}</h2>
               <p className="text-xs text-slate-400">{activeScenario.company}</p>
               {CASE_TAGS[activeScenario.id] && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium text-teal-400 bg-teal-400/10 border border-teal-400/20 px-1.5 py-0.5 rounded">
+                <span className="inline-flex items-center gap-1 text-xs font-mono font-medium text-teal-400 bg-teal-400/10 border border-teal-400/20 px-1.5 py-0.5 rounded">
                   <span className="text-teal-500/60">Learning:</span> {CASE_TAGS[activeScenario.id]}
                 </span>
               )}
@@ -144,7 +144,7 @@ export function CaseFilePane() {
                   }`}
                 />
               ))}
-              <span className="text-[10px] text-slate-500 ml-1">
+              <span className="text-xs text-slate-500 ml-1">
                 Step {currentStepIndex + 1} / {activeScenario.steps.length}
               </span>
             </div>
@@ -161,10 +161,10 @@ export function CaseFilePane() {
                 >
                   <div className="glass-panel-strong rounded-lg p-4 space-y-3" data-tour-target="case-brief">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-amber-400/80">Mission Brief</span>
+                      <span className="text-xs font-medium text-amber-400/70">Mission Brief</span>
                       <button
                         onClick={() => setShowNarrative(!showNarrative)}
-                        className="text-[10px] text-slate-500 hover:text-slate-300"
+                        className="text-xs text-slate-500 hover:text-slate-300"
                       >
                         {showNarrative ? "Hide" : "Show"}
                       </button>
@@ -181,16 +181,16 @@ export function CaseFilePane() {
                   </div>
 
                   <div className="glass-panel rounded-lg p-4 space-y-2" data-tour-target="case-objective">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400/80">Objective</span>
+                    <span className="text-xs font-medium text-emerald-400/70">Objective</span>
                     <p className="text-sm text-slate-200">{step.goal}</p>
                   </div>
 
                   <div className="glass-panel rounded-lg p-4 space-y-2" data-tour-target="case-hint">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400/80">Hint</span>
+                      <span className="text-xs font-medium text-amber-400/70">Hint</span>
                       <button
                         onClick={() => setShowHint(!showHint)}
-                        className="text-[10px] text-slate-500 hover:text-slate-300"
+                        className="text-xs text-slate-500 hover:text-slate-300"
                       >
                         {showHint ? "Hide" : "Show"}
                       </button>
@@ -208,7 +208,7 @@ export function CaseFilePane() {
 
                   {step.lesson && (
                     <div className="glass-panel rounded-lg p-4 space-y-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-cyan-400/80">Lesson</span>
+                      <span className="text-xs font-medium text-slate-300">Lesson</span>
                       <pre className="text-xs font-mono text-slate-300 bg-slate-950/80 rounded-md p-3 overflow-x-auto blur-sm hover:blur-0 transition-all cursor-help select-none" title="Hover to reveal the solution">
                         {step.lesson}
                       </pre>
@@ -239,7 +239,7 @@ export function CaseFilePane() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 8 }}
-                className={`text-[10px] rounded-md p-2 ${
+                className={`text-xs rounded-md p-2 ${
                   checkResult.correct
                     ? "bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
                     : "bg-rose-400/10 text-rose-400 border border-rose-400/20"
@@ -251,8 +251,6 @@ export function CaseFilePane() {
           </AnimatePresence>
           <div className="flex gap-2">
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={prevStep}
               disabled={currentStepIndex === 0}
               className="flex-1 py-2 rounded-md text-xs font-medium bg-white/5 text-slate-300 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed border border-white/[0.06]"
@@ -260,8 +258,6 @@ export function CaseFilePane() {
               Prev
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={handleCheck}
               data-tour-target="case-check"
               className="flex-[2] py-2 rounded-md text-xs font-medium bg-cyan-400/15 text-cyan-300 hover:bg-cyan-400/25 border border-cyan-400/30"
@@ -269,8 +265,6 @@ export function CaseFilePane() {
               Check Solution
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={nextStep}
               disabled={currentStepIndex >= activeScenario.steps.length - 1}
               className="flex-1 py-2 rounded-md text-xs font-medium bg-white/5 text-slate-300 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed border border-white/[0.06]"

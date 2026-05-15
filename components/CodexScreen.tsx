@@ -698,7 +698,7 @@ function QueryCookbook() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Category:</span>
+          <span className="text-xs font-medium text-slate-500">Category:</span>
           <select
             value={activeCategory}
             onChange={(e) => setActiveCategory(e.target.value as QueryCategory | "all")}
@@ -714,7 +714,7 @@ function QueryCookbook() {
         </div>
 
         <div className="flex items-center gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Difficulty:</span>
+          <span className="text-xs font-medium text-slate-500">Difficulty:</span>
           <select
             value={activeDifficulty}
             onChange={(e) => setActiveDifficulty(e.target.value as QueryDifficulty | "all")}
@@ -743,11 +743,11 @@ function QueryCookbook() {
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-medium border ${DIFFICULTY_COLORS[q.difficulty]}`}
+                  className={`px-2 py-0.5 rounded text-xs font-medium border ${DIFFICULTY_COLORS[q.difficulty]}`}
                 >
                   {q.difficulty}
                 </span>
-                <span className="text-[10px] text-slate-500">+{q.xpReward} XP</span>
+                <span className="text-xs text-slate-500">+{q.xpReward} XP</span>
               </div>
             </div>
 
@@ -759,7 +759,7 @@ function QueryCookbook() {
 
             <button
               onClick={() => handleCopy(q.query, q.id)}
-              className="text-[10px] font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+              className="text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
             >
               {copiedId === q.id ? "Copied!" : "Copy to clipboard"}
             </button>
@@ -782,7 +782,7 @@ function CommandTable({ block }: { block: ContentBlock & { type: "table" } }) {
             {block.headers.map((h, i) => (
               <th
                 key={i}
-                className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-cyan-400/80"
+                className="px-3 py-2 text-left text-xs font-medium text-slate-300"
               >
                 {h}
               </th>
@@ -804,7 +804,7 @@ function CommandTable({ block }: { block: ContentBlock & { type: "table" } }) {
                         className="text-cyan-300 hover:text-cyan-200 font-medium transition-colors flex items-center gap-1"
                       >
                         {cell}
-                        <span className="text-[9px] text-slate-500">
+                        <span className="text-xs text-slate-500">
                           {expanded === cell ? "▲" : "▼"}
                         </span>
                       </button>
@@ -867,7 +867,7 @@ export function CodexScreen() {
     <div className="flex-1 flex h-full">
       <div className="w-64 glass-panel border-r border-cyan-400/20 flex flex-col" data-tour-target="learn-sidebar">
         <div className="h-10 flex items-center px-4 border-b border-white/[0.06]">
-          <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">DQL Codex</span>
+          <span className="text-xs font-medium text-slate-300">DQL Codex</span>
         </div>
         <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {SECTIONS.map((s) => (

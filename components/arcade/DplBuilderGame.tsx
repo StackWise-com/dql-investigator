@@ -219,16 +219,12 @@ export function DplBuilderGame({ onExit }: { onExit: () => void }) {
           <p className="text-xs text-slate-500">out of {QUESTIONS_PER_GAME * 100} possible</p>
           <div className="flex gap-2 pt-2">
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={onExit}
               className="flex-1 py-2 rounded-md text-xs font-medium bg-white/5 text-slate-300 hover:bg-white/10 border border-white/[0.06]"
             >
               Back to Arcade
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => {
                 window.location.reload();
               }}
@@ -246,15 +242,15 @@ export function DplBuilderGame({ onExit }: { onExit: () => void }) {
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="h-12 flex items-center justify-between px-6 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">DPL Pattern Builder</span>
-          <span className="text-[10px] text-slate-500">Q{questionIndex + 1} / {QUESTIONS_PER_GAME}</span>
+          <span className="text-xs font-semibold text-emerald-400">DPL Pattern Builder</span>
+          <span className="text-xs text-slate-500">Q{questionIndex + 1} / {QUESTIONS_PER_GAME}</span>
         </div>
         <div className="flex items-center gap-4">
           <div className={`text-sm font-mono font-semibold ${remaining <= 5 ? "text-rose-400" : "text-slate-200"}`}>
             {remaining}s
           </div>
           <div className="text-sm font-semibold text-slate-200">{score} pts</div>
-          <button onClick={onExit} className="text-[10px] text-slate-500 hover:text-slate-300">Exit</button>
+          <button onClick={onExit} className="text-xs text-slate-500 hover:text-slate-300">Exit</button>
         </div>
       </div>
 
@@ -270,7 +266,7 @@ export function DplBuilderGame({ onExit }: { onExit: () => void }) {
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-2xl mx-auto space-y-6">
           <div className="glass-panel-strong rounded-xl p-5 space-y-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Goal: {challenge.goal}</p>
+            <p className="text-xs font-medium text-slate-500">Goal: {challenge.goal}</p>
             <div className="bg-slate-950/80 border border-white/[0.06] rounded-lg px-4 py-3">
               <code className="text-xs font-mono text-slate-300 break-all">{challenge.logLine}</code>
             </div>
@@ -281,8 +277,6 @@ export function DplBuilderGame({ onExit }: { onExit: () => void }) {
             {options.map((opt) => (
               <motion.button
                 key={opt}
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
                 disabled={!!feedback}
                 onClick={() => handleAnswer(opt)}
                 className={`w-full text-left px-4 py-3 rounded-lg text-xs font-mono border transition-colors ${
@@ -319,8 +313,6 @@ export function DplBuilderGame({ onExit }: { onExit: () => void }) {
             <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={nextQuestion}
               className="w-full py-2 rounded-md text-xs font-medium bg-cyan-400/15 text-cyan-300 hover:bg-cyan-400/25 border border-cyan-400/30"
             >

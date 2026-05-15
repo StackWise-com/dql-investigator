@@ -111,8 +111,6 @@ export function ArcadeScreen() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => setMode(card.id)}
                 className={`glass-panel-strong rounded-xl border p-6 text-left transition-colors ${card.color}`}
               >
@@ -121,7 +119,7 @@ export function ArcadeScreen() {
                 </div>
                 <h3 className="text-base font-semibold text-slate-100 mb-1">{card.title}</h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-4">{card.description}</p>
-                <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                <div className="flex items-center gap-3 text-xs text-slate-500">
                   <span className="text-slate-300 font-medium">Best: {stats.best}</span>
                   <span>&#183;</span>
                   <span>Played: {stats.played}</span>
@@ -145,7 +143,7 @@ export function ArcadeScreen() {
                   className="flex items-center justify-between glass-panel rounded-lg px-4 py-2.5 border border-white/[0.04]"
                 >
                   <div className="flex items-center gap-3">
-                    <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded border ${
+                    <span className={`text-xs font-semibold uppercase px-1.5 py-0.5 rounded border ${
                       score.mode === "timer"
                         ? "text-rose-400 border-rose-400/20 bg-rose-400/10"
                         : score.mode === "pipeline"

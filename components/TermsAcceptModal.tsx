@@ -52,7 +52,7 @@ export function TermsAcceptModal() {
           >
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold text-slate-100">Before you continue</h2>
-              <span className="text-[10px] text-slate-500">v {TERMS_VERSION}</span>
+              <span className="text-xs text-slate-500">v {TERMS_VERSION}</span>
             </div>
 
             <p className="text-xs text-slate-400 mb-4">
@@ -183,8 +183,6 @@ export function TermsAcceptModal() {
               )}
 
               <motion.button
-                whileHover={{ scale: agreed && !submitting ? 1.01 : 1 }}
-                whileTap={{ scale: agreed && !submitting ? 0.99 : 1 }}
                 onClick={handleAccept}
                 disabled={!agreed || submitting}
                 className="w-full py-2.5 rounded-md text-sm font-medium bg-cyan-400/15 text-cyan-300 hover:bg-cyan-400/25 border border-cyan-400/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -202,7 +200,7 @@ export function TermsAcceptModal() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-[11px] font-semibold uppercase tracking-wider text-cyan-400 mb-1">
+      <h3 className="text-xs font-medium text-accent mb-1">
         {title}
       </h3>
       <p>{children}</p>

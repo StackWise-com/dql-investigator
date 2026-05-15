@@ -6,6 +6,9 @@ import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
 import { runPipeline, inferColumns } from "@/lib/dql/engine";
 import { getSampleData } from "@/lib/dql/data";
 import type { DQLRecord, PipelineStage } from "@/lib/types/dql";
+import { CellMenu } from "@/components/data-view/CellMenu";
+import { ColumnHeaderMenu } from "@/components/data-view/ColumnHeaderMenu";
+import { FieldSchemaSidebar } from "@/components/data-view/FieldSchemaSidebar";
 
 const DISPLAY_LIMIT = 200;
 
@@ -16,6 +19,8 @@ export function DataViewPane() {
   const selectedStageIndex = useInvestigatorStore((s) => s.selectedStageIndex);
   const setSelectedStageIndex = useInvestigatorStore((s) => s.setSelectedStageIndex);
   const setStageResults = useInvestigatorStore((s) => s.setStageResults);
+  const hiddenColumns = useInvestigatorStore((s) => s.hiddenColumns);
+  const columnSort = useInvestigatorStore((s) => s.columnSort);
   const [flashStage, setFlashStage] = useState<number | null>(null);
   const [prevPipelineLen, setPrevPipelineLen] = useState(pipeline.length);
 
@@ -77,10 +82,27 @@ export function DataViewPane() {
       ? results[selectedStageIndex]
       : results[results.length - 1];
 
-  const columns = displayResult?.columns || [];
-  const rows = displayResult?.data || [];
+  const allColumns = displayResult?.columns || [];
+  const columns = allColumns.filter((c) => !hiddenColumns.includes(c.name));
+  const rawRows = displayResult?.data || [];
+  const rows = useMemo(() => {
+    if (!columnSort) return rawRows;
+    return [...rawRows].sort((a, b) => {
+      const av = a[columnSort.field];
+      const bv = b[columnSort.field];
+      const aStr = av === null || av === undefined ? "" : String(av);
+      const bStr = bv === null || bv === undefined ? "" : String(bv);
+      const aNum = Number(av);
+      const bNum = Number(bv);
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return columnSort.dir === "asc" ? aNum - bNum : bNum - aNum;
+      }
+      return columnSort.dir === "asc" ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
+    });
+  }, [rawRows, columnSort]);
   const command = displayResult?.command || "fetch";
   const prevRows = displayResult?.previousData || [];
+  const sampleRow = rows[0] || null;
 
   // Search term for highlighting
   const searchTerm = command === "search"
@@ -98,43 +120,13 @@ export function DataViewPane() {
   const prevKeys = new Set(prevRows.map((r, i) => rowKey(r, i)));
   const currentKeys = new Set(rows.map((r, i) => rowKey(r, i)));
 
-  const removedRows = prevRows.filter((r, i) => !currentKeys.has(rowKey(r, i)));
-  const addedRows = rows.filter((r, i) => !prevKeys.has(rowKey(r, i)));
-
   const getRowVisualState = (row: DQLRecord, idx: number) => {
     const key = rowKey(row, idx);
-    const isNew = !prevKeys.has(key) && prevRows.length > 0;
     const isRemoved = !currentKeys.has(key);
-
-    switch (command) {
-      case "filter":
-        if (isRemoved) return "removed-red";
-        if (!isNew && removedRows.length > 0) return "kept-green";
-        return "normal";
-      case "filterOut":
-        if (isRemoved) return "removed-orange";
-        if (!isNew && removedRows.length > 0) return "kept-green";
-        return "normal";
-      case "sort":
-        return "swap";
-      case "limit":
-        if (idx >= Number(pipeline[selectedStageIndex]?.args?.count || 100)) return "cutoff";
-        return "normal";
-      case "summarize":
-        return "merge";
-      case "dedup":
-        if (isRemoved) return "merged-amber";
-        return "normal";
-      case "fieldsAdd":
-        if (isNew) return "new-green";
-        return "normal";
-      case "parse":
-        return "scan";
-      case "makeTimeseries":
-        return "timeseries";
-      default:
-        return "normal";
-    }
+    if (command === "filter" && isRemoved) return "removed-red";
+    if (command === "filterOut" && isRemoved) return "removed-orange";
+    if (command === "dedup" && isRemoved) return "merged-amber";
+    return "normal";
   };
 
   const getRowClasses = (state: string) => {
@@ -143,69 +135,33 @@ export function DataViewPane() {
         return "bg-rose-500/20 border-rose-500/40 text-rose-200";
       case "removed-orange":
         return "bg-orange-500/20 border-orange-500/40 text-orange-200";
-      case "kept-green":
-        return "border-emerald-500/30";
-      case "new-green":
-        return "bg-emerald-500/10 border-emerald-500/30";
       case "merged-amber":
         return "bg-amber-500/20 border-amber-500/40";
-      case "cutoff":
-        return "bg-rose-500/10 border-rose-500/20 opacity-50";
-      case "scan":
-        return "border-teal-400/30";
-      case "timeseries":
-        return "border-violet-400/30 bg-violet-400/5";
       default:
         return "";
     }
   };
 
-  const getInitialAnimation = (state: string, idx: number) => {
-    switch (state) {
-      case "removed-red":
-      case "removed-orange":
-      case "merged-amber":
-        return { opacity: 1, y: 0, scale: 1, backgroundColor: "rgba(239,68,68,0.1)" };
-      case "new-green":
-        return { opacity: 0, x: 20 };
-      case "swap":
-        return { opacity: 0, y: idx % 2 === 0 ? -10 : 10 };
-      case "timeseries":
-        return { opacity: 0, y: -8, scale: 0.98 };
-      default:
-        return { opacity: 0, y: 6 };
+  const getInitialAnimation = (state: string) => {
+    if (state === "removed-red" || state === "removed-orange" || state === "merged-amber") {
+      return { opacity: 1, y: 0 };
     }
+    return { opacity: 0, y: 4 };
   };
 
-  const getAnimateState = (state: string, idx: number) => {
-    switch (state) {
-      case "removed-red":
-      case "removed-orange":
-      case "merged-amber":
-        return {
-          opacity: 0,
-          y: 20,
-          scale: 0.95,
-          backgroundColor: state === "merged-amber" ? "rgba(245,158,11,0.3)" : "rgba(239,68,68,0.2)",
-          transition: { delay: 0.3 + idx * 0.05, duration: 0.4 },
-        };
-      case "new-green":
-        return { opacity: 1, x: 0, transition: { delay: idx * 0.03, duration: 0.3 } };
-      case "swap":
-        return { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 25, delay: idx * 0.02 } };
-      case "timeseries":
-        return { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 200, damping: 20, delay: idx * 0.03 } };
-      default:
-        return { opacity: 1, y: 0, transition: { delay: idx < 20 ? idx * 0.015 : 0, duration: 0.2 } };
+  const getAnimateState = (state: string) => {
+    if (state === "removed-red" || state === "removed-orange" || state === "merged-amber") {
+      return { opacity: 0, y: 4, transition: { duration: 0.2 } };
     }
+    return { opacity: 1, y: 0, transition: { duration: 0.15 } };
   };
 
   return (
-    <div className="flex-1 min-w-0 glass-panel border-x border-cyan-400/10 flex flex-col" data-tour-target="dataview">
+    <div className="flex-1 min-w-0 glass-panel border-x border-white/[0.06] flex flex-col" data-tour-target="dataview">
       <div className="h-10 flex items-center px-4 border-b border-white/[0.06] justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">Data View</span>
+        <span className="text-xs font-medium text-slate-300">Data View</span>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-slate-500">
+          <span className="text-xs text-slate-500">
             {displayResult?.command && selectedStageIndex >= 0
               ? `Stage ${selectedStageIndex + 1}: ${displayResult.command}`
               : "Source"}
@@ -214,6 +170,8 @@ export function DataViewPane() {
         </div>
       </div>
 
+      <div className="flex flex-1 min-h-0">
+        <FieldSchemaSidebar columns={allColumns} sampleRow={sampleRow} />
       <div className="flex-1 overflow-auto p-4 relative">
         {/* Persistent Pipeline Impact Timeline */}
         {results.length > 1 && (
@@ -223,7 +181,7 @@ export function DataViewPane() {
             className="mb-3 glass-panel-strong border border-white/[0.06] rounded-lg px-3 py-2"
           >
             <div className="flex items-center gap-2 overflow-x-auto">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 shrink-0">Impact</span>
+              <span className="text-xs font-medium text-slate-500 shrink-0">Impact</span>
               <div className="w-px h-3 bg-white/10 shrink-0" />
               {results.slice(1).map((r, i) => {
                 const idx = i + 1;
@@ -241,13 +199,11 @@ export function DataViewPane() {
                       setFlashStage(idx);
                       setTimeout(() => setFlashStage(null), 600);
                     }}
-                    className={`shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-medium border transition-colors ${
+                    className={`shrink-0 flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium border transition-colors ${
                       isActive
                         ? "bg-cyan-400/10 text-cyan-300 border-cyan-400/20"
                         : "bg-white/5 text-slate-400 border-transparent hover:bg-white/10"
                     }`}
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
                   >
                     <span className="uppercase tracking-wider">{r.command}</span>
                     <span className="text-slate-500">{prevCount}</span>
@@ -288,8 +244,8 @@ export function DataViewPane() {
               className="absolute inset-x-4 top-16 z-10 glass-panel-strong border border-cyan-400/30 rounded-lg px-4 py-2 flex items-center justify-between pointer-events-none"
             >
               <div className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-cyan-300 uppercase tracking-wider">{results[flashStage].command}</span>
-                <span className="text-[10px] text-slate-500">
+                <span className="text-xs font-semibold text-cyan-300">{results[flashStage].command}</span>
+                <span className="text-xs text-slate-500">
                   {results[flashStage].previousData.length} → {results[flashStage].recordCount} rows
                 </span>
               </div>
@@ -320,13 +276,11 @@ export function DataViewPane() {
                     setFlashStage(i);
                     setTimeout(() => setFlashStage(null), 500);
                   }}
-                  className={`px-2.5 py-1 rounded-md text-[10px] font-medium transition-colors ${
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                     (selectedStageIndex < 0 && i === results.length - 1) || selectedStageIndex === i
                       ? "bg-cyan-400/20 text-cyan-300 border border-cyan-400/30"
                       : "bg-white/5 text-slate-400 border border-transparent hover:bg-white/10"
                   }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   {r.command}
                   <span className="ml-1 opacity-60">({r.recordCount})</span>
@@ -341,10 +295,9 @@ export function DataViewPane() {
                     {columns.map((col) => (
                       <th
                         key={col.name}
-                        className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400"
+                        className="px-3 py-2 text-left"
                       >
-                        {col.name}
-                        <span className="ml-1.5 text-slate-600 font-normal">{col.type}</span>
+                        <ColumnHeaderMenu column={col} />
                       </th>
                     ))}
                   </tr>
@@ -358,17 +311,18 @@ export function DataViewPane() {
                         <motion.tr
                           key={rowKey(row, i)}
                           layout
-                          initial={getInitialAnimation(state, i)}
-                          animate={getAnimateState(state, i)}
-                          exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+                          initial={getInitialAnimation(state)}
+                          animate={getAnimateState(state)}
+                          exit={{ opacity: 0, x: -10, transition: { duration: 0.15 } }}
                           className={`border-b border-white/[0.03] even:bg-white/[0.02] hover:bg-white/[0.04] transition-colors ${classes}`}
                         >
                           {columns.map((col) => (
                             <td
                               key={col.name}
-                              className={`px-3 py-2 text-xs font-mono truncate max-w-[200px] ${state === "removed-red" || state === "removed-orange" ? "text-rose-200" : state === "new-green" ? "text-emerald-200" : "text-slate-300"}`}
+                              className={`relative group/cell px-3 py-1.5 text-xs font-mono truncate max-w-[200px] ${state === "removed-red" || state === "removed-orange" ? "text-rose-200" : "text-slate-300"}`}
                             >
                               {formatCell(row[col.name], searchTerm)}
+                              <CellMenu field={col.name} value={row[col.name]} />
                             </td>
                           ))}
                         </motion.tr>
@@ -378,7 +332,7 @@ export function DataViewPane() {
                 </tbody>
               </table>
               {rows.length > DISPLAY_LIMIT && (
-                <div className="px-3 py-2 text-[10px] text-slate-500 bg-white/[0.02] border-t border-white/[0.06]">
+                <div className="px-3 py-2 text-xs text-slate-500 bg-white/[0.02] border-t border-white/[0.06]">
                   Showing {DISPLAY_LIMIT} of {rows.length} rows. Add a <code className="text-cyan-400/80">| limit</code> command to narrow results.
                 </div>
               )}
@@ -386,7 +340,7 @@ export function DataViewPane() {
 
             {command === "summarize" && columns.length === 2 && rows.length > 0 && (
               <div className="mt-4 glass-panel-strong rounded-lg p-4">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-3">Summarize Chart</p>
+                <p className="text-xs text-slate-500 font-semibold mb-3">Summarize Chart</p>
                 <div className="space-y-2">
                   {(() => {
                     const aggCol = columns[1];
@@ -397,15 +351,15 @@ export function DataViewPane() {
                       const pct = maxVal > 0 ? (val / maxVal) * 100 : 0;
                       return (
                         <div key={label} className="flex items-center gap-3">
-                          <span className="text-[10px] text-slate-400 w-24 truncate text-right">{label}</span>
+                          <span className="text-xs text-slate-400 w-24 truncate text-right">{label}</span>
                           <div className="flex-1 h-5 bg-white/5 rounded overflow-hidden relative">
                             <motion.div
                               className="h-full bg-emerald-400/40 rounded"
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
-                              transition={{ delay: 0.1 + i * 0.05, duration: 0.5, type: "spring" as const, stiffness: 200, damping: 20 }}
+                              transition={{ duration: 0.35, ease: "easeOut" }}
                             />
-                            <span className="absolute inset-0 flex items-center px-2 text-[10px] text-slate-300 font-mono">{val}</span>
+                            <span className="absolute inset-0 flex items-center px-2 text-xs text-slate-300 font-mono">{val}</span>
                           </div>
                         </div>
                       );
@@ -417,7 +371,7 @@ export function DataViewPane() {
 
             {command === "makeTimeseries" && rows.length > 0 && (
               <div className="mt-4 glass-panel-strong rounded-lg p-4">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-3">Time Series</p>
+                <p className="text-xs text-slate-500 font-semibold mb-3">Time Series</p>
                 <div className="flex items-end gap-1 h-32 px-2">
                   {(() => {
                     const valCol = columns.find((c) => c.name !== "timestamp")?.name || columns[0].name;
@@ -433,10 +387,10 @@ export function DataViewPane() {
                               className="w-3/4 bg-violet-400/40 rounded-t"
                               initial={{ height: 0 }}
                               animate={{ height: `${pct}%` }}
-                              transition={{ delay: 0.05 + i * 0.04, duration: 0.5, type: "spring" as const, stiffness: 150, damping: 15 }}
+                              transition={{ duration: 0.35, ease: "easeOut" }}
                             />
                           </div>
-                          <span className="text-[9px] text-slate-500">{ts}</span>
+                          <span className="text-xs text-slate-500">{ts}</span>
                         </div>
                       );
                     });
@@ -448,7 +402,7 @@ export function DataViewPane() {
             {/* Filter / FilterOut impact mini-chart */}
             {(command === "filter" || command === "filterOut") && displayResult && (
               <div className="mt-4 glass-panel-strong rounded-lg p-4">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-3">{command === "filter" ? "Filter Impact" : "FilterOut Impact"}</p>
+                <p className="text-xs text-slate-500 font-semibold mb-3">{command === "filter" ? "Filter Impact" : "FilterOut Impact"}</p>
                 <div className="flex items-center gap-3">
                   <div className="flex-1 h-6 bg-white/5 rounded overflow-hidden relative flex">
                     {(() => {
@@ -464,13 +418,13 @@ export function DataViewPane() {
                             className="h-full bg-emerald-400/40"
                             initial={{ width: 0 }}
                             animate={{ width: `${keptPct}%` }}
-                            transition={{ duration: 0.5, type: "spring" as const, stiffness: 150, damping: 20 }}
+                            transition={{ duration: 0.35, ease: "easeOut" }}
                           />
                           <motion.div
                             className="h-full bg-rose-400/40"
                             initial={{ width: 0 }}
                             animate={{ width: `${removedPct}%` }}
-                            transition={{ duration: 0.5, delay: 0.1, type: "spring" as const, stiffness: 150, damping: 20 }}
+                            transition={{ duration: 0.35, ease: "easeOut" }}
                           />
                         </>
                       );
@@ -478,7 +432,7 @@ export function DataViewPane() {
                   </div>
                   <div className="text-right shrink-0">
                     <span className="text-xs font-mono text-emerald-400">{displayResult.recordCount}</span>
-                    <span className="text-[10px] text-slate-500"> / {displayResult.previousData.length}</span>
+                    <span className="text-xs text-slate-500"> / {displayResult.previousData.length}</span>
                   </div>
                 </div>
               </div>
@@ -487,7 +441,7 @@ export function DataViewPane() {
             {/* Sort reorder indicator */}
             {command === "sort" && prevRows.length > 0 && rows.length > 0 && (
               <div className="mt-4 glass-panel-strong rounded-lg p-4">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-3">Sort Reorder</p>
+                <p className="text-xs text-slate-500 font-semibold mb-3">Sort Reorder</p>
                 <div className="flex items-center gap-1 h-8">
                   {(() => {
                     const sortField = String(pipeline[selectedStageIndex]?.args?.field || "");
@@ -508,14 +462,14 @@ export function DataViewPane() {
                           className="flex-1 flex flex-col items-center gap-0.5"
                           initial={{ y: -10, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          transition={{ delay: i * 0.02, type: "spring" as const, stiffness: 300, damping: 20 }}
+                          transition={{ duration: 0.15, ease: "easeOut" }}
                         >
                           <div className="w-full h-4 bg-white/5 rounded relative overflow-hidden">
                             <motion.div
                               className="absolute bottom-0 left-0 right-0 bg-amber-400/40 rounded-t"
                               initial={{ height: 0 }}
                               animate={{ height: `${Math.min(pct, 100)}%` }}
-                              transition={{ delay: i * 0.02, duration: 0.3 }}
+                              transition={{ duration: 0.3, ease: "easeOut" }}
                             />
                           </div>
                           <span className="text-[8px] text-slate-600">{i + 1}</span>
@@ -534,6 +488,7 @@ export function DataViewPane() {
             initialData={initialData}
           />
         )}
+      </div>
       </div>
     </div>
   );
@@ -671,8 +626,6 @@ function EmptyState({
 
       {!showDiagnosis ? (
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
           onClick={() => setShowDiagnosis(true)}
           className="px-3 py-1.5 rounded-md text-xs font-medium text-amber-300 border border-amber-400/30 bg-amber-400/10 hover:bg-amber-400/20 flex items-center gap-1.5"
         >
@@ -688,7 +641,7 @@ function EmptyState({
           className="max-w-sm text-left glass-panel-strong rounded-lg border border-amber-400/20 p-4 space-y-2"
         >
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400">
+            <span className="text-xs font-medium text-amber-400">
               Stage {diagnosis ? diagnosis.stageIndex + 1 : "?"}: {diagnosis?.command}
             </span>
           </div>
@@ -701,7 +654,7 @@ function EmptyState({
           )}
           <button
             onClick={() => setShowDiagnosis(false)}
-            className="text-[10px] text-slate-500 hover:text-slate-300 mt-1"
+            className="text-xs text-slate-500 hover:text-slate-300 mt-1"
           >
             Hide
           </button>

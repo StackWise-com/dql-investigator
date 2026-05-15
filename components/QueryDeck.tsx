@@ -41,8 +41,8 @@ export function QueryDeck() {
     <div className="h-full flex flex-col" data-tour-target="commanddeck">
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between px-4 py-2 border-b border-white/[0.06]">
-        <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">Query Deck</span>
-        <span className="text-[10px] text-slate-500">{pipeline.length} stage{pipeline.length !== 1 ? "s" : ""}</span>
+        <span className="text-xs font-medium text-slate-300">Query Deck</span>
+        <span className="text-xs text-slate-500">{pipeline.length} stage{pipeline.length !== 1 ? "s" : ""}</span>
       </div>
 
       {/* Editor area */}
@@ -70,7 +70,7 @@ export function QueryDeck() {
                 setEditorValue(next);
                 setHasUnrunChanges(true);
               }}
-              className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-500 hover:text-cyan-300 hover:bg-cyan-400/10 border border-white/[0.06] transition-colors"
+              className="text-xs font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-500 hover:text-cyan-300 hover:bg-cyan-400/10 border border-white/[0.06] transition-colors"
             >
               {cmd}
             </button>
@@ -81,8 +81,6 @@ export function QueryDeck() {
       {/* Footer actions */}
       <div className="shrink-0 p-3 border-t border-white/[0.06] flex items-center gap-2">
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
           onClick={handleRun}
           disabled={!editorValue.trim()}
           data-tour-target="run-button"
@@ -101,8 +99,6 @@ export function QueryDeck() {
         </motion.button>
 
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
           onClick={handleClear}
           className="px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-400/10 border border-rose-400/20"
         >

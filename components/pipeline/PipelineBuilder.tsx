@@ -55,9 +55,8 @@ export function PipelineBuilder() {
       <div className="p-3 space-y-3">
         <div className="flex flex-wrap gap-1">
           <motion.button
-            whileTap={{ scale: 0.95 }}
             onClick={() => setFilterCategory(null)}
-            className={`px-2 py-0.5 rounded text-[10px] font-medium border ${
+            className={`px-2 py-0.5 rounded text-xs font-medium border ${
               filterCategory === null
                 ? "bg-white/10 text-slate-200 border-white/20"
                 : "text-slate-500 border-transparent hover:bg-white/5"
@@ -68,9 +67,8 @@ export function PipelineBuilder() {
           {categories.map((cat) => (
             <motion.button
               key={cat}
-              whileTap={{ scale: 0.95 }}
               onClick={() => setFilterCategory(cat)}
-              className={`px-2 py-0.5 rounded text-[10px] font-medium border ${
+              className={`px-2 py-0.5 rounded text-xs font-medium border ${
                 filterCategory === cat
                   ? "bg-white/10 text-slate-200 border-white/20"
                   : "text-slate-500 border-transparent hover:bg-white/5"
@@ -85,8 +83,6 @@ export function PipelineBuilder() {
           {filteredCommands.map((cmd) => (
             <motion.button
               key={cmd.name}
-              whileHover={{ scale: 1.03, y: -1 }}
-              whileTap={{ scale: 0.97 }}
               onClick={() => {
                 const id = `stage-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
                 addStage({
@@ -102,14 +98,14 @@ export function PipelineBuilder() {
               }`}
             >
               <span className="text-xs font-semibold block">{cmd.name}</span>
-              <span className="text-[9px] text-slate-500 block mt-0.5 leading-tight">{cmd.description}</span>
+              <span className="text-xs text-slate-500 block mt-0.5 leading-tight">{cmd.description}</span>
             </motion.button>
           ))}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 pb-3">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2">Pipeline</div>
+        <div className="text-xs font-medium text-slate-500 mb-2">Pipeline</div>
         <div className="space-y-1.5">
           <AnimatePresence>
             {pipeline.map((stage, index) => (
@@ -130,7 +126,7 @@ export function PipelineBuilder() {
                   onClick={() => setExpandedStage(expandedStage === stage.id ? null : stage.id)}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-slate-600 font-mono">{index + 1}</span>
+                    <span className="text-xs text-slate-600 font-mono">{index + 1}</span>
                     <span className="text-xs font-semibold">{stage.command}</span>
                   </div>
                   <div className="flex items-center gap-1">
@@ -139,7 +135,7 @@ export function PipelineBuilder() {
                         e.stopPropagation();
                         if (index > 0) moveStage(index, index - 1);
                       }}
-                      className="text-slate-600 hover:text-slate-300 text-[10px] px-1"
+                      className="text-slate-600 hover:text-slate-300 text-xs px-1"
                       disabled={index === 0}
                     >
                       ↑
@@ -149,7 +145,7 @@ export function PipelineBuilder() {
                         e.stopPropagation();
                         if (index < pipeline.length - 1) moveStage(index, index + 1);
                       }}
-                      className="text-slate-600 hover:text-slate-300 text-[10px] px-1"
+                      className="text-slate-600 hover:text-slate-300 text-xs px-1"
                       disabled={index >= pipeline.length - 1}
                     >
                       ↓
@@ -159,7 +155,7 @@ export function PipelineBuilder() {
                         e.stopPropagation();
                         removeStage(stage.id);
                       }}
-                      className="text-slate-600 hover:text-rose-400 text-[10px] px-1"
+                      className="text-slate-600 hover:text-rose-400 text-xs px-1"
                     >
                       ✕
                     </button>
@@ -206,7 +202,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "fetch":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Source</label>
+          <label className="text-xs text-slate-500">Source</label>
           <select
             value={String(stage.args.source || "logs")}
             onChange={(e) => updateArg("source", e.target.value)}
@@ -222,7 +218,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "data":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Sample Records (JSON array)</label>
+          <label className="text-xs text-slate-500">Sample Records (JSON array)</label>
           <textarea
             value={String(stage.args.raw || "[{\"name\":\"test\",\"value\":1}]")}
             onChange={(e) => updateArg("raw", e.target.value)}
@@ -235,7 +231,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "filterOut":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Condition</label>
+          <label className="text-xs text-slate-500">Condition</label>
           <input
             value={String(stage.args.condition || "")}
             onChange={(e) => updateArg("condition", e.target.value)}
@@ -247,7 +243,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "fieldsKeep":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Fields (comma-separated)</label>
+          <label className="text-xs text-slate-500">Fields (comma-separated)</label>
           <input
             value={String(stage.args.fields || "")}
             onChange={(e) => updateArg("fields", e.target.value)}
@@ -259,7 +255,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "fieldsAdd":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Assignments</label>
+          <label className="text-xs text-slate-500">Assignments</label>
           <input
             value={String(stage.args.assignments || "")}
             onChange={(e) => updateArg("assignments", e.target.value)}
@@ -271,14 +267,14 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "sort":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Field</label>
+          <label className="text-xs text-slate-500">Field</label>
           <input
             value={String(stage.args.field || "")}
             onChange={(e) => updateArg("field", e.target.value)}
             placeholder="timestamp"
             className="w-full bg-slate-900/80 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-400/40 font-mono mb-2"
           />
-          <label className="text-[10px] text-slate-500">Direction</label>
+          <label className="text-xs text-slate-500">Direction</label>
           <select
             value={String(stage.args.direction || "asc")}
             onChange={(e) => updateArg("direction", e.target.value)}
@@ -292,7 +288,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "limit":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Count</label>
+          <label className="text-xs text-slate-500">Count</label>
           <input
             type="number"
             value={Number(stage.args.count) || 10}
@@ -304,21 +300,21 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "summarize":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Aggregation</label>
+          <label className="text-xs text-slate-500">Aggregation</label>
           <input
             value={String(stage.args.aggregation || "count")}
             onChange={(e) => updateArg("aggregation", e.target.value)}
             placeholder="count"
             className="w-full bg-slate-900/80 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-400/40 font-mono mb-2"
           />
-          <label className="text-[10px] text-slate-500">By field</label>
+          <label className="text-xs text-slate-500">By field</label>
           <input
             value={String(stage.args.by || "")}
             onChange={(e) => updateArg("by", e.target.value)}
             placeholder="host"
             className="w-full bg-slate-900/80 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-400/40 font-mono mb-2"
           />
-          <label className="text-[10px] text-slate-500">Alias</label>
+          <label className="text-xs text-slate-500">Alias</label>
           <input
             value={String(stage.args.alias || "count")}
             onChange={(e) => updateArg("alias", e.target.value)}
@@ -330,7 +326,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "makeTimeseries":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Aggregation</label>
+          <label className="text-xs text-slate-500">Aggregation</label>
           <select
             value={String(stage.args.aggregation || "count")}
             onChange={(e) => updateArg("aggregation", e.target.value)}
@@ -342,21 +338,21 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
             <option value="max">max</option>
             <option value="min">min</option>
           </select>
-          <label className="text-[10px] text-slate-500">Interval</label>
+          <label className="text-xs text-slate-500">Interval</label>
           <input
             value={String(stage.args.interval || "1h")}
             onChange={(e) => updateArg("interval", e.target.value)}
             placeholder="1h"
             className="w-full bg-slate-900/80 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-400/40 font-mono mb-2"
           />
-          <label className="text-[10px] text-slate-500">By field</label>
+          <label className="text-xs text-slate-500">By field</label>
           <input
             value={String(stage.args.by || "")}
             onChange={(e) => updateArg("by", e.target.value)}
             placeholder="loglevel"
             className="w-full bg-slate-900/80 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-400/40 font-mono mb-2"
           />
-          <label className="text-[10px] text-slate-500">Alias</label>
+          <label className="text-xs text-slate-500">Alias</label>
           <input
             value={String(stage.args.alias || "count")}
             onChange={(e) => updateArg("alias", e.target.value)}
@@ -368,7 +364,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "search":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Search term</label>
+          <label className="text-xs text-slate-500">Search term</label>
           <input
             value={String(stage.args.term || "")}
             onChange={(e) => updateArg("term", e.target.value)}
@@ -380,7 +376,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "fieldsRemove":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Fields to remove (comma-separated)</label>
+          <label className="text-xs text-slate-500">Fields to remove (comma-separated)</label>
           <input
             value={String(stage.args.fields || "")}
             onChange={(e) => updateArg("fields", e.target.value)}
@@ -392,7 +388,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "fieldsRename":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Renames (old = new, comma-separated)</label>
+          <label className="text-xs text-slate-500">Renames (old = new, comma-separated)</label>
           <input
             value={String(stage.args.assignments || "")}
             onChange={(e) => updateArg("assignments", e.target.value)}
@@ -404,7 +400,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "dedup":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Field</label>
+          <label className="text-xs text-slate-500">Field</label>
           <input
             value={String(stage.args.field || "")}
             onChange={(e) => updateArg("field", e.target.value)}
@@ -416,14 +412,14 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "parse":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Field</label>
+          <label className="text-xs text-slate-500">Field</label>
           <input
             value={String(stage.args.field || "content")}
             onChange={(e) => updateArg("field", e.target.value)}
             placeholder="content"
             className="w-full bg-slate-900/80 border border-white/[0.08] rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-400/40 font-mono mb-2"
           />
-          <label className="text-[10px] text-slate-500">Pattern</label>
+          <label className="text-xs text-slate-500">Pattern</label>
           <input
             value={String(stage.args.pattern || "")}
             onChange={(e) => updateArg("pattern", e.target.value)}
@@ -435,7 +431,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     case "expand":
       return (
         <>
-          <label className="text-[10px] text-slate-500">Array field</label>
+          <label className="text-xs text-slate-500">Array field</label>
           <input
             value={String(stage.args.field || "")}
             onChange={(e) => updateArg("field", e.target.value)}
@@ -447,7 +443,7 @@ function StageEditor({ stage, index }: { stage: PipelineStage; index: number }) 
     default:
       return (
         <>
-          <label className="text-[10px] text-slate-500">Raw args</label>
+          <label className="text-xs text-slate-500">Raw args</label>
           <input
             value={String(stage.args.raw || "")}
             onChange={(e) => updateArg("raw", e.target.value)}

@@ -13,6 +13,8 @@ import {
 } from "@/lib/api/profile";
 import { UserAvatar } from "./UserAvatar";
 import { ANIMAL_EMOJIS } from "@/lib/avatars";
+import { RankBadge } from "./RankBadge";
+import { BadgeShelf } from "./BadgeShelf";
 
 export function ProfileScreen() {
   // Hydrate session + progress in case the user navigates here directly.
@@ -36,6 +38,7 @@ export function ProfileScreen() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
 
+  const streak = useInvestigatorStore((s) => s.streak);
   const gameXP = Object.values(gameHighScores).reduce((a, b) => a + b, 0);
 
   useEffect(() => {
@@ -171,7 +174,7 @@ export function ProfileScreen() {
                 </span>
                 <button
                   onClick={() => setEditing(true)}
-                  className="text-[10px] text-cyan-400 hover:underline"
+                  className="text-xs text-cyan-400 hover:underline"
                 >
                   Edit
                 </button>
@@ -203,7 +206,7 @@ export function ProfileScreen() {
                 : "— not yet accepted —"}
             </span>
             {profile?.terms_version && (
-              <span className="ml-2 text-[10px] text-slate-500">version {profile.terms_version}</span>
+              <span className="ml-2 text-xs text-slate-500">version {profile.terms_version}</span>
             )}
           </Field>
 
@@ -211,6 +214,22 @@ export function ProfileScreen() {
             <Stat label="Learning XP" value={profile?.learning_xp ?? totalXP} accent="cyan" />
             <Stat label="Game XP" value={profile?.game_xp ?? gameXP} accent="violet" />
           </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-white/[0.06] bg-slate-900/40 p-3">
+              <p className="text-xs font-medium text-slate-500 mb-1">Streak</p>
+              <p className="text-sm font-semibold text-amber-400">🔥 {streak.current} day{streak.current !== 1 ? "s" : ""}</p>
+              <p className="text-xs text-slate-600 mt-0.5">Longest: {streak.longest}</p>
+            </div>
+            <div className="rounded-lg border border-white/[0.06] bg-slate-900/40 p-3">
+              <p className="text-xs font-medium text-slate-500 mb-2">Rank</p>
+              <RankBadge size="sm" />
+            </div>
+          </div>
+
+          <Field label="Badges">
+            <BadgeShelf />
+          </Field>
 
           {error && (
             <p className="text-xs text-rose-400 bg-rose-400/10 border border-rose-400/20 rounded-md p-2">{error}</p>
@@ -227,7 +246,7 @@ export function ProfileScreen() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">{label}</p>
+      <p className="text-xs font-medium text-slate-500 mb-1">{label}</p>
       <div>{children}</div>
     </div>
   );
@@ -245,7 +264,7 @@ function Stat({
   const cls = accent === "cyan" ? "text-cyan-300" : "text-violet-300";
   return (
     <div className="rounded-lg border border-white/[0.06] bg-slate-900/40 p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+      <p className="text-xs font-medium text-slate-500">{label}</p>
       <p className={`text-2xl font-bold ${cls}`}>{value}</p>
     </div>
   );

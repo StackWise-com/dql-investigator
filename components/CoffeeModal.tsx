@@ -109,7 +109,7 @@ export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
             </p>
 
             <div>
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+              <label className="text-xs font-medium text-slate-500">
                 Choose an amount (INR)
               </label>
               <div className="grid grid-cols-3 gap-2 mt-2">
@@ -144,8 +144,6 @@ export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
             )}
 
             <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
               onClick={handlePay}
               disabled={paying || !selectedAmount}
               className="w-full py-2.5 rounded-md text-sm font-medium bg-amber-400/15 text-amber-300 hover:bg-amber-400/25 border border-amber-400/30 transition-colors disabled:opacity-50"
@@ -159,7 +157,7 @@ export function CoffeeModal({ isOpen, onClose }: CoffeeModalProps) {
                 : "Pay with Razorpay"}
             </motion.button>
 
-            <p className="text-[10px] text-slate-500 text-center">
+            <p className="text-xs text-slate-500 text-center">
               Secure payments powered by Razorpay. All cards &amp; UPI accepted.
             </p>
           </motion.div>
