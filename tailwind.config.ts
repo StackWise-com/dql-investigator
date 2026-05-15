@@ -20,6 +20,11 @@ const config: Config = {
           800: "#1e293b",
           700: "#334155",
         },
+        accent: {
+          DEFAULT: "#22b8c8",
+          muted: "rgba(34,184,200,0.15)",
+          border: "rgba(34,184,200,0.25)",
+        },
         cyan: {
           400: "#22d3ee",
           500: "#06b6d4",

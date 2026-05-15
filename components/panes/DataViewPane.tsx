@@ -6,6 +6,9 @@ import { useInvestigatorStore } from "@/lib/store/useInvestigatorStore";
 import { runPipeline, inferColumns } from "@/lib/dql/engine";
 import { getSampleData } from "@/lib/dql/data";
 import type { DQLRecord, PipelineStage } from "@/lib/types/dql";
+import { CellMenu } from "@/components/data-view/CellMenu";
+import { ColumnHeaderMenu } from "@/components/data-view/ColumnHeaderMenu";
+import { FieldSchemaSidebar } from "@/components/data-view/FieldSchemaSidebar";
 
 const DISPLAY_LIMIT = 200;
 
@@ -16,6 +19,8 @@ export function DataViewPane() {
   const selectedStageIndex = useInvestigatorStore((s) => s.selectedStageIndex);
   const setSelectedStageIndex = useInvestigatorStore((s) => s.setSelectedStageIndex);
   const setStageResults = useInvestigatorStore((s) => s.setStageResults);
+  const hiddenColumns = useInvestigatorStore((s) => s.hiddenColumns);
+  const columnSort = useInvestigatorStore((s) => s.columnSort);
   const [flashStage, setFlashStage] = useState<number | null>(null);
   const [prevPipelineLen, setPrevPipelineLen] = useState(pipeline.length);
 
@@ -77,10 +82,27 @@ export function DataViewPane() {
       ? results[selectedStageIndex]
       : results[results.length - 1];
 
-  const columns = displayResult?.columns || [];
-  const rows = displayResult?.data || [];
+  const allColumns = displayResult?.columns || [];
+  const columns = allColumns.filter((c) => !hiddenColumns.includes(c.name));
+  const rawRows = displayResult?.data || [];
+  const rows = useMemo(() => {
+    if (!columnSort) return rawRows;
+    return [...rawRows].sort((a, b) => {
+      const av = a[columnSort.field];
+      const bv = b[columnSort.field];
+      const aStr = av === null || av === undefined ? "" : String(av);
+      const bStr = bv === null || bv === undefined ? "" : String(bv);
+      const aNum = Number(av);
+      const bNum = Number(bv);
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return columnSort.dir === "asc" ? aNum - bNum : bNum - aNum;
+      }
+      return columnSort.dir === "asc" ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
+    });
+  }, [rawRows, columnSort]);
   const command = displayResult?.command || "fetch";
   const prevRows = displayResult?.previousData || [];
+  const sampleRow = rows[0] || null;
 
   // Search term for highlighting
   const searchTerm = command === "search"
@@ -98,43 +120,13 @@ export function DataViewPane() {
   const prevKeys = new Set(prevRows.map((r, i) => rowKey(r, i)));
   const currentKeys = new Set(rows.map((r, i) => rowKey(r, i)));
 
-  const removedRows = prevRows.filter((r, i) => !currentKeys.has(rowKey(r, i)));
-  const addedRows = rows.filter((r, i) => !prevKeys.has(rowKey(r, i)));
-
   const getRowVisualState = (row: DQLRecord, idx: number) => {
     const key = rowKey(row, idx);
-    const isNew = !prevKeys.has(key) && prevRows.length > 0;
     const isRemoved = !currentKeys.has(key);
-
-    switch (command) {
-      case "filter":
-        if (isRemoved) return "removed-red";
-        if (!isNew && removedRows.length > 0) return "kept-green";
-        return "normal";
-      case "filterOut":
-        if (isRemoved) return "removed-orange";
-        if (!isNew && removedRows.length > 0) return "kept-green";
-        return "normal";
-      case "sort":
-        return "swap";
-      case "limit":
-        if (idx >= Number(pipeline[selectedStageIndex]?.args?.count || 100)) return "cutoff";
-        return "normal";
-      case "summarize":
-        return "merge";
-      case "dedup":
-        if (isRemoved) return "merged-amber";
-        return "normal";
-      case "fieldsAdd":
-        if (isNew) return "new-green";
-        return "normal";
-      case "parse":
-        return "scan";
-      case "makeTimeseries":
-        return "timeseries";
-      default:
-        return "normal";
-    }
+    if (command === "filter" && isRemoved) return "removed-red";
+    if (command === "filterOut" && isRemoved) return "removed-orange";
+    if (command === "dedup" && isRemoved) return "merged-amber";
+    return "normal";
   };
 
   const getRowClasses = (state: string) => {
@@ -143,67 +135,31 @@ export function DataViewPane() {
         return "bg-rose-500/20 border-rose-500/40 text-rose-200";
       case "removed-orange":
         return "bg-orange-500/20 border-orange-500/40 text-orange-200";
-      case "kept-green":
-        return "border-emerald-500/30";
-      case "new-green":
-        return "bg-emerald-500/10 border-emerald-500/30";
       case "merged-amber":
         return "bg-amber-500/20 border-amber-500/40";
-      case "cutoff":
-        return "bg-rose-500/10 border-rose-500/20 opacity-50";
-      case "scan":
-        return "border-teal-400/30";
-      case "timeseries":
-        return "border-violet-400/30 bg-violet-400/5";
       default:
         return "";
     }
   };
 
-  const getInitialAnimation = (state: string, idx: number) => {
-    switch (state) {
-      case "removed-red":
-      case "removed-orange":
-      case "merged-amber":
-        return { opacity: 1, y: 0, scale: 1, backgroundColor: "rgba(239,68,68,0.1)" };
-      case "new-green":
-        return { opacity: 0, x: 20 };
-      case "swap":
-        return { opacity: 0, y: idx % 2 === 0 ? -10 : 10 };
-      case "timeseries":
-        return { opacity: 0, y: -8, scale: 0.98 };
-      default:
-        return { opacity: 0, y: 6 };
+  const getInitialAnimation = (state: string) => {
+    if (state === "removed-red" || state === "removed-orange" || state === "merged-amber") {
+      return { opacity: 1, y: 0 };
     }
+    return { opacity: 0, y: 4 };
   };
 
   const getAnimateState = (state: string, idx: number) => {
-    switch (state) {
-      case "removed-red":
-      case "removed-orange":
-      case "merged-amber":
-        return {
-          opacity: 0,
-          y: 20,
-          scale: 0.95,
-          backgroundColor: state === "merged-amber" ? "rgba(245,158,11,0.3)" : "rgba(239,68,68,0.2)",
-          transition: { delay: 0.3 + idx * 0.05, duration: 0.4 },
-        };
-      case "new-green":
-        return { opacity: 1, x: 0, transition: { delay: idx * 0.03, duration: 0.3 } };
-      case "swap":
-        return { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 25, delay: idx * 0.02 } };
-      case "timeseries":
-        return { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 200, damping: 20, delay: idx * 0.03 } };
-      default:
-        return { opacity: 1, y: 0, transition: { delay: idx < 20 ? idx * 0.015 : 0, duration: 0.2 } };
+    if (state === "removed-red" || state === "removed-orange" || state === "merged-amber") {
+      return { opacity: 0, y: 8, transition: { delay: 0.2 + idx * 0.03, duration: 0.25 } };
     }
+    return { opacity: 1, y: 0, transition: { delay: idx < 30 ? idx * 0.008 : 0, duration: 0.15 } };
   };
 
   return (
-    <div className="flex-1 min-w-0 glass-panel border-x border-cyan-400/10 flex flex-col" data-tour-target="dataview">
+    <div className="flex-1 min-w-0 glass-panel border-x border-white/[0.06] flex flex-col" data-tour-target="dataview">
       <div className="h-10 flex items-center px-4 border-b border-white/[0.06] justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">Data View</span>
+        <span className="text-xs font-medium text-slate-300">Data View</span>
         <div className="flex items-center gap-3">
           <span className="text-[10px] text-slate-500">
             {displayResult?.command && selectedStageIndex >= 0
@@ -214,6 +170,8 @@ export function DataViewPane() {
         </div>
       </div>
 
+      <div className="flex flex-1 min-h-0">
+        <FieldSchemaSidebar columns={allColumns} sampleRow={sampleRow} />
       <div className="flex-1 overflow-auto p-4 relative">
         {/* Persistent Pipeline Impact Timeline */}
         {results.length > 1 && (
@@ -341,10 +299,9 @@ export function DataViewPane() {
                     {columns.map((col) => (
                       <th
                         key={col.name}
-                        className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-400"
+                        className="px-3 py-2 text-left"
                       >
-                        {col.name}
-                        <span className="ml-1.5 text-slate-600 font-normal">{col.type}</span>
+                        <ColumnHeaderMenu column={col} />
                       </th>
                     ))}
                   </tr>
@@ -358,17 +315,18 @@ export function DataViewPane() {
                         <motion.tr
                           key={rowKey(row, i)}
                           layout
-                          initial={getInitialAnimation(state, i)}
+                          initial={getInitialAnimation(state)}
                           animate={getAnimateState(state, i)}
-                          exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+                          exit={{ opacity: 0, x: -10, transition: { duration: 0.15 } }}
                           className={`border-b border-white/[0.03] even:bg-white/[0.02] hover:bg-white/[0.04] transition-colors ${classes}`}
                         >
                           {columns.map((col) => (
                             <td
                               key={col.name}
-                              className={`px-3 py-2 text-xs font-mono truncate max-w-[200px] ${state === "removed-red" || state === "removed-orange" ? "text-rose-200" : state === "new-green" ? "text-emerald-200" : "text-slate-300"}`}
+                              className={`relative group/cell px-3 py-1.5 text-xs font-mono truncate max-w-[200px] ${state === "removed-red" || state === "removed-orange" ? "text-rose-200" : "text-slate-300"}`}
                             >
                               {formatCell(row[col.name], searchTerm)}
+                              <CellMenu field={col.name} value={row[col.name]} />
                             </td>
                           ))}
                         </motion.tr>
@@ -534,6 +492,7 @@ export function DataViewPane() {
             initialData={initialData}
           />
         )}
+      </div>
       </div>
     </div>
   );

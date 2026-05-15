@@ -51,6 +51,10 @@ interface InvestigatorState {
   setStageResults: (results: { stageId: string; data: DQLRecord[]; columns: DQLColumn[]; previousData?: DQLRecord[]; previousColumns?: DQLColumn[] }[]) => void;
   selectedStageIndex: number;
   setSelectedStageIndex: (index: number) => void;
+  hiddenColumns: string[];
+  toggleHiddenColumn: (name: string) => void;
+  columnSort: { field: string; dir: "asc" | "desc" } | null;
+  setColumnSort: (sort: { field: string; dir: "asc" | "desc" } | null) => void;
 
   // UI
   viewMode: ViewMode;
@@ -154,6 +158,8 @@ export const useInvestigatorStore = create<InvestigatorState>()(
           editorValue: "",
           stageResults: [],
           selectedStageIndex: -1,
+          hiddenColumns: [],
+          columnSort: null,
           lastActiveAt: new Date().toISOString(),
         }),
       nextStep: () => {
@@ -237,6 +243,15 @@ export const useInvestigatorStore = create<InvestigatorState>()(
       setStageResults: (stageResults) => set({ stageResults }),
       selectedStageIndex: -1,
       setSelectedStageIndex: (selectedStageIndex) => set({ selectedStageIndex }),
+      hiddenColumns: [],
+      toggleHiddenColumn: (name) =>
+        set((state) => ({
+          hiddenColumns: state.hiddenColumns.includes(name)
+            ? state.hiddenColumns.filter((c) => c !== name)
+            : [...state.hiddenColumns, name],
+        })),
+      columnSort: null,
+      setColumnSort: (columnSort) => set({ columnSort }),
 
       viewMode: "cards",
       setViewMode: (viewMode) => set({ viewMode }),

@@ -34,17 +34,17 @@ export function CommandDeckPane() {
   const showRunButton = isEditor && hasEditorText;
 
   return (
-    <div className="w-[28%] min-w-[300px] glass-panel border-l border-cyan-400/20 flex flex-col" data-tour-target="commanddeck">
+    <div className="w-[28%] min-w-[300px] glass-panel border-l border-white/[0.06] flex flex-col" data-tour-target="commanddeck">
       <div className="h-10 flex items-center px-4 border-b border-white/[0.06] justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">Command Deck</span>
+        <span className="text-xs font-medium text-slate-300">Command Deck</span>
         <div className="flex items-center gap-1">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setViewMode("cards")}
-            className={`px-2.5 py-1 rounded-md text-[10px] font-medium ${
+            className={`px-2.5 py-1 rounded-md text-xs font-medium ${
               viewMode === "cards"
-                ? "bg-cyan-400/20 text-cyan-300"
+                ? "bg-white/10 text-slate-200"
                 : "text-slate-500 hover:text-slate-300"
             }`}
           >
@@ -54,9 +54,9 @@ export function CommandDeckPane() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setViewMode("editor")}
-            className={`px-2.5 py-1 rounded-md text-[10px] font-medium ${
+            className={`px-2.5 py-1 rounded-md text-xs font-medium ${
               viewMode === "editor"
-                ? "bg-cyan-400/20 text-cyan-300"
+                ? "bg-white/10 text-slate-200"
                 : "text-slate-500 hover:text-slate-300"
             }`}
           >
@@ -70,7 +70,7 @@ export function CommandDeckPane() {
       </div>
 
       <div className="p-3 border-t border-white/[0.06] flex items-center justify-between">
-        <span className="text-[10px] text-slate-500">{pipeline.length} stage{pipeline.length !== 1 ? "s" : ""}</span>
+        <span className="text-xs text-slate-500">{pipeline.length} stage{pipeline.length !== 1 ? "s" : ""}</span>
         <div className="flex items-center gap-2">
           {showRunButton ? (
             <motion.button
@@ -78,7 +78,7 @@ export function CommandDeckPane() {
               whileTap={{ scale: 0.98 }}
               onClick={handleRun}
               data-tour-target="run-button"
-              className={`px-3 py-1.5 rounded-md text-[10px] font-medium flex items-center gap-1.5 transition-colors ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
                 hasUnrunChanges
                   ? "bg-emerald-400/15 text-emerald-300 border border-emerald-400/30 hover:bg-emerald-400/25"
                   : "bg-white/5 text-slate-400 border border-white/[0.06] hover:bg-white/10"
@@ -94,7 +94,7 @@ export function CommandDeckPane() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={clearPipeline}
-            className="px-3 py-1.5 rounded-md text-[10px] font-medium text-rose-400 hover:bg-rose-400/10 border border-rose-400/20"
+            className="px-3 py-1.5 rounded-md text-xs font-medium text-rose-400 hover:bg-rose-400/10 border border-rose-400/20"
           >
             Clear
           </motion.button>

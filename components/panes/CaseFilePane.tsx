@@ -105,9 +105,9 @@ export function CaseFilePane() {
   };
 
   return (
-    <div className="w-[28%] min-w-[280px] glass-panel border-r border-cyan-400/20 flex flex-col">
+    <div className="w-[28%] min-w-[280px] glass-panel border-r border-white/[0.06] flex flex-col">
       <div className="h-10 flex items-center px-4 border-b border-white/[0.06] justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400/80">Case File</span>
+        <span className="text-xs font-medium text-slate-300">Case File</span>
         {activeScenario && (
           <button
             onClick={() => setScenario(null)}
@@ -161,7 +161,7 @@ export function CaseFilePane() {
                 >
                   <div className="glass-panel-strong rounded-lg p-4 space-y-3" data-tour-target="case-brief">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-amber-400/80">Mission Brief</span>
+                      <span className="text-xs font-medium text-amber-400/70">Mission Brief</span>
                       <button
                         onClick={() => setShowNarrative(!showNarrative)}
                         className="text-[10px] text-slate-500 hover:text-slate-300"
@@ -181,13 +181,13 @@ export function CaseFilePane() {
                   </div>
 
                   <div className="glass-panel rounded-lg p-4 space-y-2" data-tour-target="case-objective">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400/80">Objective</span>
+                    <span className="text-[10px] font-medium text-emerald-400/70">Objective</span>
                     <p className="text-sm text-slate-200">{step.goal}</p>
                   </div>
 
                   <div className="glass-panel rounded-lg p-4 space-y-2" data-tour-target="case-hint">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400/80">Hint</span>
+                      <span className="text-[10px] font-medium text-amber-400/70">Hint</span>
                       <button
                         onClick={() => setShowHint(!showHint)}
                         className="text-[10px] text-slate-500 hover:text-slate-300"
@@ -208,7 +208,7 @@ export function CaseFilePane() {
 
                   {step.lesson && (
                     <div className="glass-panel rounded-lg p-4 space-y-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-cyan-400/80">Lesson</span>
+                      <span className="text-[10px] font-medium text-slate-300">Lesson</span>
                       <pre className="text-xs font-mono text-slate-300 bg-slate-950/80 rounded-md p-3 overflow-x-auto blur-sm hover:blur-0 transition-all cursor-help select-none" title="Hover to reveal the solution">
                         {step.lesson}
                       </pre>
