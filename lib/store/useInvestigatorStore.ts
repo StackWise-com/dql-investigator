@@ -310,7 +310,13 @@ export const useInvestigatorStore = create<InvestigatorState>()(
           const yesterdayStr = yesterday.toISOString().slice(0, 10);
           const next = last === yesterdayStr ? state.streak.current + 1 : 1;
           const longest = Math.max(next, state.streak.longest);
-          return { streak: { current: next, longest, lastVisitDate: today } };
+          const newBadges = [...state.earnedBadges];
+          if (next >= 7 && !newBadges.includes("streak-7")) newBadges.push("streak-7");
+          if (next >= 30 && !newBadges.includes("streak-30")) newBadges.push("streak-30");
+          return {
+            streak: { current: next, longest, lastVisitDate: today },
+            earnedBadges: newBadges,
+          };
         }),
 
       earnedBadges: [],
@@ -331,7 +337,28 @@ export const useInvestigatorStore = create<InvestigatorState>()(
           const completed = prev.completedLessons.includes(lessonId)
             ? prev.completedLessons
             : [...prev.completedLessons, lessonId];
+          const newBadges = [...state.earnedBadges];
+
+          // Track-complete badge for fundamentals
+          const { TRACKS } = require("@/lib/curriculum/tracks");
+          const track = TRACKS.find((t: { id: string }) => t.id === trackId);
+          if (track && completed.length >= track.lessons.length && trackId === "fundamentals") {
+            if (!newBadges.includes("track-fundamentals")) newBadges.push("track-fundamentals");
+          }
+          // Polyglot: started all 5 tracks
+          const allTrackIds = TRACKS.map((t: { id: string }) => t.id) as string[];
+          const startedTracks = allTrackIds.filter((id: string) => {
+            const p = id === trackId
+              ? { completedLessons: completed }
+              : state.trackProgress[id];
+            return p && p.completedLessons.length > 0;
+          });
+          if (startedTracks.length >= 5 && !newBadges.includes("polyglot")) {
+            newBadges.push("polyglot");
+          }
+
           return {
+            earnedBadges: newBadges,
             trackProgress: {
               ...state.trackProgress,
               [trackId]: { completedLessons: completed, currentLessonId: nextLessonId },

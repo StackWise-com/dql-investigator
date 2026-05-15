@@ -448,6 +448,8 @@ export function LessonShell() {
   const completedScenarios = useInvestigatorStore((s) => s.completedScenarios);
   const markLessonComplete = useInvestigatorStore((s) => s.markLessonComplete);
   const addXP = useInvestigatorStore((s) => s.addXP);
+  const awardBadge = useInvestigatorStore((s) => s.awardBadge);
+  const earnedBadges = useInvestigatorStore((s) => s.earnedBadges);
   const setScenario = useInvestigatorStore((s) => s.setScenario);
   const setShowLanding = useInvestigatorStore((s) => s.setShowLanding);
   const trackProgress = useInvestigatorStore((s) => s.trackProgress);
@@ -494,9 +496,16 @@ export function LessonShell() {
       const next = nextLesson?.id ?? "";
       markLessonComplete(trackId, lessonId, next);
       addXP(earned);
+      // Skill-based badges
+      if (lesson.skills.includes("filter") && !earnedBadges.includes("first-filter")) {
+        awardBadge("first-filter");
+      }
+      if (lesson.skills.includes("parse") && !earnedBadges.includes("first-parse")) {
+        awardBadge("first-parse");
+      }
       setPhase("complete");
     },
-    [track, lesson, checkQuestions.length, nextLesson, markLessonComplete, trackId, lessonId, addXP]
+    [track, lesson, checkQuestions.length, nextLesson, markLessonComplete, trackId, lessonId, addXP, awardBadge, earnedBadges]
   );
 
   const handleNextLesson = useCallback(() => {
