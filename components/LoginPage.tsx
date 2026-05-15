@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { LoginScene } from "./three/LoginScene";
 import { COUNTRIES } from "@/lib/countries";
 import { FeedbackButton } from "./FeedbackButton";
 import { useAuth } from "@/lib/auth/useAuth";
@@ -66,31 +65,46 @@ export function LoginPage() {
   };
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-slate-950">
-      <div className="pointer-events-none">
-        <LoginScene />
-      </div>
-
-      {/* Title */}
-      <div
-        className="absolute top-6 left-8 z-20"
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse-glow" />
-          <span className="text-sm font-semibold tracking-wide text-cyan-400">DQL INVESTIGATOR</span>
+    <div className="h-screen w-screen relative overflow-hidden bg-slate-950 flex">
+      {/* Left panel — hero */}
+      <div className="hidden lg:flex flex-col justify-between w-[46%] bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border-r border-white/[0.06] p-12 relative overflow-hidden">
+        {/* Subtle grid pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{ backgroundImage: "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)", backgroundSize: "48px 48px" }}
+        />
+        {/* Logo */}
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-6">
+            <svg viewBox="0 0 32 32" className="w-8 h-8 text-accent" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="14" cy="14" r="8" />
+              <path d="M20 20l7 7" strokeLinecap="round" />
+              <path d="M11 14h6M14 11v6" strokeLinecap="round" />
+            </svg>
+            <span className="text-base font-semibold text-slate-100 tracking-tight">DQL Detective</span>
+          </div>
+          <h1 className="text-3xl font-bold text-slate-100 tracking-tight leading-snug mb-4">
+            Learn Dynatrace<br />Query Language<br />by doing.
+          </h1>
+          <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
+            Solve real observability incidents, build intuition with interactive pipelines, and track your progress from Trainee to Legend.
+          </p>
         </div>
-        <p className="text-xs text-slate-400 max-w-xs leading-relaxed">
-          Make the invisible visible. Learn Dynatrace Query Language by investigating real incidents.
-        </p>
+        {/* Stats */}
+        <div className="relative flex items-center gap-8">
+          {[["60+", "Scenarios"], ["5", "Learning Tracks"], ["Free", "Always"]].map(([n, l]) => (
+            <div key={l}>
+              <div className="text-xl font-bold text-slate-100">{n}</div>
+              <div className="text-xs text-slate-500 mt-0.5">{l}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Center glass card */}
-      <div
-        className="absolute inset-0 z-10 flex items-center justify-center p-6"
-      >
-        <div
-          className="w-full max-w-sm glass-panel-strong rounded-xl border border-cyan-400/20 p-6 space-y-4 shadow-2xl backdrop-blur-xl pointer-events-auto"
-        >
+      {/* Right panel — form */}
+      <div className="flex-1 flex items-center justify-center p-8 lg:p-16">
+        <div className="w-full max-w-sm space-y-4">
           {/* Tab toggle (hidden on forgot screen) */}
           {mode !== "forgot" && (
             <div className="flex rounded-lg bg-slate-900/60 p-0.5 pointer-events-auto">
@@ -117,7 +131,7 @@ export function LoginPage() {
               <button
                 type="button"
                 onClick={() => switchMode("login")}
-                className="text-[11px] text-slate-500 hover:text-slate-300"
+                className="text-xs text-slate-500 hover:text-slate-300"
               >
                 ← Back to sign in
               </button>
@@ -126,7 +140,7 @@ export function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-3 pointer-events-auto">
             <div>
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Email</label>
+              <label className="text-xs font-medium text-slate-500">Email</label>
               <input
                 type="email"
                 value={email}
@@ -140,12 +154,12 @@ export function LoginPage() {
             {mode !== "forgot" && (
               <div>
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Password</label>
+                  <label className="text-xs font-medium text-slate-500">Password</label>
                   {mode === "login" && (
                     <button
                       type="button"
                       onClick={() => switchMode("forgot")}
-                      className="text-[10px] text-cyan-400 hover:text-cyan-300 hover:underline"
+                      className="text-xs text-cyan-400 hover:text-cyan-300 hover:underline"
                     >
                       Forgot password?
                     </button>
@@ -164,7 +178,7 @@ export function LoginPage() {
 
             {mode === "signup" && (
               <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Country</label>
+                <label className="text-xs font-medium text-slate-500">Country</label>
                 <select
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
@@ -203,8 +217,6 @@ export function LoginPage() {
             </AnimatePresence>
 
             <motion.button
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.99 }}
               type="submit"
               disabled={loading}
               className="w-full py-2.5 rounded-md text-sm font-medium bg-cyan-400/15 text-cyan-300 hover:bg-cyan-400/25 border border-cyan-400/30 transition-colors disabled:opacity-50"
@@ -219,7 +231,7 @@ export function LoginPage() {
             </motion.button>
           </form>
 
-          <p className="text-[10px] text-slate-600 text-center">
+          <p className="text-xs text-slate-600 text-center">
             {mode === "login"
               ? "Sign in to unlock extra cases and track your progression."
               : mode === "signup"

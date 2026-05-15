@@ -57,7 +57,7 @@ export function TourTooltip({
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="text-sm font-semibold text-slate-100 leading-snug">{step.title}</h3>
-          <span className="shrink-0 text-[10px] text-slate-500 font-medium">
+          <span className="shrink-0 text-xs text-slate-500 font-medium">
             {stepIndex + 1} / {totalSteps}
           </span>
         </div>
@@ -69,7 +69,7 @@ export function TourTooltip({
         <div className="flex items-center justify-between pt-1">
           <button
             onClick={onSkip}
-            className="text-[10px] font-medium text-slate-500 hover:text-slate-300 transition-colors"
+            className="text-xs font-medium text-slate-500 hover:text-slate-300 transition-colors"
           >
             Skip Tour
           </button>
@@ -78,14 +78,14 @@ export function TourTooltip({
             {!isFirst && (
               <button
                 onClick={onBack}
-                className="px-2.5 py-1 rounded-md text-[10px] font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-colors border border-white/[0.06]"
+                className="px-2.5 py-1 rounded-md text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-colors border border-white/[0.06]"
               >
                 Back
               </button>
             )}
             <button
               onClick={onNext}
-              className="px-3 py-1.5 rounded-md text-[10px] font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-colors shadow-lg shadow-cyan-400/20"
+              className="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-colors shadow-lg shadow-cyan-400/20"
             >
               {isLast ? "Finish" : "Next"}
             </button>

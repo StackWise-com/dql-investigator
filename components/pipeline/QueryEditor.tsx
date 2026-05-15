@@ -24,7 +24,7 @@ export function QueryEditor() {
   return (
     <div className="flex flex-col h-full p-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">DQL Query</span>
+        <span className="text-xs font-medium text-slate-500">DQL Query</span>
         <div className="flex gap-1">
           {[
             { label: "Fetch", tpl: "fetch logs\n| " },
@@ -36,7 +36,7 @@ export function QueryEditor() {
             <button
               key={t.label}
               onClick={() => insertTemplate(t.tpl)}
-              className="px-1.5 py-0.5 rounded text-[9px] bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
+              className="px-1.5 py-0.5 rounded text-xs bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
             >
               {t.label}
             </button>
@@ -55,7 +55,7 @@ export function QueryEditor() {
         spellCheck={false}
         className="flex-1 min-h-[100px] bg-slate-900/80 border border-white/[0.08] rounded-lg p-3 text-xs font-mono text-slate-200 focus:outline-none focus:border-cyan-400/40 resize-none leading-relaxed"
       />
-      <div className="mt-2 text-[10px] text-slate-600">
+      <div className="mt-2 text-xs text-slate-600">
         Supported: fetch, filter, fields, sort, limit, summarize, dedup, search, parse, expand
       </div>
     </div>

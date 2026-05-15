@@ -57,14 +57,14 @@ export function CellMenu({ field, value }: CellMenuProps) {
       <button
         ref={btnRef}
         onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
-        className="opacity-0 group-hover/cell:opacity-100 absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-all text-[10px] leading-none"
+        className="opacity-0 group-hover/cell:opacity-100 absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-all text-xs leading-none"
         title="Cell actions"
       >
         ⋮
       </button>
       <Popover anchorRef={btnRef} open={open} onClose={() => setOpen(false)} placement="bottom-end">
         <div className="px-3 py-1.5 border-b border-white/[0.06]">
-          <span className="text-[10px] text-slate-500 font-mono truncate block max-w-[180px]">
+          <span className="text-xs text-slate-500 font-mono truncate block max-w-[180px]">
             {field}: {formatValue(value).slice(0, 40)}
           </span>
         </div>

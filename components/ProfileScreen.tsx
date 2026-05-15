@@ -171,7 +171,7 @@ export function ProfileScreen() {
                 </span>
                 <button
                   onClick={() => setEditing(true)}
-                  className="text-[10px] text-cyan-400 hover:underline"
+                  className="text-xs text-cyan-400 hover:underline"
                 >
                   Edit
                 </button>
@@ -203,7 +203,7 @@ export function ProfileScreen() {
                 : "— not yet accepted —"}
             </span>
             {profile?.terms_version && (
-              <span className="ml-2 text-[10px] text-slate-500">version {profile.terms_version}</span>
+              <span className="ml-2 text-xs text-slate-500">version {profile.terms_version}</span>
             )}
           </Field>
 
@@ -227,7 +227,7 @@ export function ProfileScreen() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">{label}</p>
+      <p className="text-xs font-medium text-slate-500 mb-1">{label}</p>
       <div>{children}</div>
     </div>
   );
@@ -245,7 +245,7 @@ function Stat({
   const cls = accent === "cyan" ? "text-cyan-300" : "text-violet-300";
   return (
     <div className="rounded-lg border border-white/[0.06] bg-slate-900/40 p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+      <p className="text-xs font-medium text-slate-500">{label}</p>
       <p className={`text-2xl font-bold ${cls}`}>{value}</p>
     </div>
   );

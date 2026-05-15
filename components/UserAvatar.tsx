@@ -88,8 +88,8 @@ export function UserAvatar({ email, xp, size = 32, showTitle = true, emoji }: Us
       </div>
       {showTitle && (
         <div className="flex flex-col leading-none">
-          <span className="text-[10px] font-semibold text-slate-200">{rank.title}</span>
-          <span className="text-[9px] text-slate-500">{rank.emoji} {xp} XP{totalArcade > 0 && ` · 🎮 ${totalArcade}`}</span>
+          <span className="text-xs font-semibold text-slate-200">{rank.title}</span>
+          <span className="text-xs text-slate-500">{rank.emoji} {xp} XP{totalArcade > 0 && ` · 🎮 ${totalArcade}`}</span>
         </div>
       )}
     </div>

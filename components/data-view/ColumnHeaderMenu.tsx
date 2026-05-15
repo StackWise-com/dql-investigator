@@ -45,25 +45,25 @@ export function ColumnHeaderMenu({ column }: ColumnHeaderMenuProps) {
 
   return (
     <span className="inline-flex items-center gap-1 group/header">
-      <span className="text-[10px] font-medium text-slate-400">{column.name}</span>
+      <span className="text-xs font-medium text-slate-400">{column.name}</span>
       {column.type && (
-        <span className="text-[9px] text-slate-600 font-normal">{column.type}</span>
+        <span className="text-xs text-slate-600 font-normal">{column.type}</span>
       )}
       {isActive && (
-        <span className="text-[9px] text-accent">{columnSort?.dir === "asc" ? "↑" : "↓"}</span>
+        <span className="text-xs text-accent">{columnSort?.dir === "asc" ? "↑" : "↓"}</span>
       )}
       <button
         ref={btnRef}
         onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
-        className="opacity-0 group-hover/header:opacity-100 w-4 h-4 flex items-center justify-center rounded text-slate-500 hover:text-slate-300 hover:bg-white/10 transition-all text-[10px]"
+        className="opacity-0 group-hover/header:opacity-100 w-4 h-4 flex items-center justify-center rounded text-slate-500 hover:text-slate-300 hover:bg-white/10 transition-all text-xs"
         title="Column options"
       >
         ⌄
       </button>
       <Popover anchorRef={btnRef} open={open} onClose={() => setOpen(false)} placement="bottom-start">
         <div className="px-3 py-1.5 border-b border-white/[0.06]">
-          <span className="text-[10px] font-medium text-slate-400">{column.name}</span>
-          {column.type && <span className="text-[9px] text-slate-600 ml-1">{column.type}</span>}
+          <span className="text-xs font-medium text-slate-400">{column.name}</span>
+          {column.type && <span className="text-xs text-slate-600 ml-1">{column.type}</span>}
         </div>
         <MenuItem
           label="Sort ascending"

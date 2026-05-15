@@ -65,7 +65,7 @@ export function PublicProfileScreen({ slug }: { slug: string }) {
               <Stat label="Game XP" value={row.game_xp} accent="violet" />
             </div>
 
-            <p className="text-[10px] text-slate-500">
+            <p className="text-xs text-slate-500">
               This is a public-facing snapshot. No private information is shown here.
             </p>
           </motion.div>
@@ -87,7 +87,7 @@ function Stat({
   const cls = accent === "cyan" ? "text-cyan-300" : "text-violet-300";
   return (
     <div className="rounded-lg border border-white/[0.06] bg-slate-900/40 p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+      <p className="text-xs font-medium text-slate-500">{label}</p>
       <p className={`text-2xl font-bold ${cls}`}>{value.toLocaleString()}</p>
     </div>
   );

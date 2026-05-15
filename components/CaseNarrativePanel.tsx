@@ -140,8 +140,8 @@ export function CaseNarrativePanel() {
       {/* Header */}
       <div className="shrink-0 flex items-center justify-between px-5 py-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Case File</span>
-          <span className="text-[10px] text-slate-600">—</span>
+          <span className="text-xs font-medium text-slate-400">Case File</span>
+          <span className="text-xs text-slate-600">—</span>
           <span className="text-xs text-slate-300 font-medium">{activeScenario.title}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -151,12 +151,12 @@ export function CaseNarrativePanel() {
                 setHasSeenDemo(true);
                 setScenario(null);
               }}
-              className="text-[10px] text-amber-400 hover:text-amber-300"
+              className="text-xs text-amber-400 hover:text-amber-300"
             >
               Skip Tutorial →
             </button>
           )}
-          <button onClick={() => setScenario(null)} className="text-[10px] text-slate-500 hover:text-slate-300">
+          <button onClick={() => setScenario(null)} className="text-xs text-slate-500 hover:text-slate-300">
             Close Case
           </button>
         </div>
@@ -177,7 +177,7 @@ export function CaseNarrativePanel() {
               }`}
             />
           ))}
-          <span className="text-[10px] text-slate-500 ml-1">
+          <span className="text-xs text-slate-500 ml-1">
             Step {currentStepIndex + 1} / {activeScenario.steps.length}
           </span>
         </div>
@@ -196,10 +196,10 @@ export function CaseNarrativePanel() {
               <div className="flex items-start gap-4">
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-amber-400/80">Mission Brief</span>
+                    <span className="text-xs font-medium text-amber-400/70">Mission Brief</span>
                     <button
                       onClick={() => setShowNarrative(!showNarrative)}
-                      className="text-[10px] text-slate-500 hover:text-slate-300"
+                      className="text-xs text-slate-500 hover:text-slate-300"
                     >
                       {showNarrative ? "Hide" : "Show"}
                     </button>
@@ -223,15 +223,15 @@ export function CaseNarrativePanel() {
 
             {/* Objective */}
             <div className="glass-panel rounded-xl p-4 space-y-2" data-tour-target="case-objective">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400/80">Objective</span>
+              <span className="text-xs font-medium text-emerald-400/70">Objective</span>
               <p className="text-sm text-slate-200">{step.goal}</p>
             </div>
 
             {/* Hint */}
             <div className="glass-panel rounded-xl p-4 space-y-2" data-tour-target="case-hint">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400/80">Hint</span>
-                <button onClick={() => setShowHint(!showHint)} className="text-[10px] text-slate-500 hover:text-slate-300">
+                <span className="text-xs font-medium text-amber-400/70">Hint</span>
+                <button onClick={() => setShowHint(!showHint)} className="text-xs text-slate-500 hover:text-slate-300">
                   {showHint ? "Hide" : "Show"}
                 </button>
               </div>
@@ -255,7 +255,7 @@ export function CaseNarrativePanel() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
-              className={`text-[10px] rounded-md p-2 ${
+              className={`text-xs rounded-md p-2 ${
                 checkResult.correct
                   ? "bg-emerald-400/10 text-emerald-400 border border-emerald-400/20"
                   : "bg-rose-400/10 text-rose-400 border border-rose-400/20"
@@ -267,8 +267,6 @@ export function CaseNarrativePanel() {
         </AnimatePresence>
         <div className="flex gap-2">
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
             onClick={prevStep}
             disabled={currentStepIndex === 0}
             className="flex-1 py-2.5 rounded-lg text-xs font-medium bg-white/5 text-slate-300 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed border border-white/[0.06]"
@@ -276,8 +274,6 @@ export function CaseNarrativePanel() {
             Prev
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
             onClick={handleCheck}
             data-tour-target="case-check"
             className="flex-[2] py-2.5 rounded-lg text-xs font-medium bg-cyan-400/15 text-cyan-300 hover:bg-cyan-400/25 border border-cyan-400/30"
@@ -285,8 +281,6 @@ export function CaseNarrativePanel() {
             Next Clue
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
             onClick={handleSkip}
             disabled={currentStepIndex >= activeScenario.steps.length - 1}
             className="flex-1 py-2.5 rounded-lg text-xs font-medium bg-white/5 text-slate-300 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed border border-white/[0.06]"

@@ -21,7 +21,7 @@ export function ExplainerCard({ command }: ExplainerCardProps) {
     >
       <div className="bg-slate-900/60 border border-cyan-400/10 rounded-lg p-4 my-2 space-y-3">
         <div>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-medium text-slate-500">
             What it does
           </span>
           <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">
@@ -32,7 +32,7 @@ export function ExplainerCard({ command }: ExplainerCardProps) {
         <div className="flex items-start gap-2">
           <span className="text-lg leading-none">💡</span>
           <div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400/80">
+            <span className="text-xs font-medium text-amber-400/70">
               Analogy
             </span>
             <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">
@@ -44,7 +44,7 @@ export function ExplainerCard({ command }: ExplainerCardProps) {
         <div className="flex items-start gap-2">
           <span className="text-lg leading-none">⚠️</span>
           <div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-rose-400/80">
+            <span className="text-xs font-medium text-rose-400/70">
               Common Mistake
             </span>
             <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">
@@ -56,7 +56,7 @@ export function ExplainerCard({ command }: ExplainerCardProps) {
         <div className="flex items-start gap-2">
           <span className="text-lg leading-none">✅</span>
           <div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400/80">
+            <span className="text-xs font-medium text-emerald-400/70">
               Pro Tip
             </span>
             <p className="text-xs text-slate-300 mt-0.5 leading-relaxed">

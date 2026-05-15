@@ -75,20 +75,20 @@ function SandboxPane() {
       </div>
 
       <div className="p-4 space-y-2" data-tour-target="sandbox-starters">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-3">Starter Queries</p>
+        <p className="text-xs font-medium text-slate-500 mb-3">Starter Queries</p>
         {SANDBOX_STARTERS.map((s) => (
           <div key={s.label} className="glass-panel-strong rounded-lg border border-white/[0.05] p-3 space-y-1.5">
             <div className="flex items-start justify-between gap-2">
               <p className="text-xs font-medium text-slate-200">{s.label}</p>
               <button
                 onClick={() => loadStarter(s.query)}
-                className="shrink-0 text-[10px] font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-400/10 hover:bg-cyan-400/20 px-2 py-0.5 rounded transition-colors"
+                className="shrink-0 text-xs font-medium text-cyan-400 hover:text-cyan-300 bg-cyan-400/10 hover:bg-cyan-400/20 px-2 py-0.5 rounded transition-colors"
               >
                 Load →
               </button>
             </div>
-            <p className="text-[10px] text-slate-500">{s.description}</p>
-            <pre className="text-[10px] text-slate-400 font-mono bg-black/20 rounded px-2 py-1 overflow-x-auto">{s.query}</pre>
+            <p className="text-xs text-slate-500">{s.description}</p>
+            <pre className="text-xs text-slate-400 font-mono bg-black/20 rounded px-2 py-1 overflow-x-auto">{s.query}</pre>
           </div>
         ))}
       </div>
@@ -96,7 +96,7 @@ function SandboxPane() {
       <div className="px-4 pb-4">
         <button
           onClick={() => setRefOpen((o) => !o)}
-          className="w-full flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-500 hover:text-slate-300 py-2 border-t border-white/[0.04] transition-colors"
+          className="w-full flex items-center justify-between text-xs font-medium text-slate-500 hover:text-slate-300 py-2 border-t border-white/[0.04] transition-colors"
         >
           <span>DQL Command Reference</span>
           <svg
@@ -111,7 +111,7 @@ function SandboxPane() {
             {COMMAND_VISUALS.map((v) => (
               <div key={v.cmd} className={`rounded border p-2.5 ${v.color} bg-white/[0.02]`}>
                 <p className="text-xs font-semibold">{v.title}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">{v.description}</p>
+                <p className="text-xs text-slate-400 mt-0.5">{v.description}</p>
               </div>
             ))}
           </div>
@@ -124,7 +124,7 @@ function SandboxPane() {
 function VisualGuide() {
   return (
     <div className="space-y-3">
-      <p className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Visual Signatures</p>
+      <p className="text-xs text-slate-500 font-semibold">Visual Signatures</p>
       {COMMAND_VISUALS.map((v) => (
         <div key={v.cmd} className={`rounded-lg border p-3 ${v.color} bg-white/[0.02]`}>
           <p className="text-sm font-semibold">{v.title}</p>
@@ -143,10 +143,9 @@ function getPageName(opts: {
   const { showLanding, currentPhase, activeScenario } = opts;
   if (showLanding) return "Landing Page";
   if (currentPhase === 0) return "Learn – Codex";
-  if (currentPhase === 1) return "Sandbox";
-  if (currentPhase === 2) return "Visualize";
-  if (currentPhase === 3) return activeScenario ? `Cases – ${activeScenario.title}` : "Cases – Scenario Selector";
-  if (currentPhase === 4) return "Arcade";
+  if (currentPhase === 1) return "Workbench";
+  if (currentPhase === 2) return activeScenario ? `Cases – ${activeScenario.title}` : "Cases – Scenario Selector";
+  if (currentPhase === 3) return "Arcade";
   return "DQL Detective";
 }
 
@@ -172,7 +171,7 @@ export function InvestigatorShell() {
     if (!activeScenario) {
       // First-time demo gate: if user hasn't seen the demo and lands on Cases,
       // auto-start the demo scenario.
-      if (!hasSeenDemo && currentPhase === 3) {
+      if (!hasSeenDemo && currentPhase === 2) {
         const { funScenarios } = require("@/lib/dql/fun-scenarios");
         const demo = funScenarios.find((s: { id: string }) => s.id === "demo-001");
         if (demo) {
@@ -196,26 +195,13 @@ export function InvestigatorShell() {
           ) : currentPhase === 0 ? (
             <CodexScreen />
           ) : currentPhase === 1 ? (
+            /* Workbench: free-form pipeline play (merged Sandbox + Visualize) */
             <div className="flex-1 flex">
               <SandboxPane />
               <DataViewPane />
               <CommandDeckPane />
             </div>
-          ) : currentPhase === 2 ? (
-            <div className="flex-1 flex">
-              <div className="w-[28%] min-w-[280px] glass-panel border-r border-cyan-400/20 flex flex-col" data-tour-target="visualize-sidebar">
-                <div className="p-6 border-b border-white/[0.06]">
-                  <h2 className="text-lg font-semibold text-slate-100 mb-2">Visualize</h2>
-                  <p className="text-sm text-slate-400">Build a pipeline and watch how each DQL command transforms data.</p>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  <VisualGuide />
-                </div>
-              </div>
-              <DataViewPane />
-              <CommandDeckPane />
-            </div>
-          ) : currentPhase === 4 ? (
+          ) : currentPhase === 3 ? (
             <ArcadeScreen />
           ) : (
             renderCasesPhase()

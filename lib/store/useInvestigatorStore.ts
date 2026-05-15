@@ -112,6 +112,21 @@ interface InvestigatorState {
   completedScenarios: string[];
   markScenarioComplete: (id: string) => void;
 
+  // Streak
+  streak: { current: number; longest: number; lastVisitDate: string | null };
+  updateStreak: () => void;
+
+  // Badges
+  earnedBadges: string[];
+  awardBadge: (id: string) => void;
+
+  // Weekly XP ledger (for weekly leaderboard)
+  weeklyXPLedger: { date: string; amount: number }[];
+
+  // Track progress
+  trackProgress: Record<string, { completedLessons: string[]; currentLessonId: string }>;
+  markLessonComplete: (trackId: string, lessonId: string, nextLessonId: string) => void;
+
   // Arcade
   gameScores: GameScore[];
   addGameScore: (score: GameScore) => void;
@@ -130,9 +145,8 @@ export const useInvestigatorStore = create<InvestigatorState>()(
     (set, get) => ({
       currentPhase: 0,
       phases: [
-        { id: "learn", title: "Learn", description: "Master DQL fundamentals", active: true, completed: false },
-        { id: "sandbox", title: "Sandbox", description: "Build queries freely", active: false, completed: false },
-        { id: "visualize", title: "Visualize", description: "See how data transforms", active: false, completed: false },
+        { id: "learn", title: "Learn", description: "Guided lessons & tracks", active: true, completed: false },
+        { id: "workbench", title: "Workbench", description: "Free play & experiment", active: false, completed: false },
         { id: "cases", title: "Cases", description: "Solve real incidents", active: false, completed: false },
         { id: "arcade", title: "Arcade", description: "Game modes & challenges", active: false, completed: false },
       ],
@@ -263,7 +277,17 @@ export const useInvestigatorStore = create<InvestigatorState>()(
       setEditorValue: (editorValue) => set({ editorValue }),
 
       totalXP: 0,
-      addXP: (amount) => set((state) => ({ totalXP: state.totalXP + amount })),
+      addXP: (amount) =>
+        set((state) => {
+          const today = new Date().toISOString().slice(0, 10);
+          const ledger = [...state.weeklyXPLedger];
+          const existing = ledger.findIndex((e) => e.date === today);
+          if (existing >= 0) { ledger[existing] = { date: today, amount: ledger[existing].amount + amount }; }
+          else { ledger.push({ date: today, amount }); }
+          const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 14);
+          const trimmed = ledger.filter((e) => new Date(e.date) >= cutoff);
+          return { totalXP: state.totalXP + amount, weeklyXPLedger: trimmed };
+        }),
       completedScenarios: [],
       markScenarioComplete: (id) =>
         set((state) => ({
@@ -271,6 +295,42 @@ export const useInvestigatorStore = create<InvestigatorState>()(
             ? state.completedScenarios
             : [...state.completedScenarios, id],
         })),
+
+      streak: { current: 0, longest: 0, lastVisitDate: null },
+      updateStreak: () =>
+        set((state) => {
+          const today = new Date().toISOString().slice(0, 10);
+          const last = state.streak.lastVisitDate;
+          if (last === today) return {};
+          const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().slice(0, 10);
+          const next = last === yesterdayStr ? state.streak.current + 1 : 1;
+          const longest = Math.max(next, state.streak.longest);
+          return { streak: { current: next, longest, lastVisitDate: today } };
+        }),
+
+      earnedBadges: [],
+      awardBadge: (id) =>
+        set((state) => ({
+          earnedBadges: state.earnedBadges.includes(id) ? state.earnedBadges : [...state.earnedBadges, id],
+        })),
+
+      weeklyXPLedger: [],
+
+      trackProgress: {},
+      markLessonComplete: (trackId, lessonId, nextLessonId) =>
+        set((state) => {
+          const prev = state.trackProgress[trackId] || { completedLessons: [], currentLessonId: lessonId };
+          const completed = prev.completedLessons.includes(lessonId)
+            ? prev.completedLessons
+            : [...prev.completedLessons, lessonId];
+          return {
+            trackProgress: {
+              ...state.trackProgress,
+              [trackId]: { completedLessons: completed, currentLessonId: nextLessonId },
+            },
+          };
+        }),
 
       gameScores: [],
       addGameScore: (score) =>
@@ -312,9 +372,9 @@ export const useInvestigatorStore = create<InvestigatorState>()(
     }),
     {
       name: "dql-investigator-store",
-      version: 1,
+      version: 2,
       migrate: (persistedState: unknown, version: number) => {
-        if (version !== 1) {
+        if (version < 2) {
           return {};
         }
         return persistedState as Partial<InvestigatorState>;
@@ -331,6 +391,10 @@ export const useInvestigatorStore = create<InvestigatorState>()(
         gameHighScores: state.gameHighScores,
         gameScores: state.gameScores,
         hasSeenDemo: state.hasSeenDemo,
+        streak: state.streak,
+        earnedBadges: state.earnedBadges,
+        weeklyXPLedger: state.weeklyXPLedger,
+        trackProgress: state.trackProgress,
       }),
     }
   )

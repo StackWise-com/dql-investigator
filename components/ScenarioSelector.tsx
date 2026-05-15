@@ -78,8 +78,6 @@ export function ScenarioSelector() {
                 transition={{ delay: i * 0.06 }}
               >
                 <motion.button
-                  whileHover={{ scale: 1.01, y: -2 }}
-                  whileTap={{ scale: 0.99 }}
                   onClick={() => setScenario(scenario)}
                   className={`w-full glass-panel-strong rounded-xl p-5 text-left border border-white/[0.06] ${borderTheme} transition-colors relative overflow-hidden`}
                 >
@@ -101,7 +99,7 @@ export function ScenarioSelector() {
                       <p className="text-xs text-slate-500">Partner: {scenario.characterName}</p>
                     </div>
                     <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-medium border ${
+                      className={`px-2 py-0.5 rounded text-xs font-medium border ${
                         DIFFICULTY_COLORS[scenario.difficulty as keyof typeof DIFFICULTY_COLORS]
                       }`}
                     >
@@ -112,10 +110,10 @@ export function ScenarioSelector() {
                   <p className="text-sm text-slate-400 mt-3 leading-relaxed">{scenario.briefing}</p>
 
                   <div className="flex items-center gap-3 mt-4 flex-wrap">
-                    <span className="text-[10px] text-slate-500">{scenario.steps.length} steps</span>
-                    <span className="text-[10px] text-slate-600">·</span>
-                    <span className="text-[10px] text-slate-500">+{scenario.steps.length * 25} XP</span>
-                    <span className="text-[10px] font-mono font-medium text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded">
+                    <span className="text-xs text-slate-500">{scenario.steps.length} steps</span>
+                    <span className="text-xs text-slate-600">·</span>
+                    <span className="text-xs text-slate-500">+{scenario.steps.length * 25} XP</span>
+                    <span className="text-xs font-mono font-medium text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 px-1.5 py-0.5 rounded">
                       {getCaseTag(scenario)}
                     </span>
                   </div>

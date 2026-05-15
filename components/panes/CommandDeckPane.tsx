@@ -39,8 +39,6 @@ export function CommandDeckPane() {
         <span className="text-xs font-medium text-slate-300">Command Deck</span>
         <div className="flex items-center gap-1">
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             onClick={() => setViewMode("cards")}
             className={`px-2.5 py-1 rounded-md text-xs font-medium ${
               viewMode === "cards"
@@ -51,8 +49,6 @@ export function CommandDeckPane() {
             Cards
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
             onClick={() => setViewMode("editor")}
             className={`px-2.5 py-1 rounded-md text-xs font-medium ${
               viewMode === "editor"
@@ -74,8 +70,6 @@ export function CommandDeckPane() {
         <div className="flex items-center gap-2">
           {showRunButton ? (
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={handleRun}
               data-tour-target="run-button"
               className={`px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors ${
@@ -91,8 +85,6 @@ export function CommandDeckPane() {
             </motion.button>
           ) : null}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
             onClick={clearPipeline}
             className="px-3 py-1.5 rounded-md text-xs font-medium text-rose-400 hover:bg-rose-400/10 border border-rose-400/20"
           >

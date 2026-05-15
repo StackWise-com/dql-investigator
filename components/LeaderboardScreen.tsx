@@ -86,10 +86,10 @@ export function LeaderboardScreen() {
                     <p className="text-sm text-slate-200 truncate">
                       <span className="mr-1.5">{getAnimalEmoji(row.display_slug || row.user_id)}</span>
                       {row.display_name || "anonymous"}
-                      {isMe && <span className="ml-2 text-[10px] text-cyan-400">(you)</span>}
+                      {isMe && <span className="ml-2 text-xs text-cyan-400">(you)</span>}
                     </p>
                     {row.country_code && (
-                      <p className="text-[10px] text-slate-500">{row.country_code}</p>
+                      <p className="text-xs text-slate-500">{row.country_code}</p>
                     )}
                   </div>
                   <span className="text-sm font-mono font-semibold text-slate-100">

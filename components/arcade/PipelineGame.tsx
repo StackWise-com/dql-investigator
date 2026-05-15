@@ -200,16 +200,12 @@ export function PipelineGame({ onExit }: { onExit: () => void }) {
           <p className="text-xs text-slate-500">out of {QUESTIONS_PER_GAME * 100} possible</p>
           <div className="flex gap-2 pt-2">
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={onExit}
               className="flex-1 py-2 rounded-md text-xs font-medium bg-white/5 text-slate-300 hover:bg-white/10 border border-white/[0.06]"
             >
               Back to Arcade
             </motion.button>
             <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => {
                 setScore(0);
                 setQuestionIndex(0);
@@ -232,13 +228,13 @@ export function PipelineGame({ onExit }: { onExit: () => void }) {
     <div className="flex-1 flex flex-col overflow-hidden">
       <div className="h-12 flex items-center justify-between px-6 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400">Pipeline Builder</span>
-          <span className="text-[10px] text-slate-500">Q{questionIndex + 1} / {QUESTIONS_PER_GAME}</span>
+          <span className="text-xs font-medium text-accent">Pipeline Builder</span>
+          <span className="text-xs text-slate-500">Q{questionIndex + 1} / {QUESTIONS_PER_GAME}</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-[10px] text-slate-500">Attempts: {attempts}</span>
+          <span className="text-xs text-slate-500">Attempts: {attempts}</span>
           <div className="text-sm font-semibold text-slate-200">{score} pts</div>
-          <button onClick={onExit} className="text-[10px] text-slate-500 hover:text-slate-300">Exit</button>
+          <button onClick={onExit} className="text-xs text-slate-500 hover:text-slate-300">Exit</button>
         </div>
       </div>
 
@@ -249,7 +245,7 @@ export function PipelineGame({ onExit }: { onExit: () => void }) {
             <p className="text-sm text-slate-300">{challenge.description}</p>
             <button
               onClick={() => setShowTarget(!showTarget)}
-              className="text-[10px] text-cyan-400 hover:text-cyan-300"
+              className="text-xs text-cyan-400 hover:text-cyan-300"
             >
               {showTarget ? "Hide Target" : "Show Target Output"}
             </button>
@@ -264,11 +260,11 @@ export function PipelineGame({ onExit }: { onExit: () => void }) {
                 className="glass-panel rounded-xl border border-white/[0.04] overflow-hidden"
               >
                 <div className="px-4 py-2 border-b border-white/[0.04] flex items-center justify-between">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Target Output</span>
-                  <span className="text-[10px] text-slate-500">{targetResult.recordCount} rows</span>
+                  <span className="text-xs font-medium text-slate-500">Target Output</span>
+                  <span className="text-xs text-slate-500">{targetResult.recordCount} rows</span>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-[10px]">
+                  <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="border-b border-white/[0.04]">
                         {targetResult.columns.map((col) => (
@@ -301,7 +297,7 @@ export function PipelineGame({ onExit }: { onExit: () => void }) {
           </AnimatePresence>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Your Pipeline</label>
+            <label className="text-xs font-medium text-slate-500">Your Pipeline</label>
             <textarea
               value={editorValue}
               onChange={(e) => setEditorValue(e.target.value)}
@@ -331,8 +327,6 @@ export function PipelineGame({ onExit }: { onExit: () => void }) {
           <div className="flex gap-2">
             {!feedback ? (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={handleCheck}
                 className="flex-1 py-2 rounded-md text-xs font-medium bg-cyan-400/15 text-cyan-300 hover:bg-cyan-400/25 border border-cyan-400/30"
               >
@@ -340,8 +334,6 @@ export function PipelineGame({ onExit }: { onExit: () => void }) {
               </motion.button>
             ) : (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
                 onClick={nextQuestion}
                 className="flex-1 py-2 rounded-md text-xs font-medium bg-emerald-400/15 text-emerald-300 hover:bg-emerald-400/25 border border-emerald-400/30"
               >

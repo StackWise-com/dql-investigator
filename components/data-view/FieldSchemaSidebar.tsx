@@ -84,7 +84,7 @@ export function FieldSchemaSidebar({ columns, sampleRow }: FieldSchemaSidebarPro
     <div className="hidden lg:flex flex-col w-52 shrink-0 border-r border-white/[0.06] bg-slate-900/60">
       <div className="h-10 flex items-center px-3 border-b border-white/[0.06]">
         <span className="text-xs font-medium text-slate-400">Fields</span>
-        <span className="ml-auto text-[10px] text-slate-600">{columns.length}</span>
+        <span className="ml-auto text-xs text-slate-600">{columns.length}</span>
       </div>
       <div className="flex-1 overflow-y-auto">
         {columns.map((col) => {
@@ -98,7 +98,7 @@ export function FieldSchemaSidebar({ columns, sampleRow }: FieldSchemaSidebarPro
               key={col.name}
               className={`group/field flex items-center gap-2 px-3 py-1.5 hover:bg-white/[0.04] transition-colors ${isHidden ? "opacity-40" : ""}`}
             >
-              <span className={`text-[9px] font-mono w-6 shrink-0 ${typeColor}`}>{typeAbbr}</span>
+              <span className={`text-xs font-mono w-6 shrink-0 ${typeColor}`}>{typeAbbr}</span>
               <span className="flex-1 text-xs text-slate-300 truncate" title={col.name}>{col.name}</span>
               <div className="hidden group-hover/field:flex items-center gap-0.5 shrink-0">
                 <button
