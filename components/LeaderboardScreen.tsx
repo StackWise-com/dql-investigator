@@ -114,7 +114,7 @@ export function LeaderboardScreen() {
                           title={`${d.date}: ${d.amount} XP`}
                         />
                       </div>
-                      <span className="text-[10px] text-slate-600">{d.label}</span>
+                      <span className="text-xs text-slate-600 leading-none">{d.label}</span>
                     </div>
                   ))}
                 </div>

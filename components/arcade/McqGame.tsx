@@ -257,16 +257,14 @@ export function McqGame({ onExit }: { onExit: () => void }) {
                     }
                   }
                   return (
-                    <motion.button
+                    <button
                       key={idx}
-                      whileHover={!revealed ? { scale: 1.01 } : {}}
-                      whileTap={!revealed ? { scale: 0.99 } : {}}
                       onClick={() => handleSelect(idx)}
                       className={btnClass}
                     >
                       <span className="text-xs font-semibold mr-2 text-slate-500">{String.fromCharCode(65 + idx)}.</span>
                       {opt}
-                    </motion.button>
+                    </button>
                   );
                 })}
               </div>
